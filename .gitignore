@@ -1,0 +1,8 @@
+/yarn.lock
+/package-lock.json
+/lib
+/dist
+/node_modules
+/pages
+.umi
+.umi-production

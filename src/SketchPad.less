@@ -1,0 +1,40 @@
+@import './theme';
+
+@sketchpad-prefix: ~'@{prefix}-sketchpad';
+
+.@{sketchpad-prefix}-container {
+  position: relative;
+  height: 100%;
+  background-color: white;
+  width: 100%;
+}
+
+.@{sketchpad-prefix}-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.@{sketchpad-prefix}-textInput {
+  position: absolute;
+  outline: none;
+  display: none;
+  background: none;
+  vertical-align: middle;
+  border: 0px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.42em;
+  padding: 0;
+  white-space: nowrap;
+  user-select: auto;
+}
+
+.@{sketchpad-prefix}-resizer {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: rgba(255, 255, 255, 1);
+  border: 1px solid #d0d0d0;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
