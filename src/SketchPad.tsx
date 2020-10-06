@@ -735,7 +735,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
     const { deltaY, ctrlKey } = evt;
     const [a, b, c, d, e, f] = viewMatrix;
-    let newScale = a + (ctrlKey ? -deltaY : deltaY) / 100;
+    let newScale = a + (ctrlKey ? -deltaY : deltaY) / 1000;
     newScale = Math.max(Math.min(newScale, MAX_SCALE), MIN_SCALE);
 
     if (refCanvas.current) {
