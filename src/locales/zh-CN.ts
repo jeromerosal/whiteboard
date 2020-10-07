@@ -14,4 +14,5 @@ export default {
   'umi.block.sketch.text.size.small': '小',
   'umi.block.sketch.text.size.default': '中',
   'umi.block.sketch.text.size.large': '大',
+  'umi.block.sketch.text.size.xl': 'l大',
 };

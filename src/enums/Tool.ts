@@ -39,6 +39,7 @@ export enum TextSize {
   Small = 12,
   Default = 20,
   Large = 28,
+  XL = 36
 }
 
 export const defaultToolOption = {

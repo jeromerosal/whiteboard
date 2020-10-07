@@ -10,7 +10,7 @@ let currentText = '';
 let currentColor = '';
 let currentSize = TextSize.Default;
 
-const textSize = [TextSize.Small, TextSize.Default, TextSize.Large];
+const textSize = [TextSize.Small, TextSize.Default, TextSize.Large, TextSize.XL];
 
 export interface Text {
   size: TextSize,
@@ -129,7 +129,11 @@ export const useTextDropdown = (currentToolOption: ToolOption, setCurrentToolOpt
                 }}
                 style={{ color: size === currentToolOption.textSize ? '#666' : '#ccc' }}
               >
-                {size === TextSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.text.size.small' }) : size === TextSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.text.size.default' }) : intl.formatMessage({ id: 'umi.block.sketch.text.size.large' })}
+                {size === TextSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.text.size.small' }) 
+                : size === TextSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.text.size.default' }) 
+                : size === TextSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.text.size.large' }) 
+                : intl.formatMessage({ id: 'umi.block.sketch.text.size.xl' })
+                }
               </div>
             )
           })}
