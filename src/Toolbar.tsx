@@ -1,26 +1,29 @@
-import React, { useRef, ChangeEventHandler, useContext } from 'react';
-import { useSpring, animated } from 'react-spring';
-import { useIntl } from 'react-intl';
-import Tool, { ToolOption } from './enums/Tool';
-import SelectIcon from './svgs/SelectIcon';
-import StrokeIcon from './svgs/StrokeIcon';
-import ShapeIcon from './svgs/ShapeIcon';
-import TextIcon from './svgs/TextIcon';
-import ImageIcon from './svgs/ImageIcon';
-import UndoIcon from './svgs/UndoIcon';
-import RedoIcon from './svgs/RedoIcon';
-import ClearIcon from './svgs/ClearIcon';
-import ZoomIcon from './svgs/ZoomIcon';
-import SaveIcon from './svgs/SaveIcon';
-import EraserIcon from './svgs/EraserIcon';
-import { useStrokeDropdown } from './StrokeTool';
-import { useShapeDropdown } from './ShapeTool';
+import { animated, useSpring } from 'react-spring';
 import { Dropdown } from 'antd';
+import { useIntl } from 'react-intl';
 import classNames from 'classnames';
+import React, { ChangeEventHandler, useContext, useRef  } from 'react';
+
 import './Toolbar.less';
 import { isMobileDevice } from './utils';
+import { useShapeDropdown } from './ShapeTool';
+import { useStrokeDropdown } from './StrokeTool';
 import ConfigContext from './ConfigContext';
 import EnableSketchPadContext from './contexts/EnableSketchPadContext';
+import Tool, { ToolOption } from './enums/Tool';
+
+import ClearIcon from './svgs/ClearIcon';
+import EraserIcon from './svgs/EraserIcon';
+import HighlighterIcon from './svgs/HighlighterIcon';
+import ImageIcon from './svgs/ImageIcon';
+import RedoIcon from './svgs/RedoIcon';
+import SaveIcon from './svgs/SaveIcon';
+import SelectIcon from './svgs/SelectIcon';
+import ShapeIcon from './svgs/ShapeIcon';
+import StrokeIcon from './svgs/StrokeIcon';
+import TextIcon from './svgs/TextIcon';
+import UndoIcon from './svgs/UndoIcon';
+import ZoomIcon from './svgs/ZoomIcon';
 
 const tools = [{
   label: 'umi.block.sketch.select',
@@ -44,6 +47,11 @@ const tools = [{
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
   type: Tool.Image,
+}, {
+  label: 'umi.block.sketch.highlighter',
+  icon: HighlighterIcon,
+  type: Tool.Highlighter,
+  useDropdown: useStrokeDropdown,
 }, {
   label: 'umi.block.sketch.undo',
   icon: UndoIcon,
@@ -121,7 +129,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       {tools.map((tool => {
         let borderTopStyle = 'none';
         if (isMobileDevice) {
-          if (tool.type === Tool.Stroke && currentToolOption.strokeColor) {
+          if ((tool.type === Tool.Stroke || tool.type === Tool.Highlighter) && currentToolOption.strokeColor) {
             borderTopStyle = `3px solid ${currentToolOption.strokeColor}`;
           }
 
@@ -133,6 +141,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
         const iconAnimateProps = useSpring({
           left: isMobileDevice && currentTool !== tool.type ? -12 : 0,
           borderTop: borderTopStyle,
+          width: tool.type === Tool.Highlighter ? 60 : 50,
           ...(tool.style || {})
         });
 
@@ -168,7 +177,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
         )
 
         if (tool.useDropdown) {
-          const overlay = tool.useDropdown(currentToolOption, setCurrentToolOption, setCurrentTool, prefixCls);
+          const overlay = tool.useDropdown(currentToolOption, setCurrentToolOption, setCurrentTool, prefixCls, tool.type);
 
           return (
             <Dropdown

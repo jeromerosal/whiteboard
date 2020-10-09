@@ -4,6 +4,7 @@ export default {
   'umi.block.sketch.shape': 'Shape R',
   'umi.block.sketch.text': 'Text T',
   'umi.block.sketch.image': 'Image',
+  'umi.block.sketch.highlighter': 'Highlighter',
   'umi.block.sketch.undo': 'Undo',
   'umi.block.sketch.redo': 'Redo',
   'umi.block.sketch.clear': 'Clear',
