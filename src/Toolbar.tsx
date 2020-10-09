@@ -1,4 +1,4 @@
-import React, { useRef, ChangeEventHandler, useContext } from 'react';
+import React, { useRef, ChangeEventHandler, useContext, useEffect } from 'react';
 import { useSpring, animated } from 'react-spring';
 import { useIntl } from 'react-intl';
 import Tool, { ToolOption } from './enums/Tool';
@@ -15,6 +15,7 @@ import SaveIcon from './svgs/SaveIcon';
 import EraserIcon from './svgs/EraserIcon';
 import { useStrokeDropdown } from './StrokeTool';
 import { useShapeDropdown } from './ShapeTool';
+import { useTextDropdown } from './TextTool';
 import { Dropdown } from 'antd';
 import classNames from 'classnames';
 import './Toolbar.less';
@@ -40,6 +41,7 @@ const tools = [{
   label: 'umi.block.sketch.text',
   icon: TextIcon,
   type: Tool.Text,
+  // useTextDropdown: useTextDropdown,
 }, {
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
@@ -113,6 +115,23 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     }
   };
 
+  useEffect(() => {
+    const keydownHandler = (evt: KeyboardEvent) => {
+      const { keyCode } = evt;
+      
+      if ( keyCode == 90 && evt.ctrlKey) { // key 'ctrl+z'
+        undo();
+      }
+      else if( keyCode == 89 && evt.ctrlKey) { // key 'ctrl+y'
+        redo();
+      }
+    };
+
+    addEventListener('keydown', keydownHandler);
+
+    return () => removeEventListener('keydown', keydownHandler);
+  }, []);
+
   return (
     <div className={classNames({
       [`${toolbarPrefixCls}-container`]: true,
@@ -127,6 +146,9 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
           if (tool.type === Tool.Shape && currentToolOption.shapeBorderColor) {
             borderTopStyle = `3px solid ${currentToolOption.shapeBorderColor}`;
+          }
+
+          if (tool.type === Tool.Text){
           }
         }
 
@@ -176,6 +198,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           const overlay = tool.useDropdown(currentToolOption, setCurrentToolOption, setCurrentTool, prefixCls);
 
           return (
+            <div>
             <Dropdown
               key={tool.label}
               overlay={overlay}
@@ -187,6 +210,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
             >
               {menu}
             </Dropdown>
+            </div>
           )
         } else {
           return menu;
