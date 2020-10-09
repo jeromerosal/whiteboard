@@ -1,5 +1,7 @@
 import { animated, useSpring } from 'react-spring';
 import { Dropdown } from 'antd';
+import React, { useRef, ChangeEventHandler, useContext, useEffect } from 'react';
+import { useSpring, animated } from 'react-spring';
 import { useIntl } from 'react-intl';
 import classNames from 'classnames';
 import React, { ChangeEventHandler, useContext, useRef  } from 'react';
@@ -24,6 +26,17 @@ import StrokeIcon from './svgs/StrokeIcon';
 import TextIcon from './svgs/TextIcon';
 import UndoIcon from './svgs/UndoIcon';
 import ZoomIcon from './svgs/ZoomIcon';
+import SaveIcon from './svgs/SaveIcon';
+import EraserIcon from './svgs/EraserIcon';
+import { useStrokeDropdown } from './StrokeTool';
+import { useShapeDropdown } from './ShapeTool';
+import { useTextDropdown } from './TextTool';
+import { Dropdown } from 'antd';
+import classNames from 'classnames';
+import './Toolbar.less';
+import { isMobileDevice } from './utils';
+import ConfigContext from './ConfigContext';
+import EnableSketchPadContext from './contexts/EnableSketchPadContext';
 
 const tools = [{
   label: 'umi.block.sketch.select',
@@ -43,6 +56,7 @@ const tools = [{
   label: 'umi.block.sketch.text',
   icon: TextIcon,
   type: Tool.Text,
+  // useTextDropdown: useTextDropdown,
 }, {
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
@@ -121,6 +135,23 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     }
   };
 
+  useEffect(() => {
+    const keydownHandler = (evt: KeyboardEvent) => {
+      const { keyCode } = evt;
+      
+      if ( keyCode == 90 && evt.ctrlKey) { // key 'ctrl+z'
+        undo();
+      }
+      else if( keyCode == 89 && evt.ctrlKey) { // key 'ctrl+y'
+        redo();
+      }
+    };
+
+    addEventListener('keydown', keydownHandler);
+
+    return () => removeEventListener('keydown', keydownHandler);
+  }, []);
+
   return (
     <div className={classNames({
       [`${toolbarPrefixCls}-container`]: true,
@@ -135,6 +166,9 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
           if (tool.type === Tool.Shape && currentToolOption.shapeBorderColor) {
             borderTopStyle = `3px solid ${currentToolOption.shapeBorderColor}`;
+          }
+
+          if (tool.type === Tool.Text){
           }
         }
 
@@ -154,19 +188,24 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
             })}
             style={iconAnimateProps}
             onClick={() => {
+
+              let currentToolType = tool.type;
               if (tool.type === Tool.Image && refFileInput.current) {
                 refFileInput.current.click();
               } else if (tool.type === Tool.Undo) {
                 undo();
+                currentToolType = tool.type;
               } else if (tool.type === Tool.Redo) {
                 redo();
+                currentToolType = tool.type;
               } else if (tool.type === Tool.Clear) {
                 clear();
+                currentToolType = tool.type;
               } else if (tool.type === Tool.Zoom) {
               } else if (tool.type === Tool.Save) {
                 save();
               } else {
-                setCurrentTool(tool.type);
+                setCurrentTool(currentToolType);
               }
             }}
             key={tool.label}
@@ -180,6 +219,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           const overlay = tool.useDropdown(currentToolOption, setCurrentToolOption, setCurrentTool, prefixCls, tool.type);
 
           return (
+            <div>
             <Dropdown
               key={tool.label}
               overlay={overlay}
@@ -191,6 +231,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
             >
               {menu}
             </Dropdown>
+            </div>
           )
         } else {
           return menu;
