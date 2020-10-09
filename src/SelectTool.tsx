@@ -1,10 +1,11 @@
-import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
-import Tool, { Position, ToolOption } from './enums/Tool';
-import { Text, onTextMouseDown } from './TextTool';
-import { Stroke } from './StrokeTool';
-import { Operation, Update, OperationListState, Remove } from './SketchPad';
-import { matrix_multiply, isMobileDevice } from './utils'
 import { IntlShape } from 'react-intl';
+import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
+
+import { matrix_multiply, isMobileDevice } from './utils'
+import { Operation, Update, OperationListState, Remove } from './SketchPad';
+import { Highlighter, Stroke } from './StrokeTool';
+import { Text, onTextMouseDown } from './TextTool';
+import Tool, { Position, ToolOption } from './enums/Tool';
 
 let lastSelectX = 0;
 let lastSelectY = 0;
@@ -35,8 +36,8 @@ const findSelectedItem = (items: Operation[], pos:[number, number], scale: numbe
   for(let i = items.length - 1; i >= 0; i--) {
     const item = items[i];
 
-    if ((item.tool === Tool.Stroke || item.tool === Tool.Eraser) && rectContain(item.pos, pos, 0)) {
-      const points = (item as Stroke).points;
+    if ((item.tool === Tool.Stroke || item.tool === Tool.Eraser || item.tool === Tool.Highlighter) && rectContain(item.pos, pos, 0)) {
+      const points = item.tool === Tool.Highlighter ? (item as Highlighter).points : (item as Stroke).points;
       if (points.some(p => (p.x - pos[0])**2 + (p.y - pos[1])**2 < (selectPadding * 2)**2)) {
         return item;
       }
