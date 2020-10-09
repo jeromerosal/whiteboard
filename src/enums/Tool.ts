@@ -13,6 +13,7 @@ enum Tool {
   Update = 'Update',
   LazyUpdate = 'LazyUpdate',
   Remove = 'Remove',
+  Highlighter = 'Highlighter',
 }
 
 export enum ShapeType {
@@ -43,6 +44,8 @@ export enum TextSize {
 }
 
 export const defaultToolOption = {
+  highlighterColor: strokeColor[2],
+  highlighterSize: strokeSize[4],
   strokeSize: strokeSize[1],
   strokeColor: strokeColor[0],
   shapeType: ShapeType.Rectangle,
@@ -56,6 +59,8 @@ export const defaultToolOption = {
 } 
 
 export type ToolOption = {
+  highlighterColor: string,
+  highlighterSize: number,
   strokeSize: number,
   strokeColor: string,
   shapeType: ShapeType,

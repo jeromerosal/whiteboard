@@ -1,22 +1,73 @@
-import React, { useRef, useEffect, useState, MouseEvent, CSSProperties, useImperativeHandle, forwardRef, WheelEventHandler, useReducer, Reducer, MouseEventHandler, ReactNode, RefObject, useContext, useCallback, useLayoutEffect } from 'react';
-import Tool, { ToolOption, Position, MAX_SCALE, MIN_SCALE, } from './enums/Tool';
-import { useIntl } from 'react-intl';
-import { mapClientToCanvas, isMobileDevice } from './utils';
-import { onStrokeMouseDown, onStrokeMouseMove, onStrokeMouseUp, drawStroke, Stroke, useStrokeDropdown, moveStoke } from './StrokeTool';
-import { onShapeMouseDown, onShapeMouseMove, onShapeMouseUp, Shape, drawRectangle, useShapeDropdown } from './ShapeTool';
-import { onImageComplete, Image, drawImage } from './ImageTool';
-import { onTextMouseDown, onTextComplete, drawText, Text, useTextDropdown, font } from './TextTool';
-import { onSelectMouseDown, onSelectMouseMove, onSelectMouseUp, onSelectMouseDoubleClick, SELECT_PADDING } from './SelectTool';
-import { defaultToolOption } from './enums/Tool';
 import { debounce } from 'lodash';
-import { Icon, Upload } from 'antd';
-import { v4 } from 'uuid';
-import sketchStrokeCursor from './images/sketch_stroke_cursor';
-import { useZoomGesture } from './gesture';
-import EnableSketchPadContext from './contexts/EnableSketchPadContext';
-import './SketchPad.less';
-import ConfigContext from './ConfigContext';
+import { Icon } from 'antd';
 import { usePinch, useWheel } from 'react-use-gesture';
+import { useIntl } from 'react-intl';
+import { v4 } from 'uuid';
+import React, { 
+  CSSProperties,
+  forwardRef,
+  MouseEvent,
+  MouseEventHandler,
+  ReactNode,
+  Reducer,
+  RefObject,
+  useCallback,
+  useContext,
+  useEffect, 
+  useImperativeHandle,
+  useRef, 
+  useReducer,
+  useState, 
+} from 'react';
+
+import './SketchPad.less';
+import { defaultToolOption } from './enums/Tool';
+import { drawImage, Image, onImageComplete } from './ImageTool';
+import { isMobileDevice, mapClientToCanvas } from './utils';
+import { useZoomGesture } from './gesture';
+import ConfigContext from './ConfigContext';
+import EnableSketchPadContext from './contexts/EnableSketchPadContext';
+import sketchStrokeCursor from './images/sketch_stroke_cursor';
+import Tool, { ToolOption, Position, MAX_SCALE, MIN_SCALE, } from './enums/Tool';
+
+import { 
+  onSelectMouseDoubleClick, 
+  onSelectMouseDown, 
+  onSelectMouseMove, 
+  onSelectMouseUp, 
+  SELECT_PADDING,
+} from './SelectTool';
+
+import { 
+  drawRectangle, 
+  onShapeMouseDown, 
+  onShapeMouseMove, 
+  onShapeMouseUp, 
+  Shape,
+  useShapeDropdown,
+} from './ShapeTool';
+
+import { 
+  drawHighlighter, 
+  drawStroke,
+  Highlighter,
+  moveHighlighter,
+  moveStroke, 
+  onStrokeMouseDown, 
+  onStrokeMouseMove, 
+  onStrokeMouseUp, 
+  Stroke, 
+  useStrokeDropdown,
+} from './StrokeTool';
+
+import { 
+  drawText, 
+  font,
+  onTextComplete,
+  onTextMouseDown, 
+  Text, 
+  useTextDropdown
+} from './TextTool';
 
 export interface SketchPadProps {
   currentTool: Tool;
@@ -50,7 +101,7 @@ export type Remove = {
   operationId: string,
 }
 
-export type Operation = (Stroke | Shape | Text | Image | Update | Remove) & {
+export type Operation = (Stroke | Shape | Text | Image | Update | Remove | Highlighter) & {
   id: string;
   userId: string;
   timestamp: number;
@@ -60,7 +111,7 @@ export type Operation = (Stroke | Shape | Text | Image | Update | Remove) & {
 
 export type Update = {
   operationId: string,
-  data: Partial<((Stroke | Shape | Text | Image) & {
+  data: Partial<((Stroke | Shape | Text | Image | Highlighter) & {
     pos: Position,
   })>,
 };
@@ -120,9 +171,20 @@ const reduceOperations = (operations: Operation[]): Operation[] => {
         // move other properties related to pos
         if (update.data.pos) {
           switch (target.tool) {
+            case Tool.Highlighter:
+              operations[targetIndex] = { 
+                ...operations[targetIndex], 
+                ...{ 
+                  points: moveHighlighter(target as Highlighter, target.pos, update.data.pos) 
+                } 
+              };
             case Tool.Eraser:
             case Tool.Stroke:
-              operations[targetIndex] = { ...operations[targetIndex], ...{ points: moveStoke(target as Stroke, target.pos, update.data.pos) } };
+              operations[targetIndex] = { 
+                ...operations[targetIndex], 
+                ...{ points: moveStroke(target as Stroke, target.pos, update.data.pos) 
+                } 
+              };
               break;
             case Tool.Shape: {
               const newOperation: any = ({ ...operations[targetIndex] });
@@ -219,7 +281,7 @@ const useResizeHandler = (
   items: Operation[],
   operationListDispatch: React.Dispatch<any>,
   setSelectedOperation: (operation: Operation) => void,
-  handleCompleteOperation: (tool?: Tool, data?: Stroke | Shape | Text | Image | Update | Remove, pos?: Position) => void,
+  handleCompleteOperation: (tool?: Tool, data?: Stroke | Shape | Text | Image | Update | Remove | Highlighter, pos?: Position) => void,
   refCanvas: RefObject<HTMLCanvasElement>,
   prefixCls: string,
 ): {
@@ -450,8 +512,13 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           saveGlobalTransform();
           break;
         case Tool.Eraser:
+        case Tool.Highlighter:
         case Tool.Stroke:
-          drawStroke(operation as Stroke, context, hover);
+          if(operation.tool === Tool.Stroke || operation.tool === Tool.Eraser) {
+            drawStroke(operation as Stroke, context, hover);
+          } else {
+            drawHighlighter(operation as Highlighter, context, hover);
+          }
           break
         case Tool.Shape:
           drawRectangle(operation as Shape, context, hover);
@@ -540,7 +607,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     }
   }, []);
 
-  const handleCompleteOperation = (tool?: Tool, data?: Stroke | Shape | Text | Image | Update | Remove, pos?: Position) => {
+  const handleCompleteOperation = (tool?: Tool, data?: Stroke | Shape | Text | Image | Update | Remove | Highlighter, pos?: Position) => {
     if (!tool) {
       renderOperations(operationListState.reduced);
       return;
@@ -586,15 +653,16 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       case Tool.Select:
         onSelectMouseDown(e, x, y, scale, operationListState, viewMatrix, setSelectedOperation);
         break;
+      case Tool.Highlighter:
       case Tool.Stroke:
-        onStrokeMouseDown(x, y, currentToolOption);
+        onStrokeMouseDown(x, y, currentToolOption, currentTool);
         break;
       case Tool.Eraser: 
         onStrokeMouseDown(x, y, {
           ...currentToolOption,
           strokeSize: defaultToolOption.strokeSize * 2 / scale,
           strokeColor: 'rgba(255, 255, 255, 1)',
-        });
+        }, currentTool);
         break;
       case Tool.Shape:
         onShapeMouseDown(x, y, currentToolOption);
@@ -654,9 +722,10 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         onSelectMouseMove(e, x, y, scale, operationListState, selectedOperation, setViewMatrix, setHoverOperationId, handleCompleteOperation, operationListDispatch, setSelectedOperation);
         break;
       case Tool.Eraser:
+      case Tool.Highlighter:
       case Tool.Stroke: {
         saveGlobalTransform();
-        refContext.current && onStrokeMouseMove(x, y, refContext.current);
+        refContext.current && onStrokeMouseMove(x, y, refContext.current, currentTool);
         restoreGlobalTransform();
         break;
       }
@@ -699,8 +768,9 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         refContext.current && onStrokeMouseUp(setCurrentTool, handleCompleteOperation, Tool.Eraser);
         break;
       }
+      case Tool.Highlighter:
       case Tool.Stroke: {
-        refContext.current && onStrokeMouseUp(setCurrentTool, handleCompleteOperation);
+        refContext.current && onStrokeMouseUp(setCurrentTool, handleCompleteOperation, currentTool);
         break;
       }
       case Tool.Shape: {
@@ -735,7 +805,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
     const { deltaY, ctrlKey } = evt;
     const [a, b, c, d, e, f] = viewMatrix;
-    let newScale = a + (ctrlKey ? -deltaY : deltaY) / 1000;
+    let newScale = a - (ctrlKey ? +deltaY : deltaY) / 1000;
     newScale = Math.max(Math.min(newScale, MAX_SCALE), MIN_SCALE);
 
     if (refCanvas.current) {
@@ -773,7 +843,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   }, []);
 
   const canvasStyle: CSSProperties = {};
-  if (currentTool === Tool.Stroke) {
+  if (currentTool === Tool.Stroke || currentTool === Tool.Highlighter) {
     canvasStyle.cursor = `url(${sketchStrokeCursor}) 0 14, crosshair`;
   } else if (currentTool === Tool.Shape) {
     canvasStyle.cursor = `crosshair`;
@@ -879,6 +949,24 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     let content = null;
 
     switch (selectedOperation.tool) {
+      case Tool.Highlighter:
+        content = useStrokeDropdown({
+          highlighterSize: (selectedOperation as Highlighter).size,
+          highlighterColor: (selectedOperation as Highlighter).color,
+        } as ToolOption, (option: ToolOption) => {
+          const data = {
+            color: option.highlighterColor,
+            size: option.highlighterSize,
+          };
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          setSelectedOperation({ ...selectedOperation, ...data });
+        }, () => {}, prefixCls, selectedOperation.tool);
+        break;
       case Tool.Stroke:
         content = useStrokeDropdown({
           strokeSize: (selectedOperation as Stroke).size,
@@ -895,7 +983,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           });
 
           setSelectedOperation({ ...selectedOperation, ...data });
-        }, () => {}, prefixCls);
+        }, () => {}, prefixCls, selectedOperation.tool);
         break;
       case Tool.Shape:
         content = useShapeDropdown({
