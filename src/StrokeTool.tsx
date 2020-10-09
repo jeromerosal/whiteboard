@@ -52,7 +52,7 @@ const drawLineStroke = (context: CanvasRenderingContext2D, item: Stroke, start: 
 };
 
 const drawLineHighlighter = (context: CanvasRenderingContext2D, item: Highlighter, start: Point, { x, y } : Point) => {
-  context.globalAlpha = 0.7;
+  context.globalAlpha = 0.3;
   context.beginPath();
   context.lineWidth = item.size;
   context.strokeStyle = item.color;
@@ -105,7 +105,7 @@ export const drawHighlighter = (highlighter: Highlighter, context: CanvasRenderi
 
   context.lineJoin = 'miter';
   context.lineCap = 'square';
-  context.globalAlpha = 0.7;
+  context.globalAlpha = 0.3;
   context.beginPath();
   context.lineWidth = highlighter.size;
   context.globalCompositeOperation = 'source-over';

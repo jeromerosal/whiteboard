@@ -175,7 +175,6 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
         const iconAnimateProps = useSpring({
           left: isMobileDevice && currentTool !== tool.type ? -12 : 0,
           borderTop: borderTopStyle,
-          width: tool.type === Tool.Highlighter ? 60 : 50,
           ...(tool.style || {})
         });
 
