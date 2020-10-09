@@ -145,19 +145,24 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
             })}
             style={iconAnimateProps}
             onClick={() => {
+
+              let currentToolType = tool.type;
               if (tool.type === Tool.Image && refFileInput.current) {
                 refFileInput.current.click();
               } else if (tool.type === Tool.Undo) {
                 undo();
+                currentToolType = tool.type;
               } else if (tool.type === Tool.Redo) {
                 redo();
+                currentToolType = tool.type;
               } else if (tool.type === Tool.Clear) {
                 clear();
+                currentToolType = tool.type;
               } else if (tool.type === Tool.Zoom) {
               } else if (tool.type === Tool.Save) {
                 save();
               } else {
-                setCurrentTool(tool.type);
+                setCurrentTool(currentToolType);
               }
             }}
             key={tool.label}
