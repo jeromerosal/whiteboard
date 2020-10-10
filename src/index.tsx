@@ -85,7 +85,7 @@ const Block: React.FC<BlockProps> = (props) => {
       </Layout>
     } else if (toolbarPlacement === 'top') {
       return <Layout hasSider={false}>
-        <Header>{toolbar}</Header>
+        {toolbar}
         <Content>{sketchPad}</Content>
       </Layout>
     } else if (toolbarPlacement === 'right') {
