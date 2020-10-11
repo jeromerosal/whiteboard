@@ -38,7 +38,7 @@ export const onLatexMouseDown = (e: {
     textarea.style.lineHeight = (toolOption.latexSize as number) * scale + 'px';
     textarea.style.height = (toolOption.latexSize as number) * scale + 'px';
     textarea.style.color = toolOption.textColor;
-    textarea.innerText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
+    textarea.innerText = typeof toolOption.defaultLatex === 'string' ? toolOption.defaultLatex : intl.formatMessage(toolOption.defaultLatex);
 
     if (isMobileDevice) {
       textarea.focus();
@@ -57,7 +57,7 @@ export const onLatexMouseDown = (e: {
       }
     }, 0);
 
-    currentText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
+    currentText = typeof toolOption.defaultLatex === 'string' ? toolOption.defaultLatex : intl.formatMessage(toolOption.defaultLatex);
     currentColor = toolOption.textColor;
     currentSize = toolOption.latexSize;
   }

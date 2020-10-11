@@ -175,8 +175,7 @@ export const onSelectMouseDoubleClick = (
       const canvas = refCanvas.current;
       const { top, left } = canvas.getBoundingClientRect();
       handleCompleteOperation(Tool.Remove, { operationId: selectedItem.id });
-      console.log('mousedown')
-      onLatexMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { latexSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl);
+      onLatexMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { latexSize: operation.size, textColor: operation.color, defaultLatex: operation.text } as ToolOption, scale, refInput, refCanvas, intl);
     }
   }
 }
