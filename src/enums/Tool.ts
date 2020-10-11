@@ -33,7 +33,7 @@ export interface Position {
   h: number;
 }
 
-export const strokeSize = [0.5, 2, 4, 6, 8, 10, 12];
+export const strokeSize = [2, 4, 6, 8, 10];
 
 export const strokeColor = ['#4a4a4a', '#f55b6c', '#f7c924', '#63d321', '#50e3c2', '#59b9ff', '#bd10e0', '#ffffff'];
 
@@ -62,10 +62,11 @@ export const defaultToolOption = {
   textColor: strokeColor[0],
   textSize: TextSize.Default,
   latexSize: LatexSize.Default,
-  
+
   defaultLatex: {
     id: 'umi.block.sketch.latex.placeholder'
   },
+
   defaultText: {
     id: 'umi.block.sketch.text.placeholder'
   },
@@ -81,11 +82,7 @@ export type ToolOption = {
   shapeBorderSize: number,
   textColor: string,
   textSize: TextSize,
-  latexSize: LatexSize,
-
-  defaultLatex: string | {
-    id: string,
-  },
+  latexSize: LatexSize
 
   defaultText: string | {
     id: string,

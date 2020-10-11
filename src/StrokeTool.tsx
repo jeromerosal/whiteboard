@@ -69,6 +69,10 @@ const drawLineHighlighter = (context: CanvasRenderingContext2D, item: Highlighte
 
 export const drawStroke = (stroke: Stroke, context: CanvasRenderingContext2D, hover: boolean) => {
   const points = stroke.points.filter((_, index) => index % 2 === 0);
+  if (points.length < 3) {
+    return;
+  };
+
   context.lineJoin = 'round';
   context.lineCap = 'round';
   context.globalAlpha = 1;
@@ -88,8 +92,7 @@ export const drawStroke = (stroke: Stroke, context: CanvasRenderingContext2D, ho
   }
 
   // curve through the last two points
-  if(points.length > 2)
-    context.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+  context.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
 
   context.stroke();
 }
@@ -169,8 +172,7 @@ export function onStrokeMouseUp(setCurrentTool: (tool: Tool) => void, handleComp
   };
 
   // click to back to select mode.
-  //Temporary Turned Off
-  /*if (stroke?.points.length < 1 || highlighter?.points.length < 1) {
+  if (stroke?.points.length < 6 || highlighter?.points.length < 6) {
     if (!isMobileDevice) {
       setCurrentTool(Tool.Select);
     }
@@ -183,7 +185,6 @@ export function onStrokeMouseUp(setCurrentTool: (tool: Tool) => void, handleComp
 
     return;
   }
-  */
 
   const item = currentTool === Tool.Stroke || currentTool === Tool.Eraser ? stroke : highlighter;
   points = [];
