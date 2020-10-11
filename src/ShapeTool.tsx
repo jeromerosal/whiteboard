@@ -139,6 +139,9 @@ export const onShapeMouseUp = (x: number, y: number, setCurrentTool: (tool: Tool
     w: Math.abs(item.end.x - item.start.x),
     h: Math.abs(item.end.y - item.start.y),
   });
+
+  setCurrentTool(Tool.Select);
+
   return [item];
 }
 
