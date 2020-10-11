@@ -256,7 +256,6 @@ export const useStrokeDropdown = (currentToolOption: ToolOption, setCurrentToolO
                 key={size}
                 onClick={(evt) => {
                   evt.stopPropagation();
-                  console.log(size);
                   setCurrentToolOption({ ...currentToolOption, highlighterSize: size });
                   setCurrentTool && setCurrentTool(Tool.Highlighter);
                 }}

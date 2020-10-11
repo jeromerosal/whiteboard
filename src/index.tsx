@@ -11,6 +11,8 @@ import locales, { localeType } from './locales';
 import { isMobileDevice } from './utils';
 import './index.less';
 import ConfigContext, { DefaultConfig } from './ConfigContext';
+import { BlockMath } from 'react-katex';
+import 'katex/dist/katex.min.css';
 
 const { Header, Sider, Content } = Layout;
 
@@ -85,14 +87,14 @@ const Block: React.FC<BlockProps> = (props) => {
       </Layout>
     } else if (toolbarPlacement === 'top') {
       return <Layout hasSider={false}>
-        <Header>{toolbar}</Header>
+        {toolbar}
         <Content>{sketchPad}</Content>
       </Layout>
     } else if (toolbarPlacement === 'right') {
       return <Layout style={{ flexDirection: 'row' }}>
-        <Content>{sketchPad}</Content>
-        <Sider width={55} theme='light'>{toolbar}</Sider>
-      </Layout>
+              <Content>{sketchPad}</Content>
+              <Sider width={55} theme='light'>{toolbar}</Sider>
+            </Layout>
     } else {
       return null;
     }

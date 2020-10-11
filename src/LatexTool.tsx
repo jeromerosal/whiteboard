@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Tool, { ToolOption, Position, TextSize, strokeColor } from './enums/Tool';
+import Tool, { ToolOption, Position, LatexSize, strokeColor } from './enums/Tool';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
 import { mapClientToCanvas, isMobileDevice } from './utils';
@@ -8,16 +8,17 @@ import './TextTool.less';
 
 let currentText = '';
 let currentColor = '';
-let currentSize = TextSize.Default;
-const textSize = [TextSize.Small, TextSize.Default, TextSize.Large, TextSize.XL];
+let currentSize = LatexSize.Default;
 
-export interface Text {
-  size: TextSize,
+const latexSize = [LatexSize.Small, LatexSize.Default, LatexSize.Large, LatexSize.XL];
+
+export interface Latex {
+  size: LatexSize,
   color: string,
   text: string,
 }
 
-export const onTextMouseDown = (e: {
+export const onLatexMouseDown = (e: {
   clientX: number,
   clientY: number,
 }, toolOption: ToolOption, scale: number, refInput: RefObject<HTMLDivElement>, refCanvas: RefObject<HTMLCanvasElement>, intl: IntlShape) => {
@@ -33,9 +34,9 @@ export const onTextMouseDown = (e: {
     textarea.style.display = 'block';
     textarea.style.left = x + canvas.offsetLeft + 'px';
     textarea.style.top = y + canvas.offsetTop + 'px';
-    textarea.style.fontSize = (toolOption.textSize as number) * scale + 'px';
-    textarea.style.lineHeight = (toolOption.textSize as number) * scale + 'px';
-    textarea.style.height = (toolOption.textSize as number) * scale + 'px';
+    textarea.style.fontSize = (toolOption.latexSize as number) * scale + 'px';
+    textarea.style.lineHeight = (toolOption.latexSize as number) * scale + 'px';
+    textarea.style.height = (toolOption.latexSize as number) * scale + 'px';
     textarea.style.color = toolOption.textColor;
     textarea.innerText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
 
@@ -58,11 +59,11 @@ export const onTextMouseDown = (e: {
 
     currentText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
     currentColor = toolOption.textColor;
-    currentSize = toolOption.textSize;
+    currentSize = toolOption.latexSize;
   }
 }
 
-export const onTextComplete = (refInput: RefObject<HTMLDivElement>, refCanvas: RefObject<HTMLCanvasElement>, viewMatrix: number[], scale: number, handleCompleteOperation: (tool?: Tool, data?: Text, pos?: Position) => void, setCurrentTool: (tool: Tool) => void) => {
+export const onLatexComplete = (refInput: RefObject<HTMLDivElement>, refCanvas: RefObject<HTMLCanvasElement>, viewMatrix: number[], scale: number, handleCompleteOperation: (tool?: Tool, data?: Latex, pos?: Position) => void, setCurrentTool: (tool: Tool) => void) => {
   if (currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
     const text = textarea.innerText;
@@ -85,17 +86,17 @@ export const onTextComplete = (refInput: RefObject<HTMLDivElement>, refCanvas: R
       h: height,
     };
 
-    handleCompleteOperation(Tool.Text, { text, color: currentColor, size: currentSize }, pos);
+    handleCompleteOperation(Tool.Latex, { text, color: currentColor, size: currentSize }, pos);
     setCurrentTool(Tool.Select);
     currentText = '';
   }
 }
 
-export const font = `"PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif, "localant"`;
+export const fontLatex = `"PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif, "localant"`;
 
-export const drawText = (item: Text, context: CanvasRenderingContext2D, pos: Position) => {
+export const drawLatex = (item: Latex, context: CanvasRenderingContext2D, pos: Position) => {
   context.globalCompositeOperation = 'source-over';
-  context.font = `${item.size}px ${font}`;
+  context.font = `${item.size}px ${fontLatex}` ;
   context.fillStyle = item.color || '#4a4a4a';
   context.textBaseline = 'middle';
 
@@ -105,52 +106,32 @@ export const drawText = (item: Text, context: CanvasRenderingContext2D, pos: Pos
   }
 }
 
-export const useTextDropdown = (currentToolOption: ToolOption, setCurrentToolOption: (option: ToolOption) => void, setCurrentTool: (tool: Tool) => void, intl: IntlShape, prefixCls: string) => {
+export const useLatexDropdown = (currentToolOption: ToolOption, setCurrentToolOption: (option: ToolOption) => void, setCurrentTool: (tool: Tool) => void, intl: IntlShape, prefixCls: string) => {
   prefixCls += '-textTool';
-
   return (
     <div className={`${prefixCls}-strokeMenu`}>
       <div className={`${prefixCls}-colorAndSize`}>
-        <div style={{opacity: 1, display: 'flex', flexDirection: 'column'}} className={`${prefixCls}-textSizeSelector`}
-        >
-          {textSize.map(size => {
+        <div className={`${prefixCls}-textSizeSelector`}>
+          {latexSize.map(size => {
             return (
               <div
                 key={size}
                 onTouchStart={(evt) => {
                   evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, textSize: size });
+                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
                   setCurrentTool && setCurrentTool(Tool.Stroke);
                 }}
                 onClick={(evt) => {
                   evt.stopPropagation();
-                  if( evt.target.className === 'active' ) {
-                    const _allSizes = evt.target.parentNode.childNodes;
-                    evt.target.parentNode.classList.add('show-sizes');
-                    evt.target.parentNode.parentNode.classList.add('show-sizes');
-
-                    for( const _size of _allSizes) {
-                      _size.classList.add('show-size');
-                    }
-                  }
-                  else {
-                    setCurrentToolOption({ ...currentToolOption, textSize: size });
-                    setCurrentTool && setCurrentTool(Tool.Stroke);
-                    const _allSizes = evt.target.parentNode.childNodes;
-                    evt.target.parentNode.classList.remove('show-sizes');
-                    evt.target.parentNode.parentNode.classList.remove('show-sizes');
-                    for( const _size of _allSizes) {
-                      _size.classList.remove('show-size')
-                    }
-                  }
+                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
+                  setCurrentTool && setCurrentTool(Tool.Stroke);
                 }}
-                style={{ color: size === currentToolOption.textSize ? '#666' : '#ccc' }}
-                className={ size === currentToolOption.textSize ? 'active': 'inactive'}
+                style={{ color: size === currentToolOption.latexSize ? '#666' : '#ccc' }}
               >
-                {size === TextSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.text.size.small' }) 
-                : size === TextSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.text.size.default' }) 
-                : size === TextSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.text.size.large' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.text.size.xl' })
+                {size === LatexSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.small' }) 
+                : size === LatexSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.default' }) 
+                : size === LatexSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.large' }) 
+                : intl.formatMessage({ id: 'umi.block.sketch.latex.size.xl' })
                 }
               </div>
             )
