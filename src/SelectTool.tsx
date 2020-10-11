@@ -5,6 +5,7 @@ import { matrix_multiply, isMobileDevice } from './utils'
 import { Operation, Update, OperationListState, Remove } from './SketchPad';
 import { Highlighter, Stroke } from './StrokeTool';
 import { Text, onTextMouseDown } from './TextTool';
+import { Latex, onLatexMouseDown } from './LatexTool';
 import Tool, { Position, ToolOption } from './enums/Tool';
 
 let lastSelectX = 0;
@@ -41,7 +42,7 @@ const findSelectedItem = (items: Operation[], pos:[number, number], scale: numbe
       if (points.some(p => (p.x - pos[0])**2 + (p.y - pos[1])**2 < (selectPadding * 2)**2)) {
         return item;
       }
-    } else if (item.tool === Tool.Shape || item.tool === Tool.Text || item.tool === Tool.Image) {
+    } else if (item.tool === Tool.Shape || item.tool === Tool.Text || item.tool === Tool.Latex || item.tool === Tool.Image) {
       const rotate = 0;
 
       const selectedItem = rectContain({
@@ -165,6 +166,17 @@ export const onSelectMouseDoubleClick = (
       const { top, left } = canvas.getBoundingClientRect();
       handleCompleteOperation(Tool.Remove, { operationId: selectedItem.id });
       onTextMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { textSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl);
+    }
+
+    if (selectedItem.tool === Tool.Latex) {
+      const operation = selectedItem as Latex;
+      const [a, b, c, d, e, f] = viewMatrix;
+
+      const canvas = refCanvas.current;
+      const { top, left } = canvas.getBoundingClientRect();
+      handleCompleteOperation(Tool.Remove, { operationId: selectedItem.id });
+      console.log('mousedown')
+      onLatexMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { latexSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl);
     }
   }
 }

@@ -3,6 +3,7 @@ enum Tool {
   Stroke = 'Stroke',
   Shape = 'Shape',
   Text = 'Text',
+  Latex = 'Latex',
   Image = 'Image',
   Undo = 'Undo',
   Redo = 'Redo',
@@ -43,6 +44,13 @@ export enum TextSize {
   XL = 36
 }
 
+export enum LatexSize {
+  Small = 12,
+  Default = 20,
+  Large = 28,
+  XL = 100
+}
+
 export const defaultToolOption = {
   highlighterColor: strokeColor[2],
   highlighterSize: strokeSize[4],
@@ -53,6 +61,7 @@ export const defaultToolOption = {
   shapeBorderSize: 4,
   textColor: strokeColor[0],
   textSize: TextSize.Default,
+  latexSize: LatexSize.Default,
   defaultText: {
     id: 'umi.block.sketch.text.placeholder'
   },
@@ -68,6 +77,7 @@ export type ToolOption = {
   shapeBorderSize: number,
   textColor: string,
   textSize: TextSize,
+  latexSize: LatexSize
 
   defaultText: string | {
     id: string,
