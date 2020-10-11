@@ -69,6 +69,15 @@ import {
   useTextDropdown
 } from './TextTool';
 
+import { 
+  drawLatex, 
+  fontLatex,
+  onLatexComplete,
+  onLatexMouseDown, 
+  Latex, 
+  useLatexDropdown
+} from './LatexTool';
+
 export interface SketchPadProps {
   currentTool: Tool;
   setCurrentTool: (tool: Tool) => void;
@@ -101,7 +110,7 @@ export type Remove = {
   operationId: string,
 }
 
-export type Operation = (Stroke | Shape | Text | Image | Update | Remove | Highlighter) & {
+export type Operation = (Stroke | Shape | Text | Latex | Image | Update | Remove | Highlighter) & {
   id: string;
   userId: string;
   timestamp: number;
@@ -111,7 +120,7 @@ export type Operation = (Stroke | Shape | Text | Image | Update | Remove | Highl
 
 export type Update = {
   operationId: string,
-  data: Partial<((Stroke | Shape | Text | Image | Highlighter) & {
+  data: Partial<((Stroke | Shape | Text | Latex | Image | Highlighter) & {
     pos: Position,
   })>,
 };
@@ -526,6 +535,9 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         case Tool.Text:
           drawText(operation as Text, context, operation.pos);
           break
+        case Tool.Latex:
+          drawLatex(operation as Latex, context, operation.pos);
+          break
         case Tool.Image:
           drawImage(operation as Image, context, operation.pos, operation.id, () => {
             renderOperations(operations);
@@ -607,7 +619,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     }
   }, []);
 
-  const handleCompleteOperation = (tool?: Tool, data?: Stroke | Shape | Text | Image | Update | Remove | Highlighter, pos?: Position) => {
+  const handleCompleteOperation = (tool?: Tool, data?: Stroke | Shape | Text | Latex | Image | Update | Remove | Highlighter, pos?: Position) => {
     if (!tool) {
       renderOperations(operationListState.reduced);
       return;
@@ -633,6 +645,10 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       },
     });
   }
+
+  let settingMenu = null;
+  let removeButton = null;
+  let content = null;
 
   const {
     onMouseMove: onMouseResizeMove,
@@ -670,10 +686,246 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       case Tool.Text:
         onTextMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl);
         break;
+      //LATEX MOUSEDOWN
+      case Tool.Latex:
+        onLatexMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl);
+        const textOperation: Latex = selectedOperation as Latex;
+        content = useLatexDropdown({
+          latexSize: 20,//textOperation.size,
+          textColor: "black",//textOperation.color,
+        } as ToolOption, (option: ToolOption) => {
+          const data: Partial<Operation> = {
+            color: option.textColor,
+            size: option.latexSize,
+          };
+
+          if (refContext.current && option.latexSize !== 20){//textOperation.size) {
+            const context = refContext.current;
+
+            // font size has changed, need to update pos
+            context.font = `${option.latexSize}px ${fontLatex}`;
+            context.textBaseline = 'alphabetic';
+            // measureText does not support multi-line
+            const lines = textOperation.text.split('\n');
+            data.pos = {
+              ...selectedOperation.pos,
+              w: Math.max(...(lines.map(line => context.measureText(line).width))),
+              h: lines.length * option.latexSize,
+            };
+          }
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          // @ts-ignore
+          setSelectedOperation({ ...selectedOperation, ...data });
+        }, () => {}, intl, prefixCls);
+
+        
+        settingMenu = (
+          <div style={{display: 'block'}} onMouseDown={stopPropagation}>
+            {content}
+          </div>
+        );
+        break;
       default:
         break;
     }
   };
+  //OPERATION
+  if (selectedOperation) {
+    switch (selectedOperation.tool) {
+      case Tool.Highlighter:
+        content = useStrokeDropdown({
+          highlighterSize: (selectedOperation as Highlighter).size,
+          highlighterColor: (selectedOperation as Highlighter).color,
+        } as ToolOption, (option: ToolOption) => {
+          const data = {
+            color: option.highlighterColor,
+            size: option.highlighterSize,
+          };
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          setSelectedOperation({ ...selectedOperation, ...data });
+        }, () => {}, prefixCls, selectedOperation.tool);
+        break;
+      case Tool.Stroke:
+        content = useStrokeDropdown({
+          strokeSize: (selectedOperation as Stroke).size,
+          strokeColor: (selectedOperation as Stroke).color,
+        } as ToolOption, (option: ToolOption) => {
+          const data = {
+            color: option.strokeColor,
+            size: option.strokeSize,
+          };
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          setSelectedOperation({ ...selectedOperation, ...data });
+        }, () => {}, prefixCls, selectedOperation.tool);
+        break;
+      case Tool.Shape:
+        content = useShapeDropdown({
+          shapeType: (selectedOperation as Shape).type,
+          shapeBorderColor: (selectedOperation as Shape).color,
+          shapeBorderSize: (selectedOperation as Shape).size,
+        } as ToolOption, (option: ToolOption) => {
+          const data = {
+            type: option.shapeType,
+            color: option.shapeBorderColor,
+            size: option.shapeBorderSize,
+          };
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          setSelectedOperation({ ...selectedOperation, ...data });
+        }, () => {}, prefixCls);
+        break;
+      case Tool.Text: {
+        const textOperation: Text = selectedOperation as Text;
+        content = useTextDropdown({
+          textSize: textOperation.size,
+          textColor: textOperation.color,
+        } as ToolOption, (option: ToolOption) => {
+          const data: Partial<Operation> = {
+            color: option.textColor,
+            size: option.textSize,
+          };
+
+          if (refContext.current && option.textSize !== textOperation.size) {
+            const context = refContext.current;
+
+            // font size has changed, need to update pos
+            context.font = `${option.textSize}px ${font}`;
+            context.textBaseline = 'alphabetic';
+            // measureText does not support multi-line
+            const lines = textOperation.text.split('\n');
+            data.pos = {
+              ...selectedOperation.pos,
+              w: Math.max(...(lines.map(line => context.measureText(line).width))),
+              h: lines.length * option.textSize,
+            };
+          }
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          // @ts-ignore
+          setSelectedOperation({ ...selectedOperation, ...data });
+        }, () => {}, intl, prefixCls);
+        break;
+      } 
+
+      case Tool.Latex: {
+        const textOperation: Latex = selectedOperation as Latex;
+        content = useLatexDropdown({
+          latexSize: textOperation ? textOperation.size: 20,
+          textColor: textOperation? textOperation.color: 'black',
+        } as ToolOption, (option: ToolOption) => {
+          const data: Partial<Operation> = {
+            color: option.textColor,
+            size: option.latexSize,
+          };
+
+          const textOperationSize = textOperation ? textOperation.size: 20;
+
+          if (refContext.current && option.latexSize !== textOperationSize) {
+            const context = refContext.current;
+
+            // font size has changed, need to update pos
+            context.font = `${option.latexSize}px ${fontLatex}`;
+            context.textBaseline = 'alphabetic';
+            // measureText does not support multi-line
+            const lines = textOperation.text.split('\n');
+            data.pos = {
+              ...selectedOperation.pos,
+              w: Math.max(...(lines.map(line => context.measureText(line).width))),
+              h: lines.length * option.latexSize,
+            };
+          }
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          // @ts-ignore
+          setSelectedOperation({ ...selectedOperation, ...data });
+        }, () => {}, intl, prefixCls);
+        break;
+      }
+      default:
+        break;
+    }
+
+    const resultRect = {
+      xMin: selectedOperation.pos.x,
+      xMax: selectedOperation.pos.x + selectedOperation.pos.w,
+      yMin: selectedOperation.pos.y,
+      yMax: selectedOperation.pos.y + selectedOperation.pos.h,
+    };
+
+    const [a, b, c, d, e, f] = viewMatrix;
+    const selectPadding = Math.max(SELECT_PADDING * 1 / scale || 0, SELECT_PADDING);
+    const left = resultRect.xMin;
+    const top = resultRect.yMax + selectPadding;
+
+    const menuStyle: CSSProperties = {
+      position: 'absolute',
+      left: (a * left + c * top + e),
+      top: (b * left + d * top + f),
+    };
+
+    settingMenu = (
+      <div style={menuStyle} onMouseDown={stopPropagation}>
+        {content}
+      </div>
+    );
+
+    const onRemoveOperation = (evt: React.TouchEvent | React.MouseEvent) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+  
+      if (selectedOperation) {
+        setSelectedOperation(null);
+        handleCompleteOperation(Tool.Remove, { operationId: selectedOperation.id });
+      }
+    }
+    
+    const removeX = selectedOperation.tool === Tool.Text || selectedOperation.tool === Tool.Latex? resultRect.xMax - 5 / scale : resultRect.xMax - 7 / scale;
+    const removeY = selectedOperation.tool === Tool.Text || selectedOperation.tool === Tool.Latex? resultRect.yMin - 11 / scale : resultRect.yMin - 9 / scale;
+    const removeStyle: CSSProperties = {
+      position: 'absolute',
+      left: (a * removeX + c * removeY + e),
+      top: (b * removeX + d * removeY + f),
+      background: 'white',
+      lineHeight: '16px',
+      fontSize: '16px',
+      borderRadius: '50%',
+      cursor: 'pointer',
+      color: '#f45b6c',
+    };
+
+    removeButton = (
+      <div style={removeStyle} onMouseDown={onRemoveOperation} onTouchStart={onRemoveOperation}>
+        <Icon type="close-circle" theme="filled" />
+      </div>
+    )
+  }
 
   const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 1) {
@@ -818,16 +1070,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     onScaleChange(newScale);
   };
 
-  const onRemoveOperation = (evt: React.TouchEvent | React.MouseEvent) => {
-    evt.preventDefault();
-    evt.stopPropagation();
-
-    if (selectedOperation) {
-      setSelectedOperation(null);
-      handleCompleteOperation(Tool.Remove, { operationId: selectedOperation.id });
-    }
-  }
-
   useEffect(() => {
     const canvas = refCanvas.current as HTMLCanvasElement;
 
@@ -851,70 +1093,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     canvasStyle.cursor = `text`;
   }
 
-  useImperativeHandle(ref, () => {
-    return {
-      selectImage: (image: string) => {
-        if (image && refCanvas.current) {
-          onImageComplete(image, refCanvas.current, viewMatrix, handleCompleteOperation);
-        }
-      },
-      undo: () => {
-        setSelectedOperation(null);
-        if (operationListState.reduced.length) {
-          handleCompleteOperation(Tool.Undo);
-        }
-      },
-      redo: () => {
-        setSelectedOperation(null);
-
-        let isRedoable = 0;
-        const queue = operationListState.queue;
-        for (let i = queue.length - 1; i >= 0; i--) {
-          if (queue[i].tool === Tool.Undo) {
-            isRedoable++;
-          } else if (queue[i].tool === Tool.Redo) {
-            isRedoable--;
-          } else {
-            break;
-          }
-        }
-
-        if (isRedoable > 0) {
-          handleCompleteOperation(Tool.Redo);
-        }
-      },
-      clear: () => {
-        setSelectedOperation(null);
-        handleCompleteOperation(Tool.Clear);
-      },
-      save: (handleSave?: onSaveCallback) => {
-        if (refCanvas.current && refContext.current) {
-          const canvas = refCanvas.current;
-          const w = canvas.width;
-          const h = canvas.height;
-          const context = refContext.current;
-          context.globalCompositeOperation = "destination-over";
-          context.fillStyle = "#fff";
-          context.fillRect(0, 0, w, h);
-
-          const dataUrl = canvas.toDataURL('image/png');
-
-          if (handleSave) {
-            handleSave({
-              canvas,
-              dataUrl,
-            });
-          } else {
-            const a = document.createElement('a');
-            a.href = dataUrl;
-            a.download = 'sketch.png';
-            a.click();
-          }
-        }
-      },
-    };
-  });
-
   useZoomGesture(refCanvas);
   const bindPinch = usePinch((state) => {
     const { ctrlKey, origin, delta } = state;
@@ -929,6 +1107,75 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       });
     }
   });
+
+  const imperativeHandler = () => {
+    useImperativeHandle(ref, () => {
+      return {
+        selectImage: (image: string) => {
+          if (image && refCanvas.current) {
+            onImageComplete(image, refCanvas.current, viewMatrix, handleCompleteOperation);
+          }
+        },
+        undo: () => {
+          setSelectedOperation(null);
+          if (operationListState.reduced.length) {
+            handleCompleteOperation(Tool.Undo);
+          }
+        },
+        redo: () => {
+          setSelectedOperation(null);
+  
+          let isRedoable = 0;
+          const queue = operationListState.queue;
+          for (let i = queue.length - 1; i >= 0; i--) {
+            if (queue[i].tool === Tool.Undo) {
+              isRedoable++;
+            } else if (queue[i].tool === Tool.Redo) {
+              isRedoable--;
+            } else {
+              break;
+            }
+          }
+  
+          if (isRedoable > 0) {
+            handleCompleteOperation(Tool.Redo);
+          }
+        },
+        clear: () => {
+          setSelectedOperation(null);
+          handleCompleteOperation(Tool.Clear);
+        },
+        save: (handleSave?: onSaveCallback) => {
+          if (refCanvas.current && refContext.current) {
+            const canvas = refCanvas.current;
+            const w = canvas.width;
+            const h = canvas.height;
+            const context = refContext.current;
+            context.globalCompositeOperation = "destination-over";
+            context.fillStyle = "#fff";
+            context.fillRect(0, 0, w, h);
+  
+            const dataUrl = canvas.toDataURL('image/png');
+  
+            if (handleSave) {
+              handleSave({
+                canvas,
+                dataUrl,
+              });
+            } else {
+              const a = document.createElement('a');
+              a.href = dataUrl;
+              a.download = 'sketch.png';
+              a.click();
+            }
+          }
+        },
+      };
+    });
+  }
+  
+  imperativeHandler();
+
   const bindWheel = useWheel((state) => {
     const { ctrlKey, event, delta } = state;
 
@@ -942,154 +1189,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       });
     }
   });
-
-  let settingMenu = null;
-  let removeButton = null;
-  if (selectedOperation) {
-    let content = null;
-
-    switch (selectedOperation.tool) {
-      case Tool.Highlighter:
-        content = useStrokeDropdown({
-          highlighterSize: (selectedOperation as Highlighter).size,
-          highlighterColor: (selectedOperation as Highlighter).color,
-        } as ToolOption, (option: ToolOption) => {
-          const data = {
-            color: option.highlighterColor,
-            size: option.highlighterSize,
-          };
-
-          handleCompleteOperation(Tool.Update, {
-            operationId: selectedOperation.id,
-            data,
-          });
-
-          setSelectedOperation({ ...selectedOperation, ...data });
-        }, () => {}, prefixCls, selectedOperation.tool);
-        break;
-      case Tool.Stroke:
-        content = useStrokeDropdown({
-          strokeSize: (selectedOperation as Stroke).size,
-          strokeColor: (selectedOperation as Stroke).color,
-        } as ToolOption, (option: ToolOption) => {
-          const data = {
-            color: option.strokeColor,
-            size: option.strokeSize,
-          };
-
-          handleCompleteOperation(Tool.Update, {
-            operationId: selectedOperation.id,
-            data,
-          });
-
-          setSelectedOperation({ ...selectedOperation, ...data });
-        }, () => {}, prefixCls, selectedOperation.tool);
-        break;
-      case Tool.Shape:
-        content = useShapeDropdown({
-          shapeType: (selectedOperation as Shape).type,
-          shapeBorderColor: (selectedOperation as Shape).color,
-          shapeBorderSize: (selectedOperation as Shape).size,
-        } as ToolOption, (option: ToolOption) => {
-          const data = {
-            type: option.shapeType,
-            color: option.shapeBorderColor,
-            size: option.shapeBorderSize,
-          };
-
-          handleCompleteOperation(Tool.Update, {
-            operationId: selectedOperation.id,
-            data,
-          });
-
-          setSelectedOperation({ ...selectedOperation, ...data });
-        }, () => {}, prefixCls);
-        break;
-      case Tool.Text: {
-        const textOperation: Text = selectedOperation as Text;
-        content = useTextDropdown({
-          textSize: textOperation.size,
-          textColor: textOperation.color,
-        } as ToolOption, (option: ToolOption) => {
-          const data: Partial<Operation> = {
-            color: option.textColor,
-            size: option.textSize,
-          };
-
-          if (refContext.current && option.textSize !== textOperation.size) {
-            const context = refContext.current;
-
-            // font size has changed, need to update pos
-            context.font = `${option.textSize}px ${font}`;
-            context.textBaseline = 'alphabetic';
-            // measureText does not support multi-line
-            const lines = textOperation.text.split('\n');
-            data.pos = {
-              ...selectedOperation.pos,
-              w: Math.max(...(lines.map(line => context.measureText(line).width))),
-              h: lines.length * option.textSize,
-            };
-          }
-
-          handleCompleteOperation(Tool.Update, {
-            operationId: selectedOperation.id,
-            data,
-          });
-
-          // @ts-ignore
-          setSelectedOperation({ ...selectedOperation, ...data });
-        }, () => {}, intl, prefixCls);
-        break;
-      }
-      default:
-        break;
-    }
-
-    const resultRect = {
-      xMin: selectedOperation.pos.x,
-      xMax: selectedOperation.pos.x + selectedOperation.pos.w,
-      yMin: selectedOperation.pos.y,
-      yMax: selectedOperation.pos.y + selectedOperation.pos.h,
-    };
-
-    const [a, b, c, d, e, f] = viewMatrix;
-    const selectPadding = Math.max(SELECT_PADDING * 1 / scale || 0, SELECT_PADDING);
-    const left = resultRect.xMin;
-    const top = resultRect.yMax + selectPadding;
-
-    const menuStyle: CSSProperties = {
-      position: 'absolute',
-      left: (a * left + c * top + e),
-      top: (b * left + d * top + f),
-    };
-
-    settingMenu = (
-      <div style={menuStyle} onMouseDown={stopPropagation}>
-        {content}
-      </div>
-    );
-
-
-    const removeX = selectedOperation.tool === Tool.Text ? resultRect.xMax - 5 / scale : resultRect.xMax - 7 / scale;
-    const removeY = selectedOperation.tool === Tool.Text ? resultRect.yMin - 11 / scale : resultRect.yMin - 9 / scale;
-    const removeStyle: CSSProperties = {
-      position: 'absolute',
-      left: (a * removeX + c * removeY + e),
-      top: (b * removeX + d * removeY + f),
-      background: 'white',
-      lineHeight: '16px',
-      fontSize: '16px',
-      borderRadius: '50%',
-      cursor: 'pointer',
-      color: '#f45b6c',
-    };
-
-    removeButton = (
-      <div style={removeStyle} onMouseDown={onRemoveOperation} onTouchStart={onRemoveOperation}>
-        <Icon type="close-circle" theme="filled" />
-      </div>
-    )
-  }
 
   return (
     <div
@@ -1117,6 +1216,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         style={{ fontSize: `${12 * scale}px`, }}
         className={`${sketchpadPrefixCls}-textInput`}
         onBlur={() => {
+          onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
           onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
         }}
       >

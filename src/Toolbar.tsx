@@ -1,21 +1,9 @@
-import { animated, useSpring } from 'react-spring';
-import { Dropdown } from 'antd';
 import React, { useRef, ChangeEventHandler, useContext, useEffect } from 'react';
 import { useSpring, animated } from 'react-spring';
 import { useIntl } from 'react-intl';
-import classNames from 'classnames';
-import React, { ChangeEventHandler, useContext, useRef  } from 'react';
-
 import './Toolbar.less';
-import { isMobileDevice } from './utils';
-import { useShapeDropdown } from './ShapeTool';
-import { useStrokeDropdown } from './StrokeTool';
-import ConfigContext from './ConfigContext';
-import EnableSketchPadContext from './contexts/EnableSketchPadContext';
 import Tool, { ToolOption } from './enums/Tool';
-
 import ClearIcon from './svgs/ClearIcon';
-import EraserIcon from './svgs/EraserIcon';
 import HighlighterIcon from './svgs/HighlighterIcon';
 import ImageIcon from './svgs/ImageIcon';
 import RedoIcon from './svgs/RedoIcon';
@@ -24,13 +12,12 @@ import SelectIcon from './svgs/SelectIcon';
 import ShapeIcon from './svgs/ShapeIcon';
 import StrokeIcon from './svgs/StrokeIcon';
 import TextIcon from './svgs/TextIcon';
+import LatexIcon from './svgs/LatexIcon';
 import UndoIcon from './svgs/UndoIcon';
 import ZoomIcon from './svgs/ZoomIcon';
-import SaveIcon from './svgs/SaveIcon';
 import EraserIcon from './svgs/EraserIcon';
 import { useStrokeDropdown } from './StrokeTool';
 import { useShapeDropdown } from './ShapeTool';
-import { useTextDropdown } from './TextTool';
 import { Dropdown } from 'antd';
 import classNames from 'classnames';
 import './Toolbar.less';
@@ -56,7 +43,10 @@ const tools = [{
   label: 'umi.block.sketch.text',
   icon: TextIcon,
   type: Tool.Text,
-  // useTextDropdown: useTextDropdown,
+}, {
+  label: 'umi.block.sketch.latex',
+  icon: LatexIcon,
+  type: Tool.Latex,
 }, {
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
@@ -169,6 +159,9 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           }
 
           if (tool.type === Tool.Text){
+          }
+
+          if (tool.type === Tool.Latex){
           }
         }
 
