@@ -649,6 +649,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   let settingMenu = null;
   let removeButton = null;
   let content = null;
+  let latexMenu = null;
 
   const {
     onMouseMove: onMouseResizeMove,
@@ -689,46 +690,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       //LATEX MOUSEDOWN
       case Tool.Latex:
         onLatexMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl);
-        const textOperation: Latex = selectedOperation as Latex;
-        content = useLatexDropdown({
-          latexSize: 20,//textOperation.size,
-          textColor: "black",//textOperation.color,
-        } as ToolOption, (option: ToolOption) => {
-          const data: Partial<Operation> = {
-            color: option.textColor,
-            size: option.latexSize,
-          };
-
-          if (refContext.current && option.latexSize !== 20){//textOperation.size) {
-            const context = refContext.current;
-
-            // font size has changed, need to update pos
-            context.font = `${option.latexSize}px ${fontLatex}`;
-            context.textBaseline = 'alphabetic';
-            // measureText does not support multi-line
-            const lines = textOperation.text.split('\n');
-            data.pos = {
-              ...selectedOperation.pos,
-              w: Math.max(...(lines.map(line => context.measureText(line).width))),
-              h: lines.length * option.latexSize,
-            };
-          }
-
-          handleCompleteOperation(Tool.Update, {
-            operationId: selectedOperation.id,
-            data,
-          });
-
-          // @ts-ignore
-          setSelectedOperation({ ...selectedOperation, ...data });
-        }, () => {}, intl, prefixCls);
-
-        
-        settingMenu = (
-          <div style={{display: 'block'}} onMouseDown={stopPropagation}>
-            {content}
-          </div>
-        );
         break;
       default:
         break;
@@ -840,7 +801,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             color: option.textColor,
             size: option.latexSize,
           };
-
           const textOperationSize = textOperation ? textOperation.size: 20;
 
           if (refContext.current && option.latexSize !== textOperationSize) {
@@ -1070,6 +1030,12 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     onScaleChange(newScale);
   };
 
+  const showFormulas = (evt) => {
+    if(currentTool === Tool.Latex) {
+      console.log('SHOW FORMULA');
+    }
+  }
+
   useEffect(() => {
     const canvas = refCanvas.current as HTMLCanvasElement;
 
@@ -1209,7 +1175,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         {...bindPinch()}
         {...bindWheel()}
       />
-
       <div
         ref={refInput}
         contentEditable
@@ -1219,9 +1184,9 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
           onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
         }}
+        // onFocus={showFormulas}
       >
       </div>
-
       {settingMenu}
       {removeButton}
       {resizer}
