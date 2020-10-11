@@ -62,6 +62,7 @@ export const defaultToolOption = {
   textColor: strokeColor[0],
   textSize: TextSize.Default,
   latexSize: LatexSize.Default,
+  
   defaultLatex: {
     id: 'umi.block.sketch.latex.placeholder'
   },
