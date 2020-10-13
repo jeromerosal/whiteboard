@@ -1,7 +1,9 @@
+import { ChromePicker } from 'react-color';
 import React from 'react';
-import Tool, { strokeSize, strokeColor, ToolOption } from './enums/Tool';
+
 import { isMobileDevice } from './utils';
-import { Icon } from 'antd';
+import Tool, { strokeSize, ToolOption } from './enums/Tool';
+
 import './StrokeTool.less';
 
 interface Point {
@@ -271,48 +273,35 @@ export const useStrokeDropdown = (currentToolOption: ToolOption, setCurrentToolO
         </div>
         <div className={`${prefixCls}-split`}></div>
         <div className={`${prefixCls}-palette`}>
-          {toolType === Tool.Stroke && strokeColor.map(color => {
-            return (
-              <div
-                className={`${prefixCls}-color`}
-                key={color}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, strokeColor: color });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
-                }}
-                onTouchStart={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, strokeColor: color });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
-                }}
-              >
-                <div className={`${prefixCls}-fill`} style={{ background: color }}></div>
-                {currentToolOption.strokeColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
-              </div>
-            );
-          })}
-          {toolType === Tool.Highlighter && strokeColor.map(color => {
-            return (
-              <div
-                className={`${prefixCls}-color`}
-                key={color}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, highlighterColor: color });
-                  setCurrentTool && setCurrentTool(Tool.Highlighter);
-                }}
-                onTouchStart={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, highlighterColor: color });
-                  setCurrentTool && setCurrentTool(Tool.Highlighter);
-                }}
-              >
-                <div className={`${prefixCls}-fill`} style={{ background: color }}></div>
-                {currentToolOption.highlighterColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
-              </div>
-            );
-          })}
+          {toolType === Tool.Stroke && (
+            <ChromePicker
+              color={currentToolOption.strokeColor}
+              disableAlpha
+              onChange={(color) => {
+                console.log(color)
+                setCurrentToolOption({ ...currentToolOption, strokeColor: color.hex });
+                setCurrentTool && setCurrentTool(Tool.Stroke);
+              }}
+              onChangeComplete={(color) => {
+                setCurrentToolOption({ ...currentToolOption, strokeColor: color.hex });
+                setCurrentTool && setCurrentTool(Tool.Stroke);
+              }}
+            />
+          )}
+          {toolType === Tool.Highlighter && (
+            <ChromePicker
+              color={currentToolOption.highlighterColor}
+              disableAlpha
+              onChange={(color) => {
+                setCurrentToolOption({ ...currentToolOption, highlighterColor: color.hex });
+                setCurrentTool && setCurrentTool(Tool.Highlighter);
+              }}
+              onChangeComplete={(color) => {
+                setCurrentToolOption({ ...currentToolOption, highlighterColor: color.hex });
+                setCurrentTool && setCurrentTool(Tool.Highlighter);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
