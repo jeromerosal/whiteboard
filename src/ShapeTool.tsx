@@ -1,7 +1,6 @@
-import { ChromePicker } from 'react-color';
-import Tool, { ShapeType, strokeSize, ToolOption } from './enums/Tool';
-import React from 'react';
-
+import Tool, { ToolOption, ShapeType, strokeSize, strokeColor, } from './enums/Tool';
+import React, { useContext } from 'react';
+import { Icon } from 'antd';
 import './ShapeTool.less';
 
 export interface Position {
@@ -219,18 +218,25 @@ export const useShapeDropdown = (currentToolOption: ToolOption, setCurrentToolOp
         </div>
         <div className={`${prefixCls}-split`}></div>
         <div className={`${prefixCls}-palette`}>
-          <ChromePicker
-            color={currentToolOption.shapeBorderColor}
-            disableAlpha
-            onChange={(color) => {
-              setCurrentToolOption({ ...currentToolOption, shapeBorderColor: color.hex });
-              setCurrentTool && setCurrentTool(Tool.Shape);
-            }}
-            onChangeComplete={(color) => {
-              setCurrentToolOption({ ...currentToolOption, shapeBorderColor: color.hex });
-              setCurrentTool && setCurrentTool(Tool.Shape);
-            }}
-          />
+          {strokeColor.map(color => {
+            return <div
+              className={`${prefixCls}-color`}
+              key={color}
+              onTouchStart={(evt) => {
+                evt.stopPropagation();
+                setCurrentToolOption({ ...currentToolOption, shapeBorderColor: color });
+                setCurrentTool(Tool.Shape);
+              }}
+              onClick={(evt) => {
+                evt.stopPropagation();
+                setCurrentToolOption({ ...currentToolOption, shapeBorderColor: color });
+                setCurrentTool(Tool.Shape);
+              }}
+            >
+              <div className={`${prefixCls}-fill`} style={{ background: color }}></div>
+              {currentToolOption.shapeBorderColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
+            </div>
+          })}
         </div>
       </div>
     </div>
