@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Tool, { ToolOption, Position, LatexSize, strokeColor } from './enums/Tool';
+import Tool, { ToolOption, Position, EmojiSize, strokeColor } from './enums/Tool';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
 import { mapClientToCanvas, isMobileDevice } from './utils';
@@ -8,17 +8,17 @@ import './TextTool.less';
 
 let currentText = '';
 let currentColor = '';
-let currentSize = LatexSize.Default;
+let currentSize = EmojiSize.Default;
 
-const latexSize = [LatexSize.Small, LatexSize.Default, LatexSize.Large, LatexSize.XL];
+const emojiSize = [EmojiSize.Small, EmojiSize.Default, EmojiSize.Large, EmojiSize.XL];
 
-export interface Latex {
-  size: LatexSize,
+export interface Emoji {
+  size: EmojiSize,
   color: string,
   text: string,
 }
 
-export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanvas, intl, selectedItem, setCurrentTool: (tool: Tool) => void) => {
+export const onEmojiMouseDown = (e, toolOption, scale:number , refInput, refCanvas, intl, selectedItem, setCurrentTool: (tool: Tool) => void) => {
   setCurrentTool(selectedItem)
   if (!currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
@@ -32,9 +32,9 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
     textarea.style.display = 'block';
     textarea.style.left = x + canvas.offsetLeft + 'px';
     textarea.style.top = y + canvas.offsetTop + 'px';
-    textarea.style.fontSize = (toolOption.latexSize as number) * scale + 'px';
-    textarea.style.lineHeight = (toolOption.latexSize as number) * scale + 'px';
-    textarea.style.height = (toolOption.latexSize as number) * scale + 'px';
+    textarea.style.fontSize = (toolOption.emojiSize as number) * scale + 'px';
+    textarea.style.lineHeight = (toolOption.emojiSize as number) * scale + 'px';
+    textarea.style.height = (toolOption.emojiSize as number) * scale + 'px';
     textarea.style.color = toolOption.textColor;
     textarea.innerText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
 
@@ -57,11 +57,11 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
 
     currentText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
     currentColor = toolOption.textColor;
-    currentSize = toolOption.latexSize;
+    currentSize = toolOption.emojiSize;
   }
 }
 
-export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
+export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
   if (currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
     const text = textarea.innerText;
@@ -84,17 +84,17 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
       h: height,
     };
 
-    handleCompleteOperation(Tool.Latex, { text, color: currentColor, size: currentSize }, pos);
+    handleCompleteOperation(Tool.Emoji, { text, color: currentColor, size: currentSize }, pos);
     setCurrentTool(Tool.Select);
     currentText = '';
   }
 }
 
-export const fontLatex = `"PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif, "localant"`;
+export const fontEmoji = `"PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif, "localant"`;
 
-export const drawLatex = (item: Latex, context: CanvasRenderingContext2D, pos: Position) => {
+export const drawEmoji = (item: Emoji, context: CanvasRenderingContext2D, pos: Position) => {
   context.globalCompositeOperation = 'source-over';
-  context.font = `${item.size}px ${fontLatex}` ;
+  context.font = `${item.size}px ${fontEmoji}` ;
   context.fillStyle = item.color || '#4a4a4a';
   context.textBaseline = 'middle';
 
@@ -104,32 +104,32 @@ export const drawLatex = (item: Latex, context: CanvasRenderingContext2D, pos: P
   }
 }
 
-export const focusLatexDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
+export const focusEmojiDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
   prefixCls += '-textTool';
   return (
     <div style={{ position: 'fixed', top: '50%', left: '20%'}} className={`${prefixCls}-strokeMenu`}>
       <div className={`${prefixCls}-colorAndSize`}>
         <div className={`${prefixCls}-textSizeSelector`}>
-          {latexSize.map(size => {
+          {emojiSize.map(size => {
             return (
               <div
                 key={size}
                 onTouchStart={(evt) => {
                   evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
+                  setCurrentToolOption({ ...currentToolOption, emojiSize: size });
                   setCurrentTool && setCurrentTool(Tool.Stroke);
                 }}
                 onClick={(evt) => {
                   evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
+                  setCurrentToolOption({ ...currentToolOption, emojiSize: size });
                   setCurrentTool && setCurrentTool(Tool.Stroke);
                 }}
-                style={{ color: size === currentToolOption.latexSize ? '#666' : '#ccc' }}
+                style={{ color: size === currentToolOption.emojiSize ? '#666' : '#ccc' }}
               >
-                {size === LatexSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.small' }) 
-                : size === LatexSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.default' }) 
-                : size === LatexSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.large' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.latex.size.xl' })
+                {size === EmojiSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.small' }) 
+                : size === EmojiSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.default' }) 
+                : size === EmojiSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.large' }) 
+                : intl.formatMessage({ id: 'umi.block.sketch.emoji.size.xl' })
                 }
               </div>
             )
@@ -161,32 +161,32 @@ export const focusLatexDropdown = (currentToolOption, setCurrentToolOption, setC
 }
 
 
-export const useLatexDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
+export const useEmojiDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
   prefixCls += '-textTool';
   return (
     <div className={`${prefixCls}-strokeMenu`}>
       <div className={`${prefixCls}-colorAndSize`}>
         <div className={`${prefixCls}-textSizeSelector`}>
-          {latexSize.map(size => {
+          {emojiSize.map(size => {
             return (
               <div
                 key={size}
                 onTouchStart={(evt) => {
                   evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
+                  setCurrentToolOption({ ...currentToolOption, emojiSize: size });
                   setCurrentTool && setCurrentTool(Tool.Stroke);
                 }}
                 onClick={(evt) => {
                   evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
+                  setCurrentToolOption({ ...currentToolOption, emojiSize: size });
                   setCurrentTool && setCurrentTool(Tool.Stroke);
                 }}
-                style={{ color: size === currentToolOption.latexSize ? '#666' : '#ccc' }}
+                style={{ color: size === currentToolOption.emojiSize ? '#666' : '#ccc' }}
               >
-                {size === LatexSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.small' }) 
-                : size === LatexSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.default' }) 
-                : size === LatexSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.large' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.latex.size.xl' })
+                {size === EmojiSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.small' }) 
+                : size === EmojiSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.default' }) 
+                : size === EmojiSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.large' }) 
+                : intl.formatMessage({ id: 'umi.block.sketch.emoji.size.xl' })
                 }
               </div>
             )

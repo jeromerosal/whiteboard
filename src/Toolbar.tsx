@@ -13,6 +13,7 @@ import ShapeIcon from './svgs/ShapeIcon';
 import StrokeIcon from './svgs/StrokeIcon';
 import TextIcon from './svgs/TextIcon';
 import LatexIcon from './svgs/LatexIcon';
+import EmojiIcon from './svgs/EmojiIcon';
 import UndoIcon from './svgs/UndoIcon';
 import ZoomIcon from './svgs/ZoomIcon';
 import EraserIcon from './svgs/EraserIcon';
@@ -47,7 +48,11 @@ const tools = [{
   label: 'umi.block.sketch.latex',
   icon: LatexIcon,
   type: Tool.Latex,
-}, {
+},  {
+  label: 'umi.block.sketch.emoji',
+  icon: EmojiIcon,
+  type: Tool.Emoji,
+},  {
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
   type: Tool.Image,
@@ -162,6 +167,9 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           }
 
           if (tool.type === Tool.Latex){
+          }
+
+          if (tool.type === Tool.Emoji){
           }
         }
 

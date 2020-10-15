@@ -75,8 +75,19 @@ import {
   onLatexComplete,
   onLatexMouseDown, 
   Latex, 
-  useLatexDropdown
+  useLatexDropdown,
+  focusLatexDropdown
 } from './LatexTool';
+
+import { 
+  drawEmoji, 
+  fontEmoji,
+  onEmojiComplete,
+  onEmojiMouseDown, 
+  Emoji, 
+  useEmojiDropdown,
+  focusEmojiDropdown
+} from './EmojiTool';
 
 export interface SketchPadProps {
   currentTool: Tool;
@@ -110,7 +121,7 @@ export type Remove = {
   operationId: string,
 }
 
-export type Operation = (Stroke | Shape | Text | Latex | Image | Update | Remove | Highlighter) & {
+export type Operation = (Stroke | Shape | Text | Latex | Emoji | Image | Update | Remove | Highlighter) & {
   id: string;
   userId: string;
   timestamp: number;
@@ -120,7 +131,7 @@ export type Operation = (Stroke | Shape | Text | Latex | Image | Update | Remove
 
 export type Update = {
   operationId: string,
-  data: Partial<((Stroke | Shape | Text | Latex | Image | Highlighter) & {
+  data: Partial<((Stroke | Shape | Text | Latex | Emoji | Image | Highlighter) & {
     pos: Position,
   })>,
 };
@@ -453,13 +464,14 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const intl = useIntl();
   const { prefixCls } = useContext(ConfigContext);
   const enableSketchPadContext = useContext(EnableSketchPadContext);
-
+  const [ currentMenuStyle, setCurrentMenuStyle ] = useState<CSSProperties | null>(null);
   const sketchpadPrefixCls = prefixCls + '-sketchpad';
 
   // a  c  e
   // b  d  f
   // 0  0  1
   const [viewMatrix, setViewMatrix] = useState([1, 0, 0, 1, 0, 0]);
+  const [ showSettings, setShowSettings ] = useState('')
 
   const [hoverOperationId, setHoverOperationId] = useState<string | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
@@ -538,6 +550,9 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         case Tool.Latex:
           drawLatex(operation as Latex, context, operation.pos);
           break
+        case Tool.Emoji:
+          drawEmoji(operation as Emoji, context, operation.pos);
+          break
         case Tool.Image:
           drawImage(operation as Image, context, operation.pos, operation.id, () => {
             renderOperations(operations);
@@ -564,7 +579,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     const keydownHandler = (evt: KeyboardEvent) => {
       const { keyCode } = evt;
       // key 'delete'
-      if (keyCode === 8) {
+      if (keyCode === 8 || keyCode === 46 ) {
         if (selectedOperation) {
           setSelectedOperation(null);
           handleCompleteOperation(Tool.Remove, { operationId: selectedOperation.id });
@@ -619,7 +634,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     }
   }, []);
 
-  const handleCompleteOperation = (tool?: Tool, data?: Stroke | Shape | Text | Latex | Image | Update | Remove | Highlighter, pos?: Position) => {
+  const handleCompleteOperation = (tool?: Tool, data?: Stroke | Shape | Text | Latex | Emoji | Image | Update | Remove | Highlighter, pos?: Position) => {
     if (!tool) {
       renderOperations(operationListState.reduced);
       return;
@@ -686,49 +701,13 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       case Tool.Text:
         onTextMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl);
         break;
-      //LATEX MOUSEDOWN
+
       case Tool.Latex:
-        onLatexMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl);
-        const textOperation: Latex = selectedOperation as Latex;
-        content = useLatexDropdown({
-          latexSize: 20,//textOperation.size,
-          textColor: "black",//textOperation.color,
-        } as ToolOption, (option: ToolOption) => {
-          const data: Partial<Operation> = {
-            color: option.textColor,
-            size: option.latexSize,
-          };
+        onLatexMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl, currentTool, setCurrentTool);
+        break;
 
-          if (refContext.current && option.latexSize !== 20){//textOperation.size) {
-            const context = refContext.current;
-
-            // font size has changed, need to update pos
-            context.font = `${option.latexSize}px ${fontLatex}`;
-            context.textBaseline = 'alphabetic';
-            // measureText does not support multi-line
-            const lines = textOperation.text.split('\n');
-            data.pos = {
-              ...selectedOperation.pos,
-              w: Math.max(...(lines.map(line => context.measureText(line).width))),
-              h: lines.length * option.latexSize,
-            };
-          }
-
-          handleCompleteOperation(Tool.Update, {
-            operationId: selectedOperation.id,
-            data,
-          });
-
-          // @ts-ignore
-          setSelectedOperation({ ...selectedOperation, ...data });
-        }, () => {}, intl, prefixCls);
-
-        
-        settingMenu = (
-          <div style={{display: 'block'}} onMouseDown={stopPropagation}>
-            {content}
-          </div>
-        );
+      case Tool.Emoji:
+        onEmojiMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl, currentTool, setCurrentTool);
         break;
       default:
         break;
@@ -868,6 +847,45 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         }, () => {}, intl, prefixCls);
         break;
       }
+
+      case Tool.Emoji: {
+        const textOperation: Emoji = selectedOperation as Emoji;
+        content = useEmojiDropdown({
+          emojiSize: textOperation ? textOperation.size: 20,
+          textColor: textOperation? textOperation.color: 'black',
+        } as ToolOption, (option: ToolOption) => {
+          const data: Partial<Operation> = {
+            color: option.textColor,
+            size: option.emojiSize,
+          };
+
+          const textOperationSize = textOperation ? textOperation.size: 20;
+
+          if (refContext.current && option.emojiSize !== textOperationSize) {
+            const context = refContext.current;
+
+            // font size has changed, need to update pos
+            context.font = `${option.emojiSize}px ${fontEmoji}`;
+            context.textBaseline = 'alphabetic';
+            // measureText does not support multi-line
+            const lines = textOperation.text.split('\n');
+            data.pos = {
+              ...selectedOperation.pos,
+              w: Math.max(...(lines.map(line => context.measureText(line).width))),
+              h: lines.length * option.emojiSize,
+            };
+          }
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          // @ts-ignore
+          setSelectedOperation({ ...selectedOperation, ...data });
+        }, () => {}, intl, prefixCls);
+        break;
+      }
       default:
         break;
     }
@@ -890,6 +908,12 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       top: (b * left + d * top + f),
     };
 
+    if(JSON.stringify(currentMenuStyle) 
+    !== JSON.stringify(menuStyle) 
+    || !currentMenuStyle )
+      setCurrentMenuStyle(menuStyle)
+    
+  
     settingMenu = (
       <div style={menuStyle} onMouseDown={stopPropagation}>
         {content}
@@ -905,9 +929,11 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         handleCompleteOperation(Tool.Remove, { operationId: selectedOperation.id });
       }
     }
+
+
     
-    const removeX = selectedOperation.tool === Tool.Text || selectedOperation.tool === Tool.Latex? resultRect.xMax - 5 / scale : resultRect.xMax - 7 / scale;
-    const removeY = selectedOperation.tool === Tool.Text || selectedOperation.tool === Tool.Latex? resultRect.yMin - 11 / scale : resultRect.yMin - 9 / scale;
+    const removeX = selectedOperation.tool === Tool.Text || selectedOperation.tool === Tool.Latex || selectedOperation.tool === Tool.Emoji? resultRect.xMax - 5 / scale : resultRect.xMax - 7 / scale;
+    const removeY = selectedOperation.tool === Tool.Text || selectedOperation.tool === Tool.Latex || selectedOperation.tool === Tool.Emoji ? resultRect.yMin - 11 / scale : resultRect.yMin - 9 / scale;
     const removeStyle: CSSProperties = {
       position: 'absolute',
       left: (a * removeX + c * removeY + e),
@@ -949,7 +975,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
     switch (currentTool) {
       case Tool.Select:
-        onSelectMouseDoubleClick(x, y, scale, operationListState, handleCompleteOperation, viewMatrix, refInput, refCanvas, intl);
+        onSelectMouseDoubleClick(x, y, scale, operationListState, handleCompleteOperation, viewMatrix, refInput, refCanvas, intl, setCurrentTool);
         setSelectedOperation(null);
         break;
       default:
@@ -1190,6 +1216,96 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     }
   });
 
+  let showDropdown = null;
+  const focusDropdown = () => {
+
+    switch(showSettings) {
+      case 'Latex':
+        const latexOperation: Latex = selectedOperation as Latex;
+        showDropdown = useLatexDropdown({
+          latexSize: latexOperation ? latexOperation.size: 20,
+          textColor: latexOperation? latexOperation.color: 'black',
+        } as ToolOption, (option: ToolOption) => {
+          const data: Partial<Operation> = {
+            color: option.textColor,
+            size: option.latexSize,
+          };
+
+        const latexOperationSize = latexOperation ? latexOperation.size: 20;
+
+        if (refContext.current && option.latexSize !== latexOperationSize) {
+          const context = refContext.current;
+
+          // font size has changed, need to update pos
+          context.font = `${option.latexSize}px ${fontLatex}`;
+          context.textBaseline = 'alphabetic';
+          // measureText does not support multi-line
+          const lines = textOperation.text.split('\n');
+          data.pos = {
+            ...selectedOperation.pos,
+            w: Math.max(...(lines.map(line => context.measureText(line).width))),
+            h: lines.length * option.latexSize,
+          };
+        }
+
+        handleCompleteOperation(Tool.Update, {
+          operationId: selectedOperation.id,
+          data,
+        });
+
+        // @ts-ignore
+        setSelectedOperation({ ...selectedOperation, ...data });
+          }, () => {}, intl, prefixCls);
+      break;
+        
+      case 'Emoji':
+        const emojiOperation: Emoji = selectedOperation as Emoji;
+        showDropdown = useEmojiDropdown({
+          emojiSize: emojiOperation ? emojiOperation.size: 20,
+          textColor: emojiOperation? emojiOperation.color: 'black',
+        } as ToolOption, (option: ToolOption) => {
+          const data: Partial<Operation> = {
+            color: option.textColor,
+            size: option.emojiSize,
+          };
+
+          const emojiOperationSize = emojiOperation ? emojiOperation.size: 20;
+
+          if (refContext.current && option.emojiSize !== emojiOperationSize) {
+            const context = refContext.current;
+
+            // font size has changed, need to update pos
+            context.font = `${option.emojiSize}px ${fontEmoji}`;
+            context.textBaseline = 'alphabetic';
+            // measureText does not support multi-line
+            const lines = emojiOperation.text.split('\n');
+            data.pos = {
+              ...selectedOperation.pos,
+              w: Math.max(...(lines.map(line => context.measureText(line).width))),
+              h: lines.length * option.emojiSize,
+            };
+          }
+
+          handleCompleteOperation(Tool.Update, {
+            operationId: selectedOperation.id,
+            data,
+          });
+
+          // @ts-ignore
+          setSelectedOperation({ ...selectedOperation, ...data });
+          }, () => {}, intl, prefixCls);
+
+          break;
+        default:
+          showDropdown="";
+          break;
+      }
+
+      return <div style={currentMenuStyle} onMouseDown={stopPropagation}>
+          {showDropdown}
+        </div>;
+  }
+
   return (
     <div
       className={`${sketchpadPrefixCls}-container`}
@@ -1217,11 +1333,18 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         className={`${sketchpadPrefixCls}-textInput`}
         onBlur={() => {
           onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+          onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
           onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+          setShowSettings('')
+
+        }}
+        onFocus={() => {
+          setShowSettings(currentTool)
         }}
       >
       </div>
 
+      {showSettings && focusDropdown() }
       {settingMenu}
       {removeButton}
       {resizer}
