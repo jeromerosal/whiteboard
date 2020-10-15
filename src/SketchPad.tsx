@@ -1240,7 +1240,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           context.font = `${option.latexSize}px ${fontLatex}`;
           context.textBaseline = 'alphabetic';
           // measureText does not support multi-line
-          const lines = textOperation.text.split('\n');
+          const lines = latexOperation.text.split('\n');
           data.pos = {
             ...selectedOperation.pos,
             w: Math.max(...(lines.map(line => context.measureText(line).width))),
