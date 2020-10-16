@@ -241,7 +241,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       <input
         type="file"
         style={{ display: 'none' }}
-        accept="image/jpeg, image/png"
+        accept="image/jpeg, image/png, video/mp4, video/avi"
         ref={refFileInput}
         onChange={handleFileChange}
       />
