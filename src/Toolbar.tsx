@@ -19,7 +19,7 @@ import ZoomIcon from './svgs/ZoomIcon';
 import EraserIcon from './svgs/EraserIcon';
 import { useStrokeDropdown } from './StrokeTool';
 import { useShapeDropdown } from './ShapeTool';
-import { Dropdown } from 'antd';
+import { Dropdown, Popover } from 'antd';
 import classNames from 'classnames';
 import './Toolbar.less';
 import { isMobileDevice } from './utils';
@@ -219,18 +219,24 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           const overlay = tool.useDropdown(currentToolOption, setCurrentToolOption, setCurrentTool, prefixCls, tool.type);
 
           return (
-            <div>
-            <Dropdown
-              key={tool.label}
-              overlay={overlay}
-              placement={toolbarPlacement === 'top' || toolbarPlacement === 'left' ? 'bottomLeft' : 'bottomRight'}
-              trigger={[isMobileDevice ? 'click' : 'hover']}
-              onVisibleChange={(visible) => {
-                enableSketchPadContext.setEnable(!visible);
-              }}
-            >
-              {menu}
-            </Dropdown>
+            <div key={tool.label}>
+              {/* <Dropdown
+                overlay={overlay}
+                placement={toolbarPlacement === 'top' || toolbarPlacement === 'left' ? 'bottomLeft' : 'bottomRight'}
+                trigger={[isMobileDevice ? 'click' : 'hover']}
+                onVisibleChange={(visible) => {
+                  enableSketchPadContext.setEnable(!visible);
+                }}
+              >
+                {menu}
+              </Dropdown> */}
+              <Popover
+                content={overlay}
+                placement={toolbarPlacement === 'top' || toolbarPlacement === 'left' ? 'bottomLeft' : 'bottomRight'}
+                trigger={isMobileDevice ? 'click' : 'hover'}
+              >
+                {menu}
+              </Popover>
             </div>
           )
         } else {

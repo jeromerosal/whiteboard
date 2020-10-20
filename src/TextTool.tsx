@@ -1,9 +1,10 @@
+import { ChromePicker } from 'react-color';
 import React, { useState } from 'react';
 import Tool, { ToolOption, Position, TextSize, strokeColor } from './enums/Tool';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
 import { mapClientToCanvas, isMobileDevice } from './utils';
-import { Icon } from 'antd';
+import { Button, Icon, Popover } from 'antd';
 import './TextTool.less';
 
 let currentText = '';
@@ -175,6 +176,26 @@ export const useTextDropdown = (currentToolOption: ToolOption, setCurrentToolOpt
               {currentToolOption.textColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
             </div>
           })}
+          <Popover 
+              placement="rightTop" 
+              content={
+                <ChromePicker
+                  color={currentToolOption.textColor}
+                  disableAlpha
+                  onChange={(color) => {
+                    setCurrentToolOption({ ...currentToolOption, textColor: color.hex });
+                    setCurrentTool && setCurrentTool(Tool.Stroke);
+                  }}
+                  onChangeComplete={(color) => {
+                    setCurrentToolOption({ ...currentToolOption, textColor: color.hex });
+                    setCurrentTool && setCurrentTool(Tool.Stroke);
+                  }}
+                />
+              } 
+              trigger="click"
+            >
+              <Button>More Colors</Button>
+            </Popover>
         </div>
       </div>
     </div>

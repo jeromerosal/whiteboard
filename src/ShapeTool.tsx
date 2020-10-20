@@ -1,7 +1,9 @@
-import Tool, { ToolOption, ShapeType, strokeSize, strokeColor, } from './enums/Tool';
-import React, { useContext } from 'react';
-import { Icon } from 'antd';
+import { Button, Icon, Popover } from 'antd';
+import { ChromePicker } from 'react-color';
+import React from 'react';
+
 import './ShapeTool.less';
+import Tool, { ShapeType, strokeColor, strokeSize, ToolOption } from './enums/Tool';
 
 export interface Position {
   x: number;
@@ -237,6 +239,27 @@ export const useShapeDropdown = (currentToolOption: ToolOption, setCurrentToolOp
               {currentToolOption.shapeBorderColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
             </div>
           })}
+
+          <Popover 
+            placement="rightTop" 
+            content={
+              <ChromePicker
+                color={currentToolOption.shapeBorderColor}
+                disableAlpha
+                onChange={(color) => {
+                  setCurrentToolOption({ ...currentToolOption, shapeBorderColor: color.hex });
+                  setCurrentTool && setCurrentTool(Tool.Shape);
+                }}
+                onChangeComplete={(color) => {
+                  setCurrentToolOption({ ...currentToolOption, shapeBorderColor: color.hex });
+                  setCurrentTool && setCurrentTool(Tool.Shape);
+                }}
+              />
+            } 
+            trigger="click"
+          >
+            <Button>More Colors</Button>
+          </Popover>
         </div>
       </div>
     </div>
