@@ -28,7 +28,7 @@ import { useZoomGesture } from './gesture';
 import ConfigContext from './ConfigContext';
 import EnableSketchPadContext from './contexts/EnableSketchPadContext';
 import sketchStrokeCursor from './images/sketch_stroke_cursor';
-import Tool, { ToolOption, Position, MAX_SCALE, MIN_SCALE, } from './enums/Tool';
+import Tool, { ToolOption, EmojiOption, Position, MAX_SCALE, MIN_SCALE, } from './enums/Tool';
 
 import { 
   onSelectMouseDoubleClick, 
@@ -86,7 +86,6 @@ import {
   onEmojiMouseDown, 
   Emoji, 
   useEmojiDropdown,
-  focusEmojiDropdown
 } from './EmojiTool';
 
 export interface SketchPadProps {
@@ -466,12 +465,16 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const enableSketchPadContext = useContext(EnableSketchPadContext);
   const [ currentMenuStyle, setCurrentMenuStyle ] = useState<CSSProperties | null>(null);
   const sketchpadPrefixCls = prefixCls + '-sketchpad';
+  const [ showEmojiMenu, setShowEmojiMenu ] = useState(false);
+  const [ currentTop, setCurrentTop ] = useState<any>('');
+  const [ currentLeft, setCurrentLeft ] = useState<any>('');
 
   // a  c  e
   // b  d  f
   // 0  0  1
   const [viewMatrix, setViewMatrix] = useState([1, 0, 0, 1, 0, 0]);
-  const [ showSettings, setShowSettings ] = useState('')
+  const [ showSettings, setShowSettings ] = useState('');
+  const [ currentInput, setCurrentInput ] = useState('')
 
   const [hoverOperationId, setHoverOperationId] = useState<string | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
@@ -578,7 +581,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   useEffect(() => {
     const keydownHandler = (evt: KeyboardEvent) => {
       const { keyCode } = evt;
-      // key 'delete'
       if (keyCode === 8 || keyCode === 46 ) {
         if (selectedOperation) {
           setSelectedOperation(null);
@@ -707,6 +709,10 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         break;
 
       case Tool.Emoji:
+        if(!currentTop) {
+          setCurrentTop(e.clientY);
+          setCurrentLeft(e.clientX);
+        }
         onEmojiMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl, currentTool, setCurrentTool);
         break;
       default:
@@ -1218,7 +1224,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
   let showDropdown = null;
   const focusDropdown = () => {
-
     switch(showSettings) {
       case 'Latex':
         const latexOperation: Latex = selectedOperation as Latex;
@@ -1257,48 +1262,9 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         setSelectedOperation({ ...selectedOperation, ...data });
           }, () => {}, intl, prefixCls);
       break;
-        
-      case 'Emoji':
-        const emojiOperation: Emoji = selectedOperation as Emoji;
-        showDropdown = useEmojiDropdown({
-          emojiSize: emojiOperation ? emojiOperation.size: 20,
-          textColor: emojiOperation? emojiOperation.color: 'black',
-        } as ToolOption, (option: ToolOption) => {
-          const data: Partial<Operation> = {
-            color: option.textColor,
-            size: option.emojiSize,
-          };
-
-          const emojiOperationSize = emojiOperation ? emojiOperation.size: 20;
-
-          if (refContext.current && option.emojiSize !== emojiOperationSize) {
-            const context = refContext.current;
-
-            // font size has changed, need to update pos
-            context.font = `${option.emojiSize}px ${fontEmoji}`;
-            context.textBaseline = 'alphabetic';
-            // measureText does not support multi-line
-            const lines = emojiOperation.text.split('\n');
-            data.pos = {
-              ...selectedOperation.pos,
-              w: Math.max(...(lines.map(line => context.measureText(line).width))),
-              h: lines.length * option.emojiSize,
-            };
-          }
-
-          handleCompleteOperation(Tool.Update, {
-            operationId: selectedOperation.id,
-            data,
-          });
-
-          // @ts-ignore
-          setSelectedOperation({ ...selectedOperation, ...data });
-          }, () => {}, intl, prefixCls);
-
-          break;
-        default:
-          showDropdown="";
-          break;
+      default:
+        showDropdown="";
+        break;
       }
 
       return <div style={currentMenuStyle} onMouseDown={stopPropagation}>
@@ -1306,6 +1272,69 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         </div>;
   }
 
+  const showEmojiDropdown = () => {
+    const emojiList = [ 
+      EmojiOption.AngryFace, 
+      EmojiOption.BeamingFacewithSmilingEyes, 
+      EmojiOption.ConfoundedFace, 
+      EmojiOption.CryingFace, 
+      EmojiOption.RollingontheFloorLaughing, 
+      EmojiOption.SleepingFace,
+      EmojiOption.SleepyFace,
+      EmojiOption.SlightlyFrowningFace,
+      EmojiOption.SlightlySmilingFace,
+      EmojiOption.NauseatedFace,
+      EmojiOption.KissingFacewithSmilingEyes,
+      EmojiOption.HuggingFace,
+      EmojiOption.GrinningFace,
+      EmojiOption.GrinningFacewithBigEyes,
+      EmojiOption.GrinningFacewithSmilingEyes,
+      EmojiOption.GrinningFacewithSweat,
+      EmojiOption.GrinningSquintingFace,
+      EmojiOption.SmilingCatwithHeartEyes,
+      EmojiOption.SmilingFacewithHalo,
+      EmojiOption.SmilingFacewithHeartEyes,
+      EmojiOption.SmilingFacewithHearts
+    ];
+
+    const emojiPosition: CSSProperties = currentMenuStyle ? currentMenuStyle : { position:'fixed', top: (currentTop ? currentTop + 30 : 300), left: (currentLeft ? currentLeft: 300)};
+    
+    const emojiStyles = {
+      emojiPosition,
+      emojiDisplay: {
+        display: showEmojiMenu ? 'flex': 'none', 
+        cursor: 'pointer', 
+        fontSize: 25,
+        flexWrap: 'wrap',
+        width: 400,
+        background: '#ffffff',
+        boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.2)',
+        borderRadius: 4,
+        padding: 10,
+      } 
+    }
+    
+    return (
+      <div 
+        style={{...emojiStyles.emojiPosition, ...emojiStyles.emojiDisplay}}
+        onClick={()=> {setShowEmojiMenu(false)}}
+      >
+        {emojiList.map( emojis => {
+          return <div key={emojis} onMouseDown={stopPropagation} onClick={()=> setCurrentInput(emojis)}>
+                    {emojis}
+                 </div>
+        })}
+      </div>
+    )
+  }
+
+  useEffect(() => {
+    refInput.current.innerText = currentInput ? currentInput: refInput.current.innerText;
+    onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+    setShowSettings('');
+    setShowEmojiMenu(false);    
+  }, [currentInput, refInput])
+  
   return (
     <div
       className={`${sketchpadPrefixCls}-container`}
@@ -1332,18 +1361,24 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         style={{ fontSize: `${12 * scale}px`, }}
         className={`${sketchpadPrefixCls}-textInput`}
         onBlur={() => {
-          onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-          onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-          onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-          setShowSettings('')
-
+          if(showSettings === 'Emoji') {
+            setCurrentTool(Tool.Emoji)
+          }
+          else{
+            onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+            onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+            setShowSettings('')
+          }
         }}
         onFocus={() => {
           setShowSettings(currentTool)
+          if(currentTool === "Emoji") {
+            setShowEmojiMenu(true)
+          }
         }}
       >
       </div>
-
+      {showEmojiDropdown()}
       {showSettings && focusDropdown() }
       {settingMenu}
       {removeButton}

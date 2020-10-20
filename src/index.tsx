@@ -60,7 +60,6 @@ const Block: React.FC<BlockProps> = (props) => {
   useEffect(() => {
     const keydownHandler = (evt: KeyboardEvent) => {
       const { keyCode } = evt;
-      
       if (keyCode === 80) { // key 'p'
         setCurrentTool(Tool.Stroke);
       } else if (keyCode === 82) { // key 'r'

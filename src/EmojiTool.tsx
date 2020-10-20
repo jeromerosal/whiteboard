@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Tool, { ToolOption, Position, EmojiSize, strokeColor } from './enums/Tool';
+import Tool, { ToolOption, EmojiOption, Position, EmojiSize, strokeColor } from './enums/Tool';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
 import { mapClientToCanvas, isMobileDevice } from './utils';
@@ -10,7 +10,7 @@ let currentText = '';
 let currentColor = '';
 let currentSize = EmojiSize.Default;
 
-const emojiSize = [EmojiSize.Small, EmojiSize.Default, EmojiSize.Large, EmojiSize.XL];
+const emojiSize = [EmojiSize.Small, EmojiSize.Default, EmojiSize.Large, EmojiSize.XL, EmojiSize.XXL];
 
 export interface Emoji {
   size: EmojiSize,
@@ -103,64 +103,6 @@ export const drawEmoji = (item: Emoji, context: CanvasRenderingContext2D, pos: P
     context.fillText(lines[i], pos.x, pos.y + item.size / 2 + (i * item.size)); // add half line height cause to textBaseline middle
   }
 }
-
-export const focusEmojiDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
-  prefixCls += '-textTool';
-  return (
-    <div style={{ position: 'fixed', top: '50%', left: '20%'}} className={`${prefixCls}-strokeMenu`}>
-      <div className={`${prefixCls}-colorAndSize`}>
-        <div className={`${prefixCls}-textSizeSelector`}>
-          {emojiSize.map(size => {
-            return (
-              <div
-                key={size}
-                onTouchStart={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, emojiSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
-                }}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, emojiSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
-                }}
-                style={{ color: size === currentToolOption.emojiSize ? '#666' : '#ccc' }}
-              >
-                {size === EmojiSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.small' }) 
-                : size === EmojiSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.default' }) 
-                : size === EmojiSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.large' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.emoji.size.xl' })
-                }
-              </div>
-            )
-          })}
-        </div>
-        <div className={`${prefixCls}-split`}></div>
-        <div className={`${prefixCls}-palette`}>
-          {strokeColor.map(color => {
-            return <div className={`${prefixCls}-color`} key={color}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                setCurrentToolOption({ ...currentToolOption, textColor: color });
-                setCurrentTool && setCurrentTool(Tool.Stroke);
-              }}
-              onTouchStart={(evt) => {
-                evt.stopPropagation();
-                setCurrentToolOption({ ...currentToolOption, textColor: color });
-                setCurrentTool && setCurrentTool(Tool.Stroke);
-              }}
-            >
-              <div className={`${prefixCls}-fill`} style={{ background: color }}></div>
-              {currentToolOption.textColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
-            </div>
-          })}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-
 export const useEmojiDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
   prefixCls += '-textTool';
   return (
@@ -174,26 +116,27 @@ export const useEmojiDropdown = (currentToolOption, setCurrentToolOption, setCur
                 onTouchStart={(evt) => {
                   evt.stopPropagation();
                   setCurrentToolOption({ ...currentToolOption, emojiSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
+                  setCurrentTool && setCurrentTool(Tool.Emoji);
                 }}
                 onClick={(evt) => {
                   evt.stopPropagation();
                   setCurrentToolOption({ ...currentToolOption, emojiSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
+                  setCurrentTool && setCurrentTool(Tool.Emoji);
                 }}
                 style={{ color: size === currentToolOption.emojiSize ? '#666' : '#ccc' }}
               >
                 {size === EmojiSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.small' }) 
                 : size === EmojiSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.default' }) 
                 : size === EmojiSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.large' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.emoji.size.xl' })
+                : size === EmojiSize.XL ? intl.formatMessage({ id: 'umi.block.sketch.emoji.size.xl' }) 
+                : intl.formatMessage({ id: 'umi.block.sketch.emoji.size.xxl' })
                 }
               </div>
             )
           })}
         </div>
-        <div className={`${prefixCls}-split`}></div>
-        <div className={`${prefixCls}-palette`}>
+        {/* <div className={`${prefixCls}-split`}></div>
+          <div className={`${prefixCls}-palette`}>
           {strokeColor.map(color => {
             return <div className={`${prefixCls}-color`} key={color}
               onClick={(evt) => {
@@ -211,7 +154,7 @@ export const useEmojiDropdown = (currentToolOption, setCurrentToolOption, setCur
               {currentToolOption.textColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
             </div>
           })}
-        </div>
+        </div>  */}
       </div>
     </div>
   )
