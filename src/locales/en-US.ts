@@ -4,6 +4,7 @@ export default {
   'umi.block.sketch.shape': 'Shape R',
   'umi.block.sketch.text': 'Text T',
   'umi.block.sketch.latex': 'Func F',
+  'umi.block.sketch.emoji': 'Emoji E',
   'umi.block.sketch.image': 'Image',
   'umi.block.sketch.highlighter': 'Highlighter',
   'umi.block.sketch.undo': 'Undo',
@@ -23,4 +24,11 @@ export default {
   'umi.block.sketch.latex.size.default': 'Default',
   'umi.block.sketch.latex.size.large': 'Large',
   'umi.block.sketch.latex.size.xl': 'XL',
+
+
+  'umi.block.sketch.emoji.placeholder': 'Type something',
+  'umi.block.sketch.emoji.size.small': 'Small',
+  'umi.block.sketch.emoji.size.default': 'Default',
+  'umi.block.sketch.emoji.size.large': 'Large',
+  'umi.block.sketch.emoji.size.xl': 'XL',
 };

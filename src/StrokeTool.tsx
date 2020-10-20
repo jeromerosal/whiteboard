@@ -1,8 +1,10 @@
+import { Button, Icon, Popover } from 'antd';
+import { ChromePicker } from 'react-color';
 import React from 'react';
-import Tool, { strokeSize, strokeColor, ToolOption } from './enums/Tool';
-import { isMobileDevice } from './utils';
-import { Icon } from 'antd';
+
 import './StrokeTool.less';
+import { isMobileDevice } from './utils';
+import Tool, { strokeColor, strokeSize, ToolOption } from './enums/Tool';
 
 interface Point {
   x: number,
@@ -292,6 +294,29 @@ export const useStrokeDropdown = (currentToolOption: ToolOption, setCurrentToolO
               </div>
             );
           })}
+          {toolType === Tool.Stroke && (
+            <Popover 
+              placement="rightTop" 
+              content={
+                <ChromePicker
+                  color={currentToolOption.strokeColor}
+                  disableAlpha
+                  onChange={(color) => {
+                    setCurrentToolOption({ ...currentToolOption, strokeColor: color.hex });
+                    setCurrentTool && setCurrentTool(Tool.Stroke);
+                  }}
+                  onChangeComplete={(color) => {
+                    setCurrentToolOption({ ...currentToolOption, strokeColor: color.hex });
+                    setCurrentTool && setCurrentTool(Tool.Stroke);
+                  }}
+                />
+              } 
+              trigger="click"
+            >
+              <Button>More Colors</Button>
+            </Popover>
+          )}
+
           {toolType === Tool.Highlighter && strokeColor.map(color => {
             return (
               <div
@@ -313,6 +338,29 @@ export const useStrokeDropdown = (currentToolOption: ToolOption, setCurrentToolO
               </div>
             );
           })}
+
+          {toolType === Tool.Highlighter && (
+            <Popover 
+              placement="rightTop" 
+              content={
+                <ChromePicker
+                  color={currentToolOption.highlighterColor}
+                  disableAlpha
+                  onChange={(color) => {
+                    setCurrentToolOption({ ...currentToolOption, highlighterColor: color.hex });
+                    setCurrentTool && setCurrentTool(Tool.Highlighter);
+                  }}
+                  onChangeComplete={(color) => {
+                    setCurrentToolOption({ ...currentToolOption, highlighterColor: color.hex });
+                    setCurrentTool && setCurrentTool(Tool.Highlighter);
+                  }}
+                />
+              } 
+              trigger="click"
+            >
+              <Button>More Colors</Button>
+            </Popover>
+          )}
         </div>
       </div>
     </div>

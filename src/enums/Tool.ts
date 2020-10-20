@@ -4,6 +4,7 @@ enum Tool {
   Shape = 'Shape',
   Text = 'Text',
   Latex = 'Latex',
+  Emoji = 'Emoji',
   Image = 'Image',
   Undo = 'Undo',
   Redo = 'Redo',
@@ -20,6 +21,7 @@ enum Tool {
 export enum ShapeType {
   Rectangle = 'Rectangle',
   Oval = 'Oval',
+  Triangle= 'Triangle'
 } 
 
 export const MAX_SCALE = 10;
@@ -35,7 +37,7 @@ export interface Position {
 
 export const strokeSize = [2, 4, 6, 8, 10];
 
-export const strokeColor = ['#4a4a4a', '#f55b6c', '#f7c924', '#63d321', '#50e3c2', '#59b9ff', '#bd10e0', '#ffffff'];
+export const strokeColor = ['#4a4a4a', '#f55b6c', '#f7c924', '#63d321', '#50e3c2', '#59b9ff', '#bd10e0', '#ffffff', '#ffc0cb', '#ffa500'];
 
 export enum TextSize {
   Small = 12,
@@ -45,6 +47,13 @@ export enum TextSize {
 }
 
 export enum LatexSize {
+  Small = 12,
+  Default = 20,
+  Large = 28,
+  XL = 100
+}
+
+export enum EmojiSize {
   Small = 12,
   Default = 20,
   Large = 28,
@@ -62,9 +71,14 @@ export const defaultToolOption = {
   textColor: strokeColor[0],
   textSize: TextSize.Default,
   latexSize: LatexSize.Default,
+  emojiSize: EmojiSize.Default,
 
   defaultLatex: {
     id: 'umi.block.sketch.latex.placeholder'
+  },
+
+  defaultEmoji: {
+    id: 'umi.block.sketch.emoji.placeholder'
   },
 
   defaultText: {
@@ -82,7 +96,8 @@ export type ToolOption = {
   shapeBorderSize: number,
   textColor: string,
   textSize: TextSize,
-  latexSize: LatexSize
+  latexSize: LatexSize,
+  emojiSize: EmojiSize,
 
   defaultText: string | {
     id: string,

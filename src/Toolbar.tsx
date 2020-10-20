@@ -13,12 +13,13 @@ import ShapeIcon from './svgs/ShapeIcon';
 import StrokeIcon from './svgs/StrokeIcon';
 import TextIcon from './svgs/TextIcon';
 import LatexIcon from './svgs/LatexIcon';
+import EmojiIcon from './svgs/EmojiIcon';
 import UndoIcon from './svgs/UndoIcon';
 import ZoomIcon from './svgs/ZoomIcon';
 import EraserIcon from './svgs/EraserIcon';
 import { useStrokeDropdown } from './StrokeTool';
 import { useShapeDropdown } from './ShapeTool';
-import { Dropdown } from 'antd';
+import { Dropdown, Popover } from 'antd';
 import classNames from 'classnames';
 import './Toolbar.less';
 import { isMobileDevice } from './utils';
@@ -47,7 +48,11 @@ const tools = [{
   label: 'umi.block.sketch.latex',
   icon: LatexIcon,
   type: Tool.Latex,
-}, {
+},  {
+  label: 'umi.block.sketch.emoji',
+  icon: EmojiIcon,
+  type: Tool.Emoji,
+},  {
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
   type: Tool.Image,
@@ -163,6 +168,9 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
           if (tool.type === Tool.Latex){
           }
+
+          if (tool.type === Tool.Emoji){
+          }
         }
 
         const iconAnimateProps = useSpring({
@@ -211,18 +219,24 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           const overlay = tool.useDropdown(currentToolOption, setCurrentToolOption, setCurrentTool, prefixCls, tool.type);
 
           return (
-            <div>
-            <Dropdown
-              key={tool.label}
-              overlay={overlay}
-              placement={toolbarPlacement === 'top' || toolbarPlacement === 'left' ? 'bottomLeft' : 'bottomRight'}
-              trigger={[isMobileDevice ? 'click' : 'hover']}
-              onVisibleChange={(visible) => {
-                enableSketchPadContext.setEnable(!visible);
-              }}
-            >
-              {menu}
-            </Dropdown>
+            <div key={tool.label}>
+              {/* <Dropdown
+                overlay={overlay}
+                placement={toolbarPlacement === 'top' || toolbarPlacement === 'left' ? 'bottomLeft' : 'bottomRight'}
+                trigger={[isMobileDevice ? 'click' : 'hover']}
+                onVisibleChange={(visible) => {
+                  enableSketchPadContext.setEnable(!visible);
+                }}
+              >
+                {menu}
+              </Dropdown> */}
+              <Popover
+                content={overlay}
+                placement={toolbarPlacement === 'top' || toolbarPlacement === 'left' ? 'bottomLeft' : 'bottomRight'}
+                trigger={isMobileDevice ? 'click' : 'hover'}
+              >
+                {menu}
+              </Popover>
             </div>
           )
         } else {
