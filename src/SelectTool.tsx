@@ -185,7 +185,7 @@ export const onSelectMouseDoubleClick = (
       const canvas = refCanvas.current;
       const { top, left } = canvas.getBoundingClientRect();
       handleCompleteOperation(Tool.Remove, { operationId: selectedItem.id });
-      onEmojiMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { emojiSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl, selectedItem.tool, setCurrentTool);
+      onEmojiMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { emojiSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl, selectedItem.tool, setCurrentTool );
     }
   }
 }

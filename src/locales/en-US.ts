@@ -31,4 +31,5 @@ export default {
   'umi.block.sketch.emoji.size.default': 'Default',
   'umi.block.sketch.emoji.size.large': 'Large',
   'umi.block.sketch.emoji.size.xl': 'XL',
+  'umi.block.sketch.emoji.size.xxl': '2XL',
 };
