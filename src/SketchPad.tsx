@@ -27,6 +27,7 @@ import { isMobileDevice, mapClientToCanvas } from './utils';
 import { useZoomGesture } from './gesture';
 import ConfigContext from './ConfigContext';
 import EnableSketchPadContext from './contexts/EnableSketchPadContext';
+import gridLines from './images/grid_lines';
 import sketchStrokeCursor from './images/sketch_stroke_cursor';
 import Tool, { ToolOption, EmojiOption, Position, MAX_SCALE, MIN_SCALE, } from './enums/Tool';
 
@@ -475,6 +476,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [viewMatrix, setViewMatrix] = useState([1, 0, 0, 1, 0, 0]);
   const [ showSettings, setShowSettings ] = useState('');
   const [ currentInput, setCurrentInput ] = useState('')
+  const [scaleGrid, setScaleGrid] = useState(30);
 
   const [hoverOperationId, setHoverOperationId] = useState<string | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
@@ -1095,6 +1097,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     if (refCanvas.current) {
       const pos = mapClientToCanvas(evt, refCanvas.current, viewMatrix);
       const scaleChange = newScale - a;
+      setScaleGrid(Math.round(newScale * 30));
       setViewMatrix([newScale, b, c, newScale, e - (pos[0] * scaleChange), f - (pos[1] * scaleChange)]);
     }
 
@@ -1124,6 +1127,10 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   } else if (currentTool === Tool.Text) {
     canvasStyle.cursor = `text`;
   }
+
+  const backgroundStyle: CSSProperties = {};
+  backgroundStyle.background = `url(${gridLines}) repeat`;
+  backgroundStyle.backgroundSize = scaleGrid;
 
   useZoomGesture(refCanvas);
   const bindPinch = usePinch((state) => {
@@ -1344,6 +1351,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       onMouseUp={onMouseUp}
+      style={backgroundStyle}
     >
       <div id='app'></div>
       <canvas

@@ -36,6 +36,11 @@ const tools = [{
   type: Tool.Stroke,
   useDropdown: useStrokeDropdown,
 }, {
+  label: 'umi.block.sketch.highlighter',
+  icon: HighlighterIcon,
+  type: Tool.Highlighter,
+  useDropdown: useStrokeDropdown,
+}, {
   label: 'umi.block.sketch.shape',
   icon: ShapeIcon,
   type: Tool.Shape,
@@ -56,11 +61,6 @@ const tools = [{
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
   type: Tool.Image,
-}, {
-  label: 'umi.block.sketch.highlighter',
-  icon: HighlighterIcon,
-  type: Tool.Highlighter,
-  useDropdown: useStrokeDropdown,
 }, {
   label: 'umi.block.sketch.undo',
   icon: UndoIcon,
