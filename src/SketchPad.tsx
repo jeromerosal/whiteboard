@@ -28,7 +28,9 @@ import { useZoomGesture } from './gesture';
 import ConfigContext from './ConfigContext';
 import EnableSketchPadContext from './contexts/EnableSketchPadContext';
 import sketchStrokeCursor from './images/sketch_stroke_cursor';
-import Tool, { ToolOption, EmojiOption, Position, MAX_SCALE, MIN_SCALE, } from './enums/Tool';
+import Tool, { ToolOption, LatexOption, EmojiOption, Position, MAX_SCALE, MIN_SCALE, } from './enums/Tool';
+import "katex/dist/katex.min.css";
+import { BlockMath } from "react-katex";
 
 import { 
   onSelectMouseDoubleClick, 
@@ -76,7 +78,6 @@ import {
   onLatexMouseDown, 
   Latex, 
   useLatexDropdown,
-  focusLatexDropdown
 } from './LatexTool';
 
 import { 
@@ -466,15 +467,16 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [ currentMenuStyle, setCurrentMenuStyle ] = useState<CSSProperties | null>(null);
   const sketchpadPrefixCls = prefixCls + '-sketchpad';
   const [ showEmojiMenu, setShowEmojiMenu ] = useState(false);
+  const [ showLatexMenu, setShowLatexMenu ] = useState(false);
   const [ currentTop, setCurrentTop ] = useState<any>('');
   const [ currentLeft, setCurrentLeft ] = useState<any>('');
-
-  // a  c  e
-  // b  d  f
-  // 0  0  1
   const [viewMatrix, setViewMatrix] = useState([1, 0, 0, 1, 0, 0]);
   const [ showSettings, setShowSettings ] = useState('');
-  const [ currentInput, setCurrentInput ] = useState('')
+  const [ currentEmoji, setCurrentEmoji ] = useState('');
+  const [ currentLatex, setCurrentLatex ] = useState('');
+  const [ latexLeftPosition, setLatexLeftPosition ] = useState(null);
+  const [ latexTopPosition, setLatexTopPosition ] = useState(null);
+
 
   const [hoverOperationId, setHoverOperationId] = useState<string | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
@@ -501,9 +503,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
   const saveGlobalTransform = () => {
     if (!refContext.current) return;
-
     const context = refContext.current;
-
     context.save();
     context.scale(DPR, DPR);
     const [a, b, c, d, e, f] = viewMatrix;
@@ -513,14 +513,12 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const restoreGlobalTransform = () => {
     if (!refContext.current) return;
     const context = refContext.current;
-
     context.restore();
   }
 
   const renderOperations = (operations: Operation[]) => {
     if (!refContext.current) return;
     const context = refContext.current;
-
     // clear canvas
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
@@ -574,7 +572,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       context.stroke();
       context.closePath();
     }
-
     restoreGlobalTransform();
   }
 
@@ -641,8 +638,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       renderOperations(operationListState.reduced);
       return;
     }
-
-    // coerce update.
     const isLazy = tool === Tool.LazyUpdate;
     tool = isLazy ? Tool.Update : tool;
 
@@ -705,6 +700,12 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         break;
 
       case Tool.Latex:
+        if(!currentTop) {
+          setCurrentTop(e.clientY);
+          setCurrentLeft(e.clientX);
+          setLatexTopPosition(e.clientY);
+          setLatexLeftPosition(e.clientX);
+        }
         onLatexMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl, currentTool, setCurrentTool);
         break;
 
@@ -1222,84 +1223,58 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     }
   });
 
-  let showDropdown = null;
-  const focusDropdown = () => {
-    switch(showSettings) {
-      case 'Latex':
-        const latexOperation: Latex = selectedOperation as Latex;
-        showDropdown = useLatexDropdown({
-          latexSize: latexOperation ? latexOperation.size: 20,
-          textColor: latexOperation? latexOperation.color: 'black',
-        } as ToolOption, (option: ToolOption) => {
-          const data: Partial<Operation> = {
-            color: option.textColor,
-            size: option.latexSize,
-          };
-
-        const latexOperationSize = latexOperation ? latexOperation.size: 20;
-
-        if (refContext.current && option.latexSize !== latexOperationSize) {
-          const context = refContext.current;
-
-          // font size has changed, need to update pos
-          context.font = `${option.latexSize}px ${fontLatex}`;
-          context.textBaseline = 'alphabetic';
-          // measureText does not support multi-line
-          const lines = latexOperation.text.split('\n');
-          data.pos = {
-            ...selectedOperation.pos,
-            w: Math.max(...(lines.map(line => context.measureText(line).width))),
-            h: lines.length * option.latexSize,
-          };
-        }
-
-        handleCompleteOperation(Tool.Update, {
-          operationId: selectedOperation.id,
-          data,
-        });
-
-        // @ts-ignore
-        setSelectedOperation({ ...selectedOperation, ...data });
-          }, () => {}, intl, prefixCls);
-      break;
-      default:
-        showDropdown="";
-        break;
-      }
-
-      return <div style={currentMenuStyle} onMouseDown={stopPropagation}>
-          {showDropdown}
-        </div>;
-  }
-
   const showEmojiDropdown = () => {
     const emojiList = [ 
-      EmojiOption.AngryFace, 
-      EmojiOption.BeamingFacewithSmilingEyes, 
-      EmojiOption.ConfoundedFace, 
-      EmojiOption.CryingFace, 
-      EmojiOption.RollingontheFloorLaughing, 
-      EmojiOption.SleepingFace,
-      EmojiOption.SleepyFace,
-      EmojiOption.SlightlyFrowningFace,
-      EmojiOption.SlightlySmilingFace,
-      EmojiOption.NauseatedFace,
-      EmojiOption.KissingFacewithSmilingEyes,
-      EmojiOption.HuggingFace,
-      EmojiOption.GrinningFace,
+      EmojiOption.BackhandIndexPointingDown,
+      EmojiOption.BackhandIndexPointingLeft,
+      EmojiOption.BackhandIndexPointingRight,
+      EmojiOption.BackhandIndexPointingUp,
+      EmojiOption.BeamingFacewithSmilingEyes,
+      EmojiOption.Boy,
+      EmojiOption.Brain,
+      EmojiOption.BriefCase,
+      EmojiOption.ClapphingHands,
+      EmojiOption.ConfoundedFace,
+      EmojiOption.ConfusedFace,
+      EmojiOption.CrossedFingers,
+      EmojiOption.CryingFace,
+      EmojiOption.Ear,
+      EmojiOption.Eyes,
+      EmojiOption.FlexedBiceps,
+      EmojiOption.FoldedHands,
+      EmojiOption.Girl,
+      EmojiOption.Glasses,
+      EmojiOption.GraduationCap,
+      EmojiOption.GrimacingFace,
       EmojiOption.GrinningFacewithBigEyes,
       EmojiOption.GrinningFacewithSmilingEyes,
       EmojiOption.GrinningFacewithSweat,
       EmojiOption.GrinningSquintingFace,
-      EmojiOption.SmilingCatwithHeartEyes,
-      EmojiOption.SmilingFacewithHalo,
-      EmojiOption.SmilingFacewithHeartEyes,
-      EmojiOption.SmilingFacewithHearts
+      EmojiOption.Handshake,
+      EmojiOption.HandwithFingersSplayed,
+      EmojiOption.HuggingFace,
+      EmojiOption.IndexPointingUp,
+      EmojiOption.LeftFacingFist,
+      EmojiOption.ManRaisingHand,
+      EmojiOption.ManTeacher,
+      EmojiOption.OKHand,
+      EmojiOption.RaisedFist,
+      EmojiOption.RaisedHand,
+      EmojiOption.RaisingHands,
+      EmojiOption.RightFacingFist,
+      EmojiOption.ThinkingFace,
+      EmojiOption.ThumbsDown,
+      EmojiOption.ThumbsUp,
+      EmojiOption.VictoryHand,
+      EmojiOption.WavingHand,
+      EmojiOption.Woman,
+      EmojiOption.WomanTeacher,
+      EmojiOption.WritingHand
     ];
 
     const emojiPosition: CSSProperties = currentMenuStyle ? currentMenuStyle : { position:'fixed', top: (currentTop ? currentTop + 30 : 300), left: (currentLeft ? currentLeft: 300)};
     
-    const emojiStyles = {
+    const emojiStyles: any = {
       emojiPosition,
       emojiDisplay: {
         display: showEmojiMenu ? 'flex': 'none', 
@@ -1320,20 +1295,140 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         onClick={()=> {setShowEmojiMenu(false)}}
       >
         {emojiList.map( emojis => {
-          return <div key={emojis} onMouseDown={stopPropagation} onClick={()=> setCurrentInput(emojis)}>
+          return <div key={emojis} onMouseDown={stopPropagation} onClick={()=> setCurrentEmoji(emojis)}>
                     {emojis}
                  </div>
-        })}
+        })
+        }
       </div>
     )
   }
 
+  //EMOJI REFINPUTS
   useEffect(() => {
-    refInput.current.innerText = currentInput ? currentInput: refInput.current.innerText;
+    refInput.current.innerText = currentEmoji ? currentEmoji: refInput.current.innerText;
     onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
     setShowSettings('');
     setShowEmojiMenu(false);    
-  }, [currentInput, refInput])
+  }, [currentEmoji, refInput]);
+
+
+  const showLatexDropdown = () => {
+    const latexList = [ 
+      LatexOption.BigSquareCup,
+      LatexOption.Product,
+      LatexOption.SquareRoot,
+      LatexOption.SquareRootN,
+      LatexOption.Summation,
+      LatexOption.WideTilde
+    ];
+
+    const latexOptions = [
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/sqrt.png',
+        label: 'SquareRoot',
+        defaultText: '\\sqrt{ab}',
+      },
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/widetilde.png',
+        label: 'WideTilde',
+        defaultText: '\\widetilde{ab}',
+      },
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/frac.png',
+        label: 'Fraction',
+        defaultText: '\\frac{a}{b}'
+      },
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/sum.png',
+        label: 'Summation',
+        defaultText: '\\displaystyle\\sum_0^n',
+      },
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/prod.png',
+        label: 'Product',
+        defaultText: '\\prod_a^b x',
+      },
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/partial.png',
+        label: 'Partial',
+        defaultText: '\\frac{\\partial^nf}{\\partial x^n}'
+      },
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/bigsqcup.png',
+        label: 'BigSquareCup',
+        defaultText: '\\bigsqcup_a^b x',
+      },
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/sqrtn.png',
+        label: 'SquareRootN',
+        defaultText: '\\sqrt[n]{ab}',
+      },
+    ]
+
+    const latexPosition: CSSProperties = currentMenuStyle ? currentMenuStyle : { position:'fixed', top: (currentTop ? currentTop + 30 : 300), left: (currentLeft ? currentLeft: 300)};
+    
+    const latexStyles: any = {
+      latexPosition,
+      latexDisplay: {
+        display: showLatexMenu ? 'flex': 'none', 
+        cursor: 'pointer', 
+        fontSize: 25,
+        flexWrap: 'wrap',
+        width: 300,
+        background: '#ffffff',
+        boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.2)',
+        borderRadius: 4,
+        padding: 10,
+      } 
+    }
+
+    const handleLatex = () => {
+      refInput.current.innerText = refInput.current.innerText;
+      refInput.current.style.display = 'none';
+      console.log(refContext)
+    }
+    
+    return (
+      <div 
+        style={{...latexStyles.latexPosition, ...latexStyles.latexDisplay}}
+        onClick={()=> {setShowLatexMenu(false)}}
+      >
+        {latexOptions.map( latexs => {
+          return (
+            <img 
+              key={latexs.url}
+              style={{ marginBottom: 10 }}
+              onMouseDown={stopPropagation}
+              alt={latexs.defaultText}
+              onClick={()=> setCurrentLatex(latexs.defaultText)}
+              src={latexs.url}
+            />
+          )
+        })}
+        <button
+          style={{
+            fontSize: 14, 
+            marginLeft: 'auto', 
+            padding: 5,
+            height: 34,
+            lineHeight: 'normal'
+          }} 
+          onClick={handleLatex}>
+            Add Formula
+        </button>
+      </div>
+    )
+  }
+
+  //LATEX REFINPUTS
+  useEffect(() => {
+    refInput.current.innerText = currentLatex ? currentLatex: refInput.current.innerText;
+    onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+    setShowSettings('');
+    setShowEmojiMenu(false);    
+  }, [currentLatex, refInput])
+  
   
   return (
     <div
@@ -1354,7 +1449,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         {...bindPinch()}
         {...bindWheel()}
       />
-
       <div
         ref={refInput}
         contentEditable
@@ -1363,6 +1457,9 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         onBlur={() => {
           if(showSettings === 'Emoji') {
             setCurrentTool(Tool.Emoji)
+          }
+          else if(showSettings === 'Latex') {
+            setCurrentTool(Tool.Latex)
           }
           else{
             onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
@@ -1375,11 +1472,19 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           if(currentTool === "Emoji") {
             setShowEmojiMenu(true)
           }
+          else if(currentTool === "Latex") {
+            setShowLatexMenu(true)
+          }
         }}
       >
       </div>
+      <div style={{position:'fixed', top: latexTopPosition, left: latexLeftPosition, fontSize: 32}}>
+          <BlockMath>
+            {refInput.current?refInput.current.innerText:"c = pmsqrt{a^4 + b^8}"}
+          </BlockMath> 
+      </div>
       {showEmojiDropdown()}
-      {showSettings && focusDropdown() }
+      {showLatexDropdown()}
       {settingMenu}
       {removeButton}
       {resizer}

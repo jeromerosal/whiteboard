@@ -24,6 +24,8 @@ export default {
   'umi.block.sketch.latex.size.default': 'Default',
   'umi.block.sketch.latex.size.large': 'Large',
   'umi.block.sketch.latex.size.xl': 'XL',
+  'umi.block.sketch.latex.size.xxl': '2XL',
+
 
 
   'umi.block.sketch.emoji.placeholder': 'Type something',

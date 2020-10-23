@@ -135,26 +135,6 @@ export const useEmojiDropdown = (currentToolOption, setCurrentToolOption, setCur
             )
           })}
         </div>
-        {/* <div className={`${prefixCls}-split`}></div>
-          <div className={`${prefixCls}-palette`}>
-          {strokeColor.map(color => {
-            return <div className={`${prefixCls}-color`} key={color}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                setCurrentToolOption({ ...currentToolOption, textColor: color });
-                setCurrentTool && setCurrentTool(Tool.Stroke);
-              }}
-              onTouchStart={(evt) => {
-                evt.stopPropagation();
-                setCurrentToolOption({ ...currentToolOption, textColor: color });
-                setCurrentTool && setCurrentTool(Tool.Stroke);
-              }}
-            >
-              <div className={`${prefixCls}-fill`} style={{ background: color }}></div>
-              {currentToolOption.textColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
-            </div>
-          })}
-        </div>  */}
       </div>
     </div>
   )

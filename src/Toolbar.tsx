@@ -30,53 +30,64 @@ const tools = [{
   label: 'umi.block.sketch.select',
   icon: SelectIcon,
   type: Tool.Select,
-}, {
+}, 
+{
   label: 'umi.block.sketch.pencil',
   icon: StrokeIcon,
   type: Tool.Stroke,
   useDropdown: useStrokeDropdown,
-}, {
-  label: 'umi.block.sketch.shape',
-  icon: ShapeIcon,
-  type: Tool.Shape,
-  useDropdown: useShapeDropdown,
-}, {
-  label: 'umi.block.sketch.text',
-  icon: TextIcon,
-  type: Tool.Text,
-}, {
-  label: 'umi.block.sketch.latex',
-  icon: LatexIcon,
-  type: Tool.Latex,
-},  {
-  label: 'umi.block.sketch.emoji',
-  icon: EmojiIcon,
-  type: Tool.Emoji,
-},  {
-  label: 'umi.block.sketch.image',
-  icon: ImageIcon,
-  type: Tool.Image,
-}, {
+}, 
+{
   label: 'umi.block.sketch.highlighter',
   icon: HighlighterIcon,
   type: Tool.Highlighter,
   useDropdown: useStrokeDropdown,
-}, {
+},
+{
+  label: 'umi.block.sketch.shape',
+  icon: ShapeIcon,
+  type: Tool.Shape,
+  useDropdown: useShapeDropdown,
+},
+{
+  label: 'umi.block.sketch.eraser',
+  icon: EraserIcon,
+  type: Tool.Eraser,
+},
+{
+  label: 'umi.block.sketch.text',
+  icon: TextIcon,
+  type: Tool.Text,
+}, 
+{
+  label: 'umi.block.sketch.emoji',
+  icon: EmojiIcon,
+  type: Tool.Emoji,
+},
+{
+  label: 'umi.block.sketch.latex',
+  icon: LatexIcon,
+  type: Tool.Latex,
+}, 
+{
+  label: 'umi.block.sketch.image',
+  icon: ImageIcon,
+  type: Tool.Image,
+},
+{
   label: 'umi.block.sketch.undo',
   icon: UndoIcon,
   type: Tool.Undo,
   style: {
     marginLeft: 'auto',
   },
-}, {
+}, 
+{
   label: 'umi.block.sketch.redo',
   icon: RedoIcon,
   type: Tool.Redo,
-}, {
-  label: 'umi.block.sketch.eraser',
-  icon: EraserIcon,
-  type: Tool.Eraser,
-}, {
+}, 
+{
   label: 'umi.block.sketch.clear',
   icon: ClearIcon,
   type: Tool.Clear,

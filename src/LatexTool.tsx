@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import Tool, { ToolOption, Position, LatexSize, strokeColor } from './enums/Tool';
+import Tool, { ToolOption, LatexOption, Position, LatexSize, strokeColor } from './enums/Tool';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
+import { BlockMath } from "react-katex";
 import { mapClientToCanvas, isMobileDevice } from './utils';
 import { Icon } from 'antd';
 import './TextTool.less';
@@ -10,7 +11,7 @@ let currentText = '';
 let currentColor = '';
 let currentSize = LatexSize.Default;
 
-const latexSize = [LatexSize.Small, LatexSize.Default, LatexSize.Large, LatexSize.XL];
+const latexSize = [LatexSize.Small, LatexSize.Default, LatexSize.Large, LatexSize.XL, LatexSize.XXL];
 
 export interface Latex {
   size: LatexSize,
@@ -65,6 +66,7 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
   if (currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
     const text = textarea.innerText;
+
     let { top, left, width, height } = textarea.getBoundingClientRect();
     width = 1 / scale * width;
     const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
@@ -103,64 +105,6 @@ export const drawLatex = (item: Latex, context: CanvasRenderingContext2D, pos: P
     context.fillText(lines[i], pos.x, pos.y + item.size / 2 + (i * item.size)); // add half line height cause to textBaseline middle
   }
 }
-
-export const focusLatexDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
-  prefixCls += '-textTool';
-  return (
-    <div style={{ position: 'fixed', top: '50%', left: '20%'}} className={`${prefixCls}-strokeMenu`}>
-      <div className={`${prefixCls}-colorAndSize`}>
-        <div className={`${prefixCls}-textSizeSelector`}>
-          {latexSize.map(size => {
-            return (
-              <div
-                key={size}
-                onTouchStart={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
-                }}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
-                }}
-                style={{ color: size === currentToolOption.latexSize ? '#666' : '#ccc' }}
-              >
-                {size === LatexSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.small' }) 
-                : size === LatexSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.default' }) 
-                : size === LatexSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.large' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.latex.size.xl' })
-                }
-              </div>
-            )
-          })}
-        </div>
-        <div className={`${prefixCls}-split`}></div>
-        <div className={`${prefixCls}-palette`}>
-          {strokeColor.map(color => {
-            return <div className={`${prefixCls}-color`} key={color}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                setCurrentToolOption({ ...currentToolOption, textColor: color });
-                setCurrentTool && setCurrentTool(Tool.Stroke);
-              }}
-              onTouchStart={(evt) => {
-                evt.stopPropagation();
-                setCurrentToolOption({ ...currentToolOption, textColor: color });
-                setCurrentTool && setCurrentTool(Tool.Stroke);
-              }}
-            >
-              <div className={`${prefixCls}-fill`} style={{ background: color }}></div>
-              {currentToolOption.textColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
-            </div>
-          })}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-
 export const useLatexDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
   prefixCls += '-textTool';
   return (
@@ -174,26 +118,27 @@ export const useLatexDropdown = (currentToolOption, setCurrentToolOption, setCur
                 onTouchStart={(evt) => {
                   evt.stopPropagation();
                   setCurrentToolOption({ ...currentToolOption, latexSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
+                  setCurrentTool && setCurrentTool(Tool.Latex);
                 }}
                 onClick={(evt) => {
                   evt.stopPropagation();
                   setCurrentToolOption({ ...currentToolOption, latexSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
+                  setCurrentTool && setCurrentTool(Tool.Latex);
                 }}
                 style={{ color: size === currentToolOption.latexSize ? '#666' : '#ccc' }}
               >
                 {size === LatexSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.small' }) 
                 : size === LatexSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.default' }) 
                 : size === LatexSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.large' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.latex.size.xl' })
+                : size === LatexSize.XL ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.xl' }) 
+                : intl.formatMessage({ id: 'umi.block.sketch.latex.size.xxl' })
                 }
               </div>
             )
           })}
         </div>
         <div className={`${prefixCls}-split`}></div>
-        <div className={`${prefixCls}-palette`}>
+          <div className={`${prefixCls}-palette`}>
           {strokeColor.map(color => {
             return <div className={`${prefixCls}-color`} key={color}
               onClick={(evt) => {
