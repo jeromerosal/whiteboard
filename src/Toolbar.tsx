@@ -1,4 +1,4 @@
-import React, { useRef, ChangeEventHandler, useContext, useEffect } from 'react';
+import React, { useRef, useState, ChangeEventHandler, useContext, useEffect } from 'react';
 import { useSpring, animated } from 'react-spring';
 import { useIntl } from 'react-intl';
 import './Toolbar.less';
@@ -14,6 +14,7 @@ import StrokeIcon from './svgs/StrokeIcon';
 import TextIcon from './svgs/TextIcon';
 import LatexIcon from './svgs/LatexIcon';
 import EmojiIcon from './svgs/EmojiIcon';
+import FormulaIcon from './svgs/FormulaIcon';
 import UndoIcon from './svgs/UndoIcon';
 import ZoomIcon from './svgs/ZoomIcon';
 import EraserIcon from './svgs/EraserIcon';
@@ -65,10 +66,11 @@ const tools = [{
   type: Tool.Emoji,
 },
 {
-  label: 'umi.block.sketch.latex',
-  icon: LatexIcon,
-  type: Tool.Latex,
-}, 
+  label: 'umi.block.sketch.formula',
+  icon: FormulaIcon,
+  type: Tool.Formula,
+},
+
 {
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
@@ -125,6 +127,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
   const { formatMessage } = useIntl();
   const { prefixCls } = useContext(ConfigContext);
   const enableSketchPadContext = useContext(EnableSketchPadContext);
+  const [ displayToolTip, setDisplayToolTip ] = useState(false);
 
   const toolbarPrefixCls = prefixCls + '-toolbar';
 
@@ -182,10 +185,13 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
           if (tool.type === Tool.Emoji){
           }
+          if (tool.type === Tool.Formula){
+          }
         }
 
         const iconAnimateProps = useSpring({
           left: isMobileDevice && currentTool !== tool.type ? -12 : 0,
+          position: 'relative',
           borderTop: borderTopStyle,
           ...(tool.style || {})
         });
@@ -194,6 +200,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           <animated.div
             className={classNames({
               [`${toolbarPrefixCls}-icon`]: true,
+              [`${tool.labelThunk ? tool.labelThunk(props) : formatMessage({ id: tool.label })}-icon`]: true,
               [`${toolbarPrefixCls}-activeIcon`]: currentTool === tool.type && !isMobileDevice,
               [`${toolbarPrefixCls}-mobile-icon`]: isMobileDevice,
             })}
@@ -222,7 +229,9 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
             key={tool.label}
           >
             <tool.icon />
-            {!isMobileDevice ? <label className={`${toolbarPrefixCls}-iconLabel`}>{tool.labelThunk ? tool.labelThunk(props) : formatMessage({ id: tool.label })}</label> : null}
+            <span className={'toolbar-tooltip'} style={{position: 'absolute',top: -10, left: 'calc(100% - 10px)', background: '#ffffff', border: '1px solid #dedede', borderRadius: 4, padding: 3}}>
+              {!isMobileDevice ? <label className={`${toolbarPrefixCls}-iconLabel`}>{tool.labelThunk ? tool.labelThunk(props) : formatMessage({ id: tool.label })}</label> : null}
+            </span>
           </animated.div>
         )
 
