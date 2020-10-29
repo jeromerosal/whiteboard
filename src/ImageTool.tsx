@@ -43,12 +43,12 @@ export const onImageComplete = (data: string, canvas: HTMLCanvasElement, viewMat
     const offsetHeight = canvas.offsetHeight;
 
     const pos = mapClientToCanvas({
-      clientX: left + (offsetWidth / 2 - imageWidth / 4),
-      clientY: top + (offsetHeight / 2 - imageHeight / 4),
+      clientX: left + (offsetWidth / 2 - imageWidth / 2),
+      clientY: top + (offsetHeight / 2 - imageHeight / 2),
     } as MouseEvent<HTMLCanvasElement>, canvas, viewMatrix);
     const posEnd = mapClientToCanvas({
-      clientX: left + (offsetWidth / 2 + imageWidth / 4),
-      clientY: top + (offsetHeight / 2 + imageHeight / 4),
+      clientX: left + (offsetWidth / 2 + imageWidth / 2),
+      clientY: top + (offsetHeight / 2 + imageHeight / 2),
     } as MouseEvent<HTMLCanvasElement>, canvas, viewMatrix);
 
     const posInfo = {

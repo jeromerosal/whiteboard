@@ -1,0 +1,70 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js add react-katex
+
+PATH: 
+  C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\nvm;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\xampp\php;C:\ProgramData\ComposerSetup\bin;C:\nvm;C:\Program Files\nodejs;C:\HashiCorp\Vagrant\bin;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Users\Admin\.windows-build-tools\python27\;C:\Users\Admin\AppData\Local\Microsoft\WindowsApps;C:\Users\Admin\AppData\Roaming\Composer\vendor\bin;C:\Users\Admin\AppData\Roaming\npm;C:\Program Files\JetBrains\IntelliJ IDEA 2020.2.1\bin;C:\ProgramData\Admin\GitHubDesktop\bin;C:\Program Files (x86)\GitHub CLI\;C:\Users\Admin\AppData\Local\Yarn\bin
+
+Yarn version: 
+  1.22.5
+
+Node version: 
+  12.18.3
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@icons/material/-/material-0.2.4.tgz: ESOCKETTIMEDOUT
+      at ClientRequest.<anonymous> (C:\Program Files (x86)\Yarn\lib\cli.js:141376:19)
+      at Object.onceWrapper (events.js:421:28)
+      at ClientRequest.emit (events.js:315:20)
+      at TLSSocket.emitRequestTimeout (_http_client.js:709:9)
+      at Object.onceWrapper (events.js:421:28)
+      at TLSSocket.emit (events.js:327:22)
+      at TLSSocket.Socket._onTimeout (net.js:482:8)
+      at listOnTimeout (internal/timers.js:549:17)
+      at processTimers (internal/timers.js:492:7)
+
+npm manifest: 
+  {
+    "name": "learntalk-whiteboard",
+    "version": "0.3.3",
+    "description": "",
+    "main": "lib/index.js",
+    "authors": {
+      "name": "",
+      "email": ""
+    },
+    "scripts": {
+      "dev": "umi dev",
+      "build": "father build",
+      "build-prod": "umi build"
+    },
+    "dependencies": {
+      "@types/vfile-message": "^2.0.0",
+      "antd": "^3.26.0",
+      "classnames": "^2.2.6",
+      "react": ">=16.0.0",
+      "react-intl": "^3.9.2",
+      "react-katex": "^2.0.2",
+      "react-spring": "^8.0.27",
+      "react-use-gesture": "^7.0.15",
+      "uuid": "^3.3.3"
+    },
+    "devDependencies": {
+      "@types/classnames": "^2.2.9",
+      "@types/uuid": "^3.4.6",
+      "father": "^2.29.1",
+      "umi": "^2.9.0",
+      "umi-plugin-block-dev": "^2.0.0",
+      "umi-plugin-react": "^1.14.8",
+      "umi-types": "^0.3.0"
+    },
+    "license": "MIT"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
