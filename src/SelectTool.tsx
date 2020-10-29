@@ -1,10 +1,14 @@
-import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
-import Tool, { Position, ToolOption } from './enums/Tool';
-import { Text, onTextMouseDown } from './TextTool';
-import { Stroke } from './StrokeTool';
-import { Operation, Update, OperationListState, Remove } from './SketchPad';
-import { matrix_multiply, isMobileDevice } from './utils'
 import { IntlShape } from 'react-intl';
+import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
+
+import { matrix_multiply, isMobileDevice } from './utils'
+import { Operation, Update, OperationListState, Remove } from './SketchPad';
+import { Highlighter, Stroke } from './StrokeTool';
+import { Text, onTextMouseDown } from './TextTool';
+import { Latex, onLatexMouseDown } from './LatexTool';
+import { Emoji, onEmojiMouseDown } from './EmojiTool';
+import { Formula, onFormulaMouseDown } from './FormulaTool';
+import Tool, { Position, ToolOption } from './enums/Tool';
 
 let lastSelectX = 0;
 let lastSelectY = 0;
@@ -35,12 +39,12 @@ const findSelectedItem = (items: Operation[], pos:[number, number], scale: numbe
   for(let i = items.length - 1; i >= 0; i--) {
     const item = items[i];
 
-    if ((item.tool === Tool.Stroke || item.tool === Tool.Eraser) && rectContain(item.pos, pos, 0)) {
-      const points = (item as Stroke).points;
+    if ((item.tool === Tool.Stroke || item.tool === Tool.Eraser || item.tool === Tool.Highlighter) && rectContain(item.pos, pos, 0)) {
+      const points = item.tool === Tool.Highlighter ? (item as Highlighter).points : (item as Stroke).points;
       if (points.some(p => (p.x - pos[0])**2 + (p.y - pos[1])**2 < (selectPadding * 2)**2)) {
         return item;
       }
-    } else if (item.tool === Tool.Shape || item.tool === Tool.Text || item.tool === Tool.Image) {
+    } else if (item.tool === Tool.Shape || item.tool === Tool.Text || item.tool === Tool.Latex || item.tool === Tool.Emoji || item.tool === Tool.Formula ||  item.tool === Tool.Image) {
       const rotate = 0;
 
       const selectedItem = rectContain({
@@ -151,6 +155,7 @@ export const onSelectMouseDoubleClick = (
   refInput: RefObject<HTMLDivElement>,
   refCanvas: RefObject<HTMLCanvasElement>,
   intl: IntlShape,
+  setCurrentTool
 ) => {
   const pos: [number, number] = [x, y];
 
@@ -164,6 +169,33 @@ export const onSelectMouseDoubleClick = (
       const { top, left } = canvas.getBoundingClientRect();
       handleCompleteOperation(Tool.Remove, { operationId: selectedItem.id });
       onTextMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { textSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl);
+    }
+
+    if (selectedItem.tool === Tool.Latex) {
+      const operation = selectedItem as Latex;
+      const [a, b, c, d, e, f] = viewMatrix;
+      const canvas = refCanvas.current;
+      const { top, left } = canvas.getBoundingClientRect();
+      handleCompleteOperation(Tool.Remove, { operationId: selectedItem.id });
+      onLatexMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { latexSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl, selectedItem.tool, setCurrentTool);
+    }
+
+    if (selectedItem.tool === Tool.Emoji) {
+      const operation = selectedItem as Emoji;
+      const [a, b, c, d, e, f] = viewMatrix;
+      const canvas = refCanvas.current;
+      const { top, left } = canvas.getBoundingClientRect();
+      handleCompleteOperation(Tool.Remove, { operationId: selectedItem.id });
+      onEmojiMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { emojiSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl, selectedItem.tool, setCurrentTool );
+    }
+
+    if (selectedItem.tool === Tool.Formula) {
+      const operation = selectedItem as Formula;
+      const [a, b, c, d, e, f] = viewMatrix;
+      const canvas = refCanvas.current;
+      const { top, left } = canvas.getBoundingClientRect();
+      handleCompleteOperation(Tool.Remove, { operationId: selectedItem.id });
+      onFormulaMouseDown({ clientX: a * selectedItem.pos.x + c * selectedItem.pos.y + e + left, clientY: b * selectedItem.pos.x + d * selectedItem.pos.y + f + top } as ReactMouseEvent<HTMLDivElement>, { formulaSize: operation.size, textColor: operation.color, defaultText: operation.text } as ToolOption, scale, refInput, refCanvas, intl, selectedItem.tool, setCurrentTool );
     }
   }
 }

@@ -1,16 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Tool, { ToolOption, Position, TextSize, strokeColor } from './enums/Tool';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
 import { mapClientToCanvas, isMobileDevice } from './utils';
-import { Icon } from 'antd';
+import { Icon, Slider } from 'antd';
 import './TextTool.less';
 
 let currentText = '';
 let currentColor = '';
 let currentSize = TextSize.Default;
-
-const textSize = [TextSize.Small, TextSize.Default, TextSize.Large];
+const textSize = [TextSize.Small, TextSize.Default, TextSize.Large, TextSize.XL];
 
 export interface Text {
   size: TextSize,
@@ -109,32 +108,24 @@ export const drawText = (item: Text, context: CanvasRenderingContext2D, pos: Pos
 export const useTextDropdown = (currentToolOption: ToolOption, setCurrentToolOption: (option: ToolOption) => void, setCurrentTool: (tool: Tool) => void, intl: IntlShape, prefixCls: string) => {
   prefixCls += '-textTool';
 
+  const handleSizes = (value) => {
+    setCurrentToolOption({ ...currentToolOption, textSize: value });
+    setCurrentTool && setCurrentTool(Tool.Formula);
+  }
   return (
     <div className={`${prefixCls}-strokeMenu`}>
-      <div className={`${prefixCls}-colorAndSize`}>
-        <div className={`${prefixCls}-textSizeSelector`}>
-          {textSize.map(size => {
-            return (
-              <div
-                key={size}
-                onTouchStart={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, textSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
-                }}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, textSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Stroke);
-                }}
-                style={{ color: size === currentToolOption.textSize ? '#666' : '#ccc' }}
-              >
-                {size === TextSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.text.size.small' }) : size === TextSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.text.size.default' }) : intl.formatMessage({ id: 'umi.block.sketch.text.size.large' })}
-              </div>
-            )
-          })}
+      <div className={`${prefixCls}-colorAndSize`} style={{display:'flex',flexDirection: 'column'}}>
+        <div style={{display: 'flex', flexDirection: 'column', height: 50, justifyContent: 'space-between'}} className={`${prefixCls}-textSizeSelector`}>
+          <label>Select Style:</label>
+          <Slider 
+            key={'sliderMenu'}
+            min={12}
+            max={300}
+            style={{width: 200}}
+            value={ currentToolOption.textSize === currentSize? currentSize : currentToolOption.textSize}
+            onChange = {handleSizes}
+          />
         </div>
-        <div className={`${prefixCls}-split`}></div>
         <div className={`${prefixCls}-palette`}>
           {strokeColor.map(color => {
             return <div className={`${prefixCls}-color`} key={color}
@@ -158,3 +149,79 @@ export const useTextDropdown = (currentToolOption: ToolOption, setCurrentToolOpt
     </div>
   )
 }
+
+// export const useTextDropdown = (currentToolOption: ToolOption, setCurrentToolOption: (option: ToolOption) => void, setCurrentTool: (tool: Tool) => void, intl: IntlShape, prefixCls: string) => {
+//   prefixCls += '-textTool';
+
+//   return (
+//     <div className={`${prefixCls}-strokeMenu`}>
+//       <div className={`${prefixCls}-colorAndSize`}>
+//         <div style={{opacity: 1, display: 'flex', flexDirection: 'column'}} className={`${prefixCls}-textSizeSelector`}
+//         >
+//           {textSize.map(size => {
+//             return (
+//               <div
+//                 key={size}
+//                 onTouchStart={(evt) => {
+//                   evt.stopPropagation();
+//                   setCurrentToolOption({ ...currentToolOption, textSize: size });
+//                   setCurrentTool && setCurrentTool(Tool.Stroke);
+//                 }}
+//                 onClick={(evt) => {
+//                   evt.stopPropagation();
+//                   if( evt.target.className === 'active' ) {
+//                     const _allSizes = evt.target.parentNode.childNodes;
+//                     evt.target.parentNode.classList.add('show-sizes');
+//                     evt.target.parentNode.parentNode.classList.add('show-sizes');
+
+//                     for( const _size of _allSizes) {
+//                       _size.classList.add('show-size');
+//                     }
+//                   }
+//                   else {
+//                     setCurrentToolOption({ ...currentToolOption, textSize: size });
+//                     setCurrentTool && setCurrentTool(Tool.Stroke);
+//                     const _allSizes = evt.target.parentNode.childNodes;
+//                     evt.target.parentNode.classList.remove('show-sizes');
+//                     evt.target.parentNode.parentNode.classList.remove('show-sizes');
+//                     for( const _size of _allSizes) {
+//                       _size.classList.remove('show-size')
+//                     }
+//                   }
+//                 }}
+//                 style={{ color: size === currentToolOption.textSize ? '#666' : '#ccc' }}
+//                 className={ size === currentToolOption.textSize ? 'active': 'inactive'}
+//               >
+//                 {size === TextSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.text.size.small' }) 
+//                 : size === TextSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.text.size.default' }) 
+//                 : size === TextSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.text.size.large' }) 
+//                 : intl.formatMessage({ id: 'umi.block.sketch.text.size.xl' })
+//                 }
+//               </div>
+//             )
+//           })}
+//         </div>
+//         <div className={`${prefixCls}-split`}></div>
+//         <div className={`${prefixCls}-palette`}>
+//           {strokeColor.map(color => {
+//             return <div className={`${prefixCls}-color`} key={color}
+//               onClick={(evt) => {
+//                 evt.stopPropagation();
+//                 setCurrentToolOption({ ...currentToolOption, textColor: color });
+//                 setCurrentTool && setCurrentTool(Tool.Stroke);
+//               }}
+//               onTouchStart={(evt) => {
+//                 evt.stopPropagation();
+//                 setCurrentToolOption({ ...currentToolOption, textColor: color });
+//                 setCurrentTool && setCurrentTool(Tool.Stroke);
+//               }}
+//             >
+//               <div className={`${prefixCls}-fill`} style={{ background: color }}></div>
+//               {currentToolOption.textColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
+//             </div>
+//           })}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }

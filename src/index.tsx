@@ -11,6 +11,8 @@ import locales, { localeType } from './locales';
 import { isMobileDevice } from './utils';
 import './index.less';
 import ConfigContext, { DefaultConfig } from './ConfigContext';
+import { BlockMath } from 'react-katex';
+import 'katex/dist/katex.min.css';
 
 const { Header, Sider, Content } = Layout;
 
@@ -45,7 +47,7 @@ const enableSketchPadReducer = (state: boolean, action: boolean) => {
 const Block: React.FC<BlockProps> = (props) => {
   const { userId, operations, onChange, toolbarPlacement, clsssName, onSave } = { ...defaultProps, ...props };
 
-  const [currentTool, setCurrentTool] = useState(Tool.Select);
+  const [currentTool, setCurrentTool] = useState(Tool.Stroke);
   const [scale, setScale] = useState(1);
   const [currentToolOption, setCurrentToolOption] = useState<ToolOption>(defaultToolOption);
   const enableSketchPad = useReducer(enableSketchPadReducer, true);
@@ -58,8 +60,7 @@ const Block: React.FC<BlockProps> = (props) => {
   useEffect(() => {
     const keydownHandler = (evt: KeyboardEvent) => {
       const { keyCode } = evt;
-      // key 'p'
-      if (keyCode === 80) {
+      if (keyCode === 80) { // key 'p'
         setCurrentTool(Tool.Stroke);
       } else if (keyCode === 82) { // key 'r'
         setCurrentTool(Tool.Shape);
@@ -69,7 +70,7 @@ const Block: React.FC<BlockProps> = (props) => {
         setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Oval });
       } else if (keyCode === 84) { // key 't'
         setCurrentTool(Tool.Text);
-      } 
+      }
     };
 
     addEventListener('keydown', keydownHandler);
@@ -85,14 +86,14 @@ const Block: React.FC<BlockProps> = (props) => {
       </Layout>
     } else if (toolbarPlacement === 'top') {
       return <Layout hasSider={false}>
-        <Header>{toolbar}</Header>
+        {toolbar}
         <Content>{sketchPad}</Content>
       </Layout>
     } else if (toolbarPlacement === 'right') {
       return <Layout style={{ flexDirection: 'row' }}>
-        <Content>{sketchPad}</Content>
-        <Sider width={55} theme='light'>{toolbar}</Sider>
-      </Layout>
+              <Content>{sketchPad}</Content>
+              <Sider width={55} theme='light'>{toolbar}</Sider>
+            </Layout>
     } else {
       return null;
     }

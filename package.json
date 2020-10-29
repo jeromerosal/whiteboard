@@ -1,5 +1,5 @@
 {
-  "name": "react-drawing-board",
+  "name": "learntalk-whiteboard",
   "version": "0.3.3",
   "description": "",
   "main": "lib/index.js",
@@ -7,21 +7,19 @@
     "name": "",
     "email": ""
   },
-  "repository": "https://github.com/dilidili/react-drawing-board",
-  "files": [
-    "src",
-    "lib"
-  ],
   "scripts": {
     "dev": "umi dev",
-    "build": "father build"
+    "build": "father build",
+    "build-prod": "umi build"
   },
   "dependencies": {
     "@types/vfile-message": "^2.0.0",
     "antd": "^3.26.0",
     "classnames": "^2.2.6",
+    "html2canvas": "^1.0.0-rc.7",
     "react": ">=16.0.0",
     "react-intl": "^3.9.2",
+    "react-katex": "^2.0.2",
     "react-spring": "^8.0.27",
     "react-use-gesture": "^7.0.15",
     "uuid": "^3.3.3"

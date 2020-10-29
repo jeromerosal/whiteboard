@@ -51,7 +51,7 @@ const draw = (item: Shape, mouseX: number, mouseY: number, context: CanvasRender
     context.rect(startX, startY, widthX, widthY);
     context.stroke();
     context.closePath();
-
+    
     if (hover) {
       context.beginPath();
       context.strokeStyle = '#3AB1FE';
@@ -61,7 +61,32 @@ const draw = (item: Shape, mouseX: number, mouseY: number, context: CanvasRender
       context.stroke();
       context.closePath();
     }
-  } else if (item.type === ShapeType.Oval) {
+  }
+  else if (item.type === ShapeType.Triangle) {
+    context.beginPath();
+    context.moveTo(startX, startX);
+    context.lineTo(startX, startX * 3);
+    context.lineTo(startX * 3, startX * 3);
+    context.closePath();
+
+    if (hover) {
+      context.beginPath();
+      context.strokeStyle = '#3AB1FE';
+      context.lineWidth = item.size / 2;
+      context.moveTo(startX - item.size / 2, (startX - item.size / 2));
+      context.lineTo(startX - item.size / 2, (startX - item.size / 2) * 3);
+      context.lineTo((startX - item.size / 2) * 3, (startX - item.size / 2) * 3);
+      context.stroke();
+      context.closePath();
+    }
+
+    // the outline
+    context.lineWidth = item.size / 2;
+    context.strokeStyle = '#3AB1FE';
+    context.stroke();
+
+  }
+  else if (item.type === ShapeType.Oval) {
     const endX = mouseX >= item.start.x ? mouseX : item.start.x;
     const endY = mouseY >= item.start.y ? mouseY : item.start.y;
     const radiusX = (endX - startX) * 0.5;
@@ -189,10 +214,26 @@ export const useShapeDropdown = (currentToolOption: ToolOption, setCurrentToolOp
             setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Oval });
             setCurrentTool(Tool.Shape);
           }}
-          className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.Oval ? { background: 'rgba(238, 238, 238, 1)' } : {}}
+          className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.Oval ? { background: 'rgba(238, 238, 238, 1)' } : {}} 
         >
           <div className={`${prefixCls}-circle`} style={ currentToolOption.shapeType === ShapeType.Oval ? { borderColor: currentToolOption.shapeBorderColor } : {}} />
         </div>
+
+        <div
+          onClick={(evt) => {
+            evt.stopPropagation();
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Triangle });
+            setCurrentTool(Tool.Shape);
+          }}
+          onTouchStart={(evt) => {
+            evt.stopPropagation();
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Triangle });
+            setCurrentTool(Tool.Shape);
+          }}
+          className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.Triangle ? { background: 'rgba(238, 238, 238, 1)' } : {}}>
+          <div className={`${prefixCls}-rect`} style={ currentToolOption.shapeType === ShapeType.Triangle ? { borderColor: currentToolOption.shapeBorderColor } : {}} />
+        </div>
+        
       </div>
 
       <div className={`${prefixCls}-colorAndSize`}>
