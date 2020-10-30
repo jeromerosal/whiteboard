@@ -37,16 +37,12 @@ const tools = [{
   icon: StrokeIcon,
   type: Tool.Stroke,
   useDropdown: useStrokeDropdown,
-}, {
-
 }, 
 {
   label: 'umi.block.sketch.highlighter',
   icon: HighlighterIcon,
   type: Tool.Highlighter,
   useDropdown: useStrokeDropdown,
-}, {
-
 },
 {
   label: 'umi.block.sketch.shape',
