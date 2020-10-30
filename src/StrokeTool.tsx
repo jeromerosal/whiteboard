@@ -21,6 +21,12 @@ export interface Highlighter {
   points: Point[],
 }
 
+export interface Eraser {
+  color: string,
+  size: number,
+  points: Point[],
+}
+
 export interface Position {
   x: number;
   y: number;
@@ -220,6 +226,7 @@ export function onStrokeMouseUp(setCurrentTool: (tool: Tool) => void, handleComp
     };
 
     handleCompleteOperation(currentTool, lineData, pos);
+    console.log(lineData)
   }
 
   return [item];

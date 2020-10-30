@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
-import Tool, { ToolOption, LatexOption, Position, LatexSize, strokeColor } from './enums/Tool';
+import Tool, { ToolOption, FormulaOption, Position, FormulaSize, strokeColor } from './enums/Tool';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
-import { BlockMath } from "react-katex";
 import { mapClientToCanvas, isMobileDevice } from './utils';
-import { Icon } from 'antd';
+import { Icon, Slider } from 'antd';
 import './TextTool.less';
 
 let currentText = '';
 let currentColor = '';
-let currentSize = LatexSize.Default;
+let currentSize = FormulaSize.Default;
 
-const latexSize = [LatexSize.Small, LatexSize.Default, LatexSize.Large, LatexSize.XL, LatexSize.XXL];
+const formulaSize = [FormulaSize.Small, FormulaSize.Default, FormulaSize.Large, FormulaSize.XL, FormulaSize.XXL];
 
-export interface Latex {
-  size: LatexSize,
+export interface Formula {
+  size: FormulaSize,
   color: string,
   text: string,
 }
 
-export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanvas, intl, selectedItem, setCurrentTool: (tool: Tool) => void) => {
+export const onFormulaMouseDown = (e, toolOption, scale:number , refInput, refCanvas, intl, selectedItem, setCurrentTool: (tool: Tool) => void) => {
   setCurrentTool(selectedItem)
   if (!currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
@@ -33,9 +32,9 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
     textarea.style.display = 'block';
     textarea.style.left = x + canvas.offsetLeft + 'px';
     textarea.style.top = y + canvas.offsetTop + 'px';
-    textarea.style.fontSize = (toolOption.latexSize as number) * scale + 'px';
-    textarea.style.lineHeight = (toolOption.latexSize as number) * scale + 'px';
-    textarea.style.height = (toolOption.latexSize as number) * scale + 'px';
+    textarea.style.fontSize = (toolOption.formulaSize as number) * scale + 'px';
+    textarea.style.lineHeight = (toolOption.formulaSize as number) * scale + 'px';
+    textarea.style.height = (toolOption.formulaSize as number) * scale + 'px';
     textarea.style.color = toolOption.textColor;
     textarea.innerText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
 
@@ -58,15 +57,14 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
 
     currentText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
     currentColor = toolOption.textColor;
-    currentSize = toolOption.latexSize;
+    currentSize = toolOption.formulaSize;
   }
 }
 
-export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
+export const onFormulaComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
   if (currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
     const text = textarea.innerText;
-
     let { top, left, width, height } = textarea.getBoundingClientRect();
     width = 1 / scale * width;
     const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
@@ -86,17 +84,17 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
       h: height,
     };
 
-    handleCompleteOperation(Tool.Latex, { text, color: currentColor, size: currentSize }, pos);
+    handleCompleteOperation(Tool.Formula, { text, color: currentColor, size: currentSize }, pos);
     setCurrentTool(Tool.Select);
     currentText = '';
   }
 }
 
-export const fontLatex = `"PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif, "localant"`;
+export const fontFormula = `"PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif, "localant"`;
 
-export const drawLatex = (item: Latex, context: CanvasRenderingContext2D, pos: Position) => {
+export const drawFormula = (item: Formula, context: CanvasRenderingContext2D, pos: Position) => {
   context.globalCompositeOperation = 'source-over';
-  context.font = `${item.size}px ${fontLatex}` ;
+  context.font = `${item.size}px ${fontFormula}` ;
   context.fillStyle = item.color || '#4a4a4a';
   context.textBaseline = 'middle';
 
@@ -105,40 +103,53 @@ export const drawLatex = (item: Latex, context: CanvasRenderingContext2D, pos: P
     context.fillText(lines[i], pos.x, pos.y + item.size / 2 + (i * item.size)); // add half line height cause to textBaseline middle
   }
 }
-export const useLatexDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
+
+export const useFormulaDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {  
   prefixCls += '-textTool';
+  const handleSizes = (value) => {
+    setCurrentToolOption({ ...currentToolOption, formulaSize: value });
+    setCurrentTool && setCurrentTool(Tool.Formula);
+  }
   return (
     <div className={`${prefixCls}-strokeMenu`}>
-      <div className={`${prefixCls}-colorAndSize`}>
-        <div className={`${prefixCls}-textSizeSelector`}>
-          {latexSize.map(size => {
+      <div className={`${prefixCls}-colorAndSize`} style={{display:'flex',flexDirection: 'column'}}>
+        <div style={{display: 'flex', flexDirection: 'column', height: 50, justifyContent: 'space-between'}} className={`${prefixCls}-textSizeSelector`}>
+          <label>Select Size:</label>
+          <Slider 
+            key={'sliderMenu'}
+            min={12}
+            max={300}
+            style={{width: 200}}
+            value={ currentToolOption.formulaSize === currentSize? currentSize : currentToolOption.formulaSize}
+            onChange = {handleSizes}
+          />
+          {/* {formulaSize.map(size => {
             return (
               <div
                 key={size}
                 onTouchStart={(evt) => {
                   evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Latex);
+                  setCurrentToolOption({ ...currentToolOption, formulaSize: size });
+                  setCurrentTool && setCurrentTool(Tool.Formula);
                 }}
                 onClick={(evt) => {
                   evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, latexSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Latex);
+                  setCurrentToolOption({ ...currentToolOption, formulaSize: size });
+                  setCurrentTool && setCurrentTool(Tool.Formula);
                 }}
-                style={{ color: size === currentToolOption.latexSize ? '#666' : '#ccc' }}
+                style={{ color: size === currentToolOption.formulaSize ? '#666' : '#ccc' }}
               >
-                {size === LatexSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.small' }) 
-                : size === LatexSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.default' }) 
-                : size === LatexSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.large' }) 
-                : size === LatexSize.XL ? intl.formatMessage({ id: 'umi.block.sketch.latex.size.xl' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.latex.size.xxl' })
+                {size === FormulaSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.formula.size.small' }) 
+                : size === FormulaSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.formula.size.default' }) 
+                : size === FormulaSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.formula.size.large' }) 
+                : size === FormulaSize.XL ? intl.formatMessage({ id: 'umi.block.sketch.formula.size.xl' }) 
+                : intl.formatMessage({ id: 'umi.block.sketch.formula.size.xxl' })
                 }
               </div>
             )
-          })}
+          })} */}
         </div>
-        <div className={`${prefixCls}-split`}></div>
-          <div className={`${prefixCls}-palette`}>
+        <div className={`${prefixCls}-palette`}>
           {strokeColor.map(color => {
             return <div className={`${prefixCls}-color`} key={color}
               onClick={(evt) => {
