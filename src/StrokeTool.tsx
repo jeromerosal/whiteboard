@@ -41,6 +41,7 @@ let stroke: Stroke | null = null;
 let points: Point[] = [];
 
 const drawLineStroke = (context: CanvasRenderingContext2D, item: Stroke, start: Point, { x, y } : Point) => {
+  context.globalAlpha = 1;
   context.lineJoin = 'round';
   context.lineCap = 'round';
   context.beginPath();
@@ -81,11 +82,12 @@ export const drawStroke = (stroke: Stroke, context: CanvasRenderingContext2D, ho
 
   context.lineJoin = 'round';
   context.lineCap = 'round';
-  context.globalAlpha = 1;
   context.beginPath();
   context.lineWidth = stroke.size;
   context.globalCompositeOperation = 'source-over';
   context.strokeStyle = hover ? '#3AB1FE' : stroke.color;
+  context.globalAlpha = 1;
+
 
   // move to the first point
   context.moveTo(points[0].x, points[0].y);
@@ -108,10 +110,9 @@ export const drawHighlighter = (highlighter: Highlighter, context: CanvasRenderi
   if (points.length < 3) {
     return;
   };
-
+  context.globalAlpha = 0.3;
   context.lineJoin = 'miter';
   context.lineCap = 'square';
-  context.globalAlpha = 0.3;
   context.beginPath();
   context.lineWidth = highlighter.size;
   context.globalCompositeOperation = 'source-over';
@@ -131,6 +132,7 @@ export const drawHighlighter = (highlighter: Highlighter, context: CanvasRenderi
   context.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
 
   context.stroke();
+  context.globalAlpha = 1;
 }
 
 export function onStrokeMouseDown(x: number, y: number, toolOption: ToolOption, toolType: string) {
