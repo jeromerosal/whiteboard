@@ -226,7 +226,6 @@ export function onStrokeMouseUp(setCurrentTool: (tool: Tool) => void, handleComp
     };
 
     handleCompleteOperation(currentTool, lineData, pos);
-    console.log(lineData)
   }
 
   return [item];

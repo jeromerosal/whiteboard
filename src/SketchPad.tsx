@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { Icon } from 'antd';
+import { Icon, Slider } from 'antd';
 import { usePinch, useWheel } from 'react-use-gesture';
 import { useIntl } from 'react-intl';
 import { v4 } from 'uuid';
@@ -104,8 +104,10 @@ export interface SketchPadProps {
   currentToolOption: ToolOption;
   userId: string;
   scale: number;
+  showEraserSize: any;
+  setShowEraserSize: any;
+  eraserSize: number;
   onScaleChange: (scale: number) => void;
-
   // controlled mode
   operations?: Operation[];
   onChange?: onChangeCallback;
@@ -465,7 +467,7 @@ const useResizeHandler = (
 }
 
 const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, ref) => {
-  const { currentTool, setCurrentTool, userId, currentToolOption, onScaleChange, scale, operations, onChange } = props;
+  const { currentTool, setCurrentTool, userId, currentToolOption, onScaleChange, scale, operations, onChange, setShowEraserSize, showEraserSize, eraserSize } = props;
 
   const refCanvas = useRef<HTMLCanvasElement>(null);
   const refContext = useRef<CanvasRenderingContext2D | null>(null);
@@ -490,7 +492,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [ currentLatex, setCurrentLatex ] = useState('');
   const [ latexLeftPosition, setLatexLeftPosition ] = useState(null);
   const [ latexTopPosition, setLatexTopPosition ] = useState(null);
-
 
   const [hoverOperationId, setHoverOperationId] = useState<string | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
@@ -532,6 +533,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   }
 
   const renderOperations = (operations: Operation[]) => {
+    console.log(operations)
     if (!refContext.current) return;
     const context = refContext.current;
     // clear canvas
@@ -704,9 +706,10 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         onStrokeMouseDown(x, y, currentToolOption, currentTool);
         break;
       case Tool.Eraser: 
+        setShowEraserSize(!showEraserSize)
         onStrokeMouseDown(x, y, {
           ...currentToolOption,
-          strokeSize: defaultToolOption.strokeSize * 2 / scale,
+          strokeSize: eraserSize,
           strokeColor: 'rgba(255, 255, 255, 1)',
         }, currentTool);
         break;
@@ -1791,7 +1794,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
     setShowSettings('');
   }, [currentLatex, refInput])
-  
   
   return (
     <div
