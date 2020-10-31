@@ -1071,6 +1071,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
     switch (currentTool) {
       case Tool.Select:
+        setShowEraserSize(false);
         onSelectMouseMove(e, x, y, scale, operationListState, selectedOperation, setViewMatrix, setHoverOperationId, handleCompleteOperation, operationListDispatch, setSelectedOperation);
         break;
       case Tool.Eraser:
