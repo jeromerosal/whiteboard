@@ -52,6 +52,8 @@ const Block: React.FC<BlockProps> = (props) => {
   const [currentToolOption, setCurrentToolOption] = useState<ToolOption>(defaultToolOption);
   const enableSketchPad = useReducer(enableSketchPadReducer, true);
   const refSketch = useRef<SketchPadRef>(null);
+  const [ showEraserSize, setShowEraserSize] = useState(false);
+  const [ eraserSize, setEraserSize ] = useState(2);
 
   const animatedProps = useSpring<{
     value: number
@@ -123,6 +125,7 @@ const Block: React.FC<BlockProps> = (props) => {
                     currentToolOption={currentToolOption}
                     setCurrentToolOption={setCurrentToolOption}
                     scale={scale}
+                    eraserSize={eraserSize}
                     selectImage={(image: string) => {
                       if (image && refSketch.current) {
                         refSketch.current.selectImage(image);
@@ -148,6 +151,9 @@ const Block: React.FC<BlockProps> = (props) => {
                         refSketch.current.save(onSave);
                       }
                     }}
+                    showEraserSize={showEraserSize} 
+                    setShowEraserSize={setShowEraserSize}
+                    setEraserSize={setEraserSize}
                   />
                 ), (
                   <AnimatedSketchPad
@@ -160,6 +166,9 @@ const Block: React.FC<BlockProps> = (props) => {
                     onScaleChange={setScale}
                     operations={operations}
                     onChange={onChange}
+                    showEraserSize={showEraserSize}
+                    setShowEraserSize={setShowEraserSize}
+                    eraserSize={eraserSize}
                   />
                 ))}
               </div>

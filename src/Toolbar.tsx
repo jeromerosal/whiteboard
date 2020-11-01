@@ -20,7 +20,7 @@ import ZoomIcon from './svgs/ZoomIcon';
 import EraserIcon from './svgs/EraserIcon';
 import { useStrokeDropdown } from './StrokeTool';
 import { useShapeDropdown } from './ShapeTool';
-import { Dropdown } from 'antd';
+import { Dropdown, Slider } from 'antd';
 import classNames from 'classnames';
 import './Toolbar.less';
 import { isMobileDevice } from './utils';
@@ -119,10 +119,14 @@ export interface ToolbarProps {
   save: () => void;
   scale: number;
   toolbarPlacement: string;
+  showEraserSize: any;
+  setShowEraserSize: any;
+  setEraserSize: any;
+  eraserSize: number;
 }
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const { currentTool, setCurrentTool, currentToolOption, setCurrentToolOption, selectImage, undo, redo, clear, save, toolbarPlacement } = props;
+  const { currentTool, setCurrentTool, currentToolOption, setCurrentToolOption, selectImage, undo, redo, clear, save, toolbarPlacement, setShowEraserSize, setEraserSize, showEraserSize, eraserSize } = props;
   const refFileInput = useRef<HTMLInputElement>(null);
   const { formatMessage } = useIntl();
   const { prefixCls } = useContext(ConfigContext);
@@ -160,6 +164,11 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
     return () => removeEventListener('keydown', keydownHandler);
   }, []);
+
+  //handleEraserSize
+  const handleEraserSize = (value) => {
+    setEraserSize(value)
+  }
 
   return (
     <div className={classNames({
@@ -206,24 +215,33 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
             })}
             style={iconAnimateProps}
             onClick={() => {
-
               let currentToolType = tool.type;
               if (tool.type === Tool.Image && refFileInput.current) {
+                setShowEraserSize(false);
                 refFileInput.current.click();
               } else if (tool.type === Tool.Undo) {
+                setShowEraserSize(false);
                 undo();
                 currentToolType = tool.type;
+              } else if (tool.type === Tool.Eraser) { 
+                setShowEraserSize(true);
+                setCurrentTool(tool.type);
               } else if (tool.type === Tool.Redo) {
+                setShowEraserSize(false);
                 redo();
                 currentToolType = tool.type;
               } else if (tool.type === Tool.Clear) {
+                setShowEraserSize(false);
                 clear();
                 currentToolType = tool.type;
               } else if (tool.type === Tool.Zoom) {
+                setShowEraserSize(false);
               } else if (tool.type === Tool.Save) {
+                setShowEraserSize(false);
                 save();
               } else {
                 setCurrentTool(currentToolType);
+                setShowEraserSize(false);
               }
             }}
             key={tool.label}
@@ -232,6 +250,47 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
             <span className={'toolbar-tooltip'} style={{position: 'absolute',top: -10, left: 'calc(100% - 10px)', background: '#ffffff', border: '1px solid #dedede', borderRadius: 4, padding: 3}}>
               {!isMobileDevice ? <label className={`${toolbarPrefixCls}-iconLabel`}>{tool.labelThunk ? tool.labelThunk(props) : formatMessage({ id: tool.label })}</label> : null}
             </span>
+            {tool.type === Tool.Eraser &&
+              <div style={{
+                position: 'absolute',
+                top: '0',
+                left: 'calc(100% + 5px)',
+                height: 'auto',
+                width: 'auto',
+                border: '1px solid rgb(218, 218, 218)',
+                borderRadius: '5px',
+                padding: 10,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                display: showEraserSize? 'flex': 'none',
+                color: '#83bff7',
+                flexDirection: 'column'
+              }}>
+                <label>Select Size:</label>
+                <Slider 
+                  className={'eraser-size'}
+                  value={eraserSize}
+                  min={1}
+                  max={50}
+                  style={{width: 75}}
+                  onChange={handleEraserSize}
+                />
+                <span className="eraser-size-circle">
+                  <label>
+                    Eraser Size Preview
+                  </label>
+                  <span
+                    style={{
+                      width: eraserSize,
+                      height: eraserSize, 
+                      borderRadius: '50%',
+                      background: '#ffffff',
+                      border: '1px solid #91d5ff'
+                    }}
+                  ></span>
+                </span>
+              </div>
+            }
           </animated.div>
         )
 
