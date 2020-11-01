@@ -7,6 +7,7 @@ export default {
   'umi.block.sketch.emoji': 'Emoji',
   'umi.block.sketch.formula': 'Formula',
   'umi.block.sketch.image': 'Image',
+  'umi.block.sketch.grid': 'Grid',
   'umi.block.sketch.highlighter': 'Highlighter',
   'umi.block.sketch.undo': 'Undo',
   'umi.block.sketch.redo': 'Redo',

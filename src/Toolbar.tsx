@@ -13,6 +13,7 @@ import ShapeIcon from './svgs/ShapeIcon';
 import StrokeIcon from './svgs/StrokeIcon';
 import TextIcon from './svgs/TextIcon';
 import LatexIcon from './svgs/LatexIcon';
+import GridIcon from './svgs/GridIcon';
 import EmojiIcon from './svgs/EmojiIcon';
 import FormulaIcon from './svgs/FormulaIcon';
 import UndoIcon from './svgs/UndoIcon';
@@ -66,6 +67,11 @@ const tools = [{
   type: Tool.Emoji,
 },
 {
+  label: 'umi.block.sketch.latex',
+  icon: LatexIcon,
+  type: Tool.Latex,
+},
+{
   label: 'umi.block.sketch.formula',
   icon: FormulaIcon,
   type: Tool.Formula,
@@ -75,6 +81,11 @@ const tools = [{
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
   type: Tool.Image,
+},
+{
+  label: 'umi.block.sketch.grid',
+  icon: GridIcon,
+  type: Tool.Grid,
 },
 {
   label: 'umi.block.sketch.undo',
@@ -123,10 +134,12 @@ export interface ToolbarProps {
   setShowEraserSize: any;
   setEraserSize: any;
   eraserSize: number;
+  setShowGrid: any;
+  showGrid: boolean;
 }
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const { currentTool, setCurrentTool, currentToolOption, setCurrentToolOption, selectImage, undo, redo, clear, save, toolbarPlacement, setShowEraserSize, setEraserSize, showEraserSize, eraserSize } = props;
+  const { currentTool, setCurrentTool, currentToolOption, setCurrentToolOption, selectImage, undo, redo, clear, save, toolbarPlacement, setShowEraserSize, setEraserSize, showEraserSize, eraserSize, setShowGrid, showGrid } = props;
   const refFileInput = useRef<HTMLInputElement>(null);
   const { formatMessage } = useIntl();
   const { prefixCls } = useContext(ConfigContext);
@@ -234,7 +247,11 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
                 setShowEraserSize(false);
                 clear();
                 currentToolType = tool.type;
-              } else if (tool.type === Tool.Zoom) {
+              } else if (tool.type === Tool.Grid) {
+                setShowGrid(!showGrid);
+                currentToolType = tool.type;
+              }
+              else if (tool.type === Tool.Zoom) {
                 setShowEraserSize(false);
               } else if (tool.type === Tool.Save) {
                 setShowEraserSize(false);

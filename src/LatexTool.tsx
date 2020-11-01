@@ -4,6 +4,7 @@ import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
 import { BlockMath } from "react-katex";
 import { mapClientToCanvas, isMobileDevice } from './utils';
+import html2canvas from 'html2canvas';
 import { Icon } from 'antd';
 import './TextTool.less';
 
@@ -63,10 +64,37 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
 }
 
 export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
+  // if (currentText && refInput.current && refCanvas.current) {
+  //   const textarea = refInput.current;
+  //   const text = textarea.innerText;
+
+  //   let { top, left, width, height } = textarea.getBoundingClientRect();
+  //   width = 1 / scale * width;
+  //   const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
+  //   height = 1 / scale * lineHeight * text.split('\n').length;
+
+  //   const currentPos = mapClientToCanvas({
+  //     clientX: left,
+  //     clientY: top,
+  //   } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
+
+  //   textarea.style.display = 'none';
+
+  //   const pos: Position = {
+  //     x: currentPos[0],
+  //     y: currentPos[1],
+  //     w: width,
+  //     h: height,
+  //   };
+
+  //   handleCompleteOperation(Tool.Latex, { text, color: currentColor, size: currentSize }, pos);
+  //   setCurrentTool(Tool.Select);
+  //   currentText = '';
+  // }
   if (currentText && refInput.current && refCanvas.current) {
+    
     const textarea = refInput.current;
     const text = textarea.innerText;
-
     let { top, left, width, height } = textarea.getBoundingClientRect();
     width = 1 / scale * width;
     const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
@@ -105,6 +133,7 @@ export const drawLatex = (item: Latex, context: CanvasRenderingContext2D, pos: P
     context.fillText(lines[i], pos.x, pos.y + item.size / 2 + (i * item.size)); // add half line height cause to textBaseline middle
   }
 }
+
 export const useLatexDropdown = (currentToolOption, setCurrentToolOption, setCurrentTool, intl, prefixCls) => {
   prefixCls += '-textTool';
   return (

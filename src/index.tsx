@@ -54,6 +54,7 @@ const Block: React.FC<BlockProps> = (props) => {
   const refSketch = useRef<SketchPadRef>(null);
   const [ showEraserSize, setShowEraserSize] = useState(false);
   const [ eraserSize, setEraserSize ] = useState(2);
+  const [ showGrid, setShowGrid ] = useState(false);
 
   const animatedProps = useSpring<{
     value: number
@@ -126,6 +127,8 @@ const Block: React.FC<BlockProps> = (props) => {
                     setCurrentToolOption={setCurrentToolOption}
                     scale={scale}
                     eraserSize={eraserSize}
+                    setShowGrid={setShowGrid}
+                    showGrid={showGrid}
                     selectImage={(image: string) => {
                       if (image && refSketch.current) {
                         refSketch.current.selectImage(image);
@@ -169,6 +172,7 @@ const Block: React.FC<BlockProps> = (props) => {
                     showEraserSize={showEraserSize}
                     setShowEraserSize={setShowEraserSize}
                     eraserSize={eraserSize}
+                    showGrid={showGrid}
                   />
                 ))}
               </div>

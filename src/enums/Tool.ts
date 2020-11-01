@@ -8,6 +8,7 @@ enum Tool {
   Formula = 'Formula',
   Latex = 'Latex',
   Image = 'Image',
+  Grid = 'Grid',
   Undo = 'Undo',
   Redo = 'Redo',
   Zoom = 'Zoom',

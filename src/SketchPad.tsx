@@ -112,6 +112,7 @@ export interface SketchPadProps {
   // controlled mode
   operations?: Operation[];
   onChange?: onChangeCallback;
+  showGrid: boolean;
 }
 
 export type onChangeCallback = (newOperaton: Operation, operationsAfter: Operation[]) => void;
@@ -468,7 +469,7 @@ const useResizeHandler = (
 }
 
 const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, ref) => {
-  const { currentTool, setCurrentTool, userId, currentToolOption, onScaleChange, scale, operations, onChange, setShowEraserSize, showEraserSize, eraserSize } = props;
+  const { currentTool, setCurrentTool, userId, currentToolOption, onScaleChange, scale, operations, onChange, setShowEraserSize, showEraserSize, eraserSize, showGrid } = props;
 
   const refCanvas = useRef<HTMLCanvasElement>(null);
   const refContext = useRef<CanvasRenderingContext2D | null>(null);
@@ -1199,7 +1200,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   }
 
   const backgroundStyle: CSSProperties = {};
-  backgroundStyle.background = `url(${gridLines}) repeat`;
+  backgroundStyle.backgroundImage = showGrid ? `url(${gridLines})`: 'none';
+  backgroundStyle.backgroundRepeat = 'repeat' ;
   backgroundStyle.backgroundSize = scaleGrid;
 
   useZoomGesture(refCanvas);
