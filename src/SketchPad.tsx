@@ -2555,7 +2555,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
     return (
       <div 
-        style={{height: 'auto', zIndex: 9, display: 'flex', flexDirection: 'column', position: 'fixed', bottom: 50, width: 'calc(100% - 100px)', left: 50, ...latexStyles.latexDisplay}}  
+        style={{height: 'auto', zIndex: 9, display: 'flex', flexDirection: 'column', position: 'fixed', bottom: 50, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...latexStyles.latexDisplay}}  
       >
         <div
           style={{display: 'flex', justifyContent: 'space-between', paddingRight: 5}}
