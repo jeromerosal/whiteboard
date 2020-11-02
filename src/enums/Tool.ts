@@ -7,6 +7,7 @@ enum Tool {
   Emoji = 'Emoji',
   Formula = 'Formula',
   Latex = 'Latex',
+  Katex = 'Katex',
   Image = 'Image',
   Grid = 'Grid',
   Undo = 'Undo',

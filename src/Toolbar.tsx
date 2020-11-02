@@ -72,12 +72,6 @@ const tools = [{
   type: Tool.Latex,
 },
 {
-  label: 'umi.block.sketch.formula',
-  icon: FormulaIcon,
-  type: Tool.Formula,
-},
-
-{
   label: 'umi.block.sketch.image',
   icon: ImageIcon,
   type: Tool.Image,
@@ -281,7 +275,8 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
                 justifyContent: 'space-between',
                 display: showEraserSize? 'flex': 'none',
                 color: '#83bff7',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                background: '#ffffff'
               }}>
                 <label>Select Size:</label>
                 <Slider 

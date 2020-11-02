@@ -123,31 +123,6 @@ export const useFormulaDropdown = (currentToolOption, setCurrentToolOption, setC
             value={ currentToolOption.formulaSize === currentSize? currentSize : currentToolOption.formulaSize}
             onChange = {handleSizes}
           />
-          {/* {formulaSize.map(size => {
-            return (
-              <div
-                key={size}
-                onTouchStart={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, formulaSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Formula);
-                }}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  setCurrentToolOption({ ...currentToolOption, formulaSize: size });
-                  setCurrentTool && setCurrentTool(Tool.Formula);
-                }}
-                style={{ color: size === currentToolOption.formulaSize ? '#666' : '#ccc' }}
-              >
-                {size === FormulaSize.Small ? intl.formatMessage({ id: 'umi.block.sketch.formula.size.small' }) 
-                : size === FormulaSize.Default ? intl.formatMessage({ id: 'umi.block.sketch.formula.size.default' }) 
-                : size === FormulaSize.Large ? intl.formatMessage({ id: 'umi.block.sketch.formula.size.large' }) 
-                : size === FormulaSize.XL ? intl.formatMessage({ id: 'umi.block.sketch.formula.size.xl' }) 
-                : intl.formatMessage({ id: 'umi.block.sketch.formula.size.xxl' })
-                }
-              </div>
-            )
-          })} */}
         </div>
         <div className={`${prefixCls}-palette`}>
           {strokeColor.map(color => {

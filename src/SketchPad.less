@@ -39,8 +39,100 @@
   cursor: pointer;
 }
 
+#latexFontSlider {
+  position: relative;
+
+  .ant-slider {
+    margin: 20px 5px -2px 3px;
+  }
+}
+
+#latexFontSlider::before{
+  content: 'Select Size';
+  position: absolute;
+  font-size: 12px;
+  top: -5px;
+  left: 0;
+}
+
 .katex-formula {
   &:hover {
     background: rgba(255, 255, 255, 1);
   }
+}
+
+.latex-list {
+  .latext-list-item {
+    margin: 0px 5px 5px 0;
+    opacity: 0.5;
+    border: 1px solid #cecece;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 18px;
+  }
+}
+
+.img-latex {
+  opacity: 1;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  margin: 5px;
+  padding: 5px;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    opacity: 1;
+    border: 1px solid #dadada;
+    box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.2);
+
+  }
+}
+
+#latexInputContainer {
+  &:hover {
+    outline: none;
+  }
+}
+
+#formulaBtn {
+  font-size: 14px;
+  width: auto;
+  display: inline-block;
+  align-self: flex-end;
+  padding: 5px 10px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 0 #dadada;
+  border: 1px solid #ececec;
+
+  &:hover {
+    outline: none;
+  }
+}
+
+.katex .op-symbol.large-op {
+  position: absolute;
+  top: 1.5em;
+  right: -0.5em;
+}
+
+.katex-display {
+  margin: -10px 50px !important;
+  padding: 50px;
+  svg {
+    margin-right: 20px;
+  }
+}
+
+.katex {
+  padding: 20px 50px 20px 50px;
+  line-height: auto !important;
+
+  * {
+    margin-right: 10px;
+  }
+}
+
+.katex .fontsize-ensurer.reset-size6.size1, .katex .sizing.reset-size6.size1 {
+  margin-right: -30px
 }
