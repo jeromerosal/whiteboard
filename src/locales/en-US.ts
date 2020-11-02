@@ -21,7 +21,7 @@ export default {
   'umi.block.sketch.text.size.large': 'Large',
   'umi.block.sketch.text.size.xl': 'XL',
 
-  'umi.block.sketch.latex.placeholder': 'Type something',
+  'umi.block.sketch.latex.placeholder': '',
   'umi.block.sketch.latex.size.small': 'Small',
   'umi.block.sketch.latex.size.default': 'Default',
   'umi.block.sketch.latex.size.large': 'Large',

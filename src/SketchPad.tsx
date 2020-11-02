@@ -327,7 +327,7 @@ const useResizeHandler = (
   }) => void,
   resizer: ReactNode,
 } => {
-  if (selectedOperation && (selectedOperation.tool === Tool.Shape || selectedOperation.tool === Tool.Image || selectedOperation.tool === Tool.Text || selectedOperation.tool === Tool.Emoji || selectedOperation.tool === Tool.Stroke)) {
+  if (selectedOperation && (selectedOperation.tool === Tool.Shape || selectedOperation.tool === Tool.Image || selectedOperation.tool === Tool.Emoji || selectedOperation.tool === Tool.Stroke)) {
     const [a, b, c, d, e, f] = viewMatrix;
     const pos = {
       x: selectedOperation.pos.x - SELECT_BOX_PADDING,
@@ -482,6 +482,9 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const sketchpadPrefixCls = prefixCls + '-sketchpad';
   const [ showEmojiMenu, setShowEmojiMenu ] = useState(false);
   const [ showFormulaMenu, setShowFormulaMenu ] = useState(false);
+  const [ showTextArea, setShowTextArea] = useState(false);
+  const [ latexValue, setLatexValue] = useState('');
+  const [ latexFontSize, setLatexFontSize ] = useState(12);
 
   const [ showLatexMenu, setShowLatexMenu ] = useState(false);
   const [ currentTop, setCurrentTop ] = useState<any>('');
@@ -492,6 +495,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [scaleGrid, setScaleGrid] = useState(30);
   const [ currentEmoji, setCurrentEmoji ] = useState('');
   const [ currentFormula, setCurrentFormula ] = useState('');
+  const [ latexGroup, setLatexGroup] = useState('Math');
 
   const [ currentLatex, setCurrentLatex ] = useState('');
   const [ latexLeftPosition, setLatexLeftPosition ] = useState(null);
@@ -725,12 +729,10 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         break;
 
       case Tool.Latex:
-        if(!currentTop) {
-          setCurrentTop(e.clientY);
-          setCurrentLeft(e.clientX);
-          setLatexTopPosition(e.clientY);
-          setLatexLeftPosition(e.clientX);
-        }
+        setCurrentTop(e.clientY);
+        setCurrentLeft(e.clientX);
+        setLatexTopPosition(e.clientY);
+        setLatexLeftPosition(e.clientX);
         onLatexMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl, currentTool, setCurrentTool);
         break;
 
@@ -1386,260 +1388,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     const formulaList = [ 
       FormulaOption.FOR_ALL,
       FormulaOption.COMPLEMENT,
-      FormulaOption.PARTIAL_DIFFERENTIAL,
-      FormulaOption.THERE_EXISTS,
-      FormulaOption.THERE_DOES_NOT_EXIST,
-      FormulaOption.EMPTY_SET,
-      FormulaOption.INCREMENT,
-      FormulaOption.NABLA,
-      FormulaOption.ELEMENT_OF,
-      FormulaOption.NOT_AN_ELEMENT_OF,
-      FormulaOption.SMALL_ELEMENT_OF,
-      FormulaOption.CONTAINS_AS_MEMBER,
-      FormulaOption.DOES_NOT_CONTAIN_AS_MEMBER,
-      FormulaOption.SMALL_CONTAINS_AS_MEMBER,
-      FormulaOption.END_OF_PROOF,
-      FormulaOption.N_ARY_PRODUCT,
-      FormulaOption.N_ARY_COPRODUCT,
-      FormulaOption.N_ARY_SUMMATION,
-      FormulaOption.MINUS_SIGN,
-      FormulaOption.MINUS_OR_PLUS_SIGN,
-      FormulaOption.DOT_PLUS,
-      FormulaOption.DIVISION_SLASH,
-      FormulaOption.SET_MINUS,
-      FormulaOption.ASTERISK_OPERATOR,
-      FormulaOption.RING_OPERATOR,
-      FormulaOption.BULLET_OPERATOR,
-      FormulaOption.SQUARE_ROOT,
-      FormulaOption.CUBE_ROOT,
-      FormulaOption.FOURTH_ROOT,
-      FormulaOption.PROPORTIONAL_TO,
-      FormulaOption.INFINITY,
-      FormulaOption.RIGHT_ANGLE,
-      FormulaOption.ANGLE,
-      FormulaOption.MEASURED_ANGLE,
-      FormulaOption.SPHERICAL_ANGLE,
-      FormulaOption.DIVIDES,
-      FormulaOption.DOES_NOT_DIVIDE,
-      FormulaOption.PARALLEL_TO,
-      FormulaOption.NOT_PARALLEL_TO,
-      FormulaOption.LOGICAL_AND,
-      FormulaOption.LOGICAL_OR,
-      FormulaOption.INTERSECTION,
-      FormulaOption.UNION,
-      FormulaOption.INTEGRAL,
-      FormulaOption.DOUBLE_INTEGRAL,
-      FormulaOption.TRIPLE_INTEGRAL,
-      FormulaOption.CONTOUR_INTEGRAL,
-      FormulaOption.SURFACE_INTEGRAL,
-      FormulaOption.VOLUME_INTEGRAL,
-      FormulaOption.CLOCKWISE_INTEGRAL,
-      FormulaOption.CLOCKWISE_CONTOUR_INTEGRAL,
-      FormulaOption.ANTICLOCKWISE_CONTOUR_INTEGRAL,
-      FormulaOption.THEREFORE,
-      FormulaOption.BECAUSE,
-      FormulaOption.RATIO,
-      FormulaOption.PROPORTION,
-      FormulaOption.DOT_MINUS,
-      FormulaOption.EXCESS,
-      FormulaOption.GEOMETRIC_PROPORTION,
-      FormulaOption.HOMOTHETIC,
-      FormulaOption.TILDE_OPERATOR,
-      FormulaOption.REVERSED_TILDE,
-      FormulaOption.INVERTED_LAZY_S,
-      FormulaOption.SINE_WAVE,
-      FormulaOption.WREATH_PRODUCT,
-      FormulaOption.NOT_TILDE,
-      FormulaOption.MINUS_TILDE,
-      FormulaOption.ASYMPTOTICALLY_EQUAL_TO,
-      FormulaOption.NOT_ASYMPTOTICALLY_EQUAL_TO,
-      FormulaOption.APPROXIMATELY_EQUAL_TO,
-      FormulaOption.APPROXIMATELY_BUT_NOT_ACTUALLY_EQUAL_TO,
-      FormulaOption.NEITHER_APPROXIMATELY_NOR_ACTUALLY_EQUAL_TO,
-      FormulaOption.ALMOST_EQUAL_TO,
-      FormulaOption.NOT_ALMOST_EQUAL_TO,
-      FormulaOption.ALMOST_EQUAL_OR_EQUAL_TO,
-      FormulaOption.TRIPLE_TILDE,
-      FormulaOption.ALL_EQUAL_TO,
-      FormulaOption.EQUIVALENT_TO,
-      FormulaOption.GEOMETRICALLY_EQUIVALENT_TO,
-      FormulaOption.DIFFERENCE_BETWEEN,
-      FormulaOption.APPROACHES_THE_LIMIT,
-      FormulaOption.GEOMETRICALLY_EQUAL_TO,
-      FormulaOption.APPROXIMATELY_EQUAL_TO_OR_THE_IMAGE_OF,
-      FormulaOption.IMAGE_OF_OR_APPROXIMATELY_EQUAL_TO,
-      FormulaOption.COLON_EQUALS,
-      FormulaOption.EQUALS_COLON,
-      FormulaOption.RING_IN_EQUAL_TO,
-      FormulaOption.RING_EQUAL_TO,
-      FormulaOption.CORRESPONDS_TO,
-      FormulaOption.ESTIMATES,
-      FormulaOption.EQUIANGULAR_TO,
-      FormulaOption.STAR_EQUALS,
-      FormulaOption.DELTA_EQUAL_TO,
-      FormulaOption.EQUAL_TO_BY_DEFINITION,
-      FormulaOption.MEASURED_BY,
-      FormulaOption.QUESTIONED_EQUAL_TO,
-      FormulaOption.NOT_EQUAL_TO,
-      FormulaOption.IDENTICAL_TO,
-      FormulaOption.NOT_IDENTICAL_TO,
-      FormulaOption.STRICTLY_EQUIVALENT_TO,
-      FormulaOption.LESS_THAN_OR_EQUAL_TO,
-      FormulaOption.GREATER_THAN_OR_EQUAL_TO,
-      FormulaOption.LESS_THAN_OVER_EQUAL_TO,
-      FormulaOption.GREATER_THAN_OVER_EQUAL_TO,
-      FormulaOption.LESS_THAN_BUT_NOT_EQUAL_TO,
-      FormulaOption.GREATER_THAN_BUT_NOT_EQUAL_TO,
-      FormulaOption.MUCH_LESS_THAN,
-      FormulaOption.MUCH_GREATER_THAN,
-      FormulaOption.BETWEEN,
-      FormulaOption.NOT_EQUIVALENT_TO,
-      FormulaOption.NOT_LESS_THAN,
-      FormulaOption.NOT_GREATER_THAN,
-      FormulaOption.NEITHER_LESS_THAN_NOR_EQUAL_TO,
-      FormulaOption.NEITHER_GREATER_THAN_NOR_EQUAL_TO,
-      FormulaOption.LESS_THAN_OR_EQUIVALENT_TO,
-      FormulaOption.GREATER_THAN_OR_EQUIVALENT_TO,
-      FormulaOption.NEITHER_LESS_THAN_NOR_EQUIVALENT_TO,
-      FormulaOption.NEITHER_GREATER_THAN_NOR_EQUIVALENT_TO,
-      FormulaOption.LESS_THAN_OR_GREATER_THAN,
-      FormulaOption.GREATER_THAN_OR_LESS_THAN,
-      FormulaOption.NEITHER_LESS_THAN_NOR_GREATER_THAN,
-      FormulaOption.NEITHER_GREATER_THAN_NOR_LESS_THAN,
-      FormulaOption.PRECEDES,
-      FormulaOption.SUCCEEDS,
-      FormulaOption.PRECEDES_OR_EQUAL_TO,
-      FormulaOption.SUCCEEDS_OR_EQUAL_TO,
-      FormulaOption.PRECEDES_OR_EQUIVALENT_TO,
-      FormulaOption.SUCCEEDS_OR_EQUIVALENT_TO,
-      FormulaOption.DOES_NOT_PRECEDE,
-      FormulaOption.DOES_NOT_SUCCEED,
-      FormulaOption.SUBSET_OF,
-      FormulaOption.SUPERSET_OF,
-      FormulaOption.NOT_A_SUBSET_OF,
-      FormulaOption.NOT_A_SUPERSET_OF,
-      FormulaOption.SUBSET_OF_OR_EQUAL_TO,
-      FormulaOption.SUPERSET_OF_OR_EQUAL_TO,
-      FormulaOption.NEITHER_A_SUBSET_OF_NOR_EQUAL_TO,
-      FormulaOption.NEITHER_A_SUPERSET_OF_NOR_EQUAL_TO,
-      FormulaOption.SUBSET_OF_WITH_NOT_EQUAL_TO,
-      FormulaOption.SUPERSET_OF_WITH_NOT_EQUAL_TO,
-      FormulaOption.MULTISET,
-      FormulaOption.MULTISET_MULTIPLICATION,
-      FormulaOption.MULTISET_UNION,
-      FormulaOption.SQUARE_IMAGE_OF,
-      FormulaOption.SQUARE_ORIGINAL_OF,
-      FormulaOption.SQUARE_IMAGE_OF_OR_EQUAL_TO,
-      FormulaOption.SQUARE_ORIGINAL_OF_OR_EQUAL_TO,
-      FormulaOption.SQUARE_CAP,
-      FormulaOption.SQUARE_CUP,
-      FormulaOption.CIRCLED_PLUS,
-      FormulaOption.CIRCLED_MINUS,
-      FormulaOption.CIRCLED_TIMES,
-      FormulaOption.CIRCLED_DIVISION_SLASH,
-      FormulaOption.CIRCLED_DOT_OPERATOR,
-      FormulaOption.CIRCLED_RING_OPERATOR,
-      FormulaOption.CIRCLED_ASTERISK_OPERATOR,
-      FormulaOption.CIRCLED_EQUALS,
-      FormulaOption.CIRCLED_DASH,
-      FormulaOption.SQUARED_PLUS,
-      FormulaOption.SQUARED_MINUS,
-      FormulaOption.SQUARED_TIMES,
-      FormulaOption.SQUARED_DOT_OPERATOR,
-      FormulaOption.RIGHT_TACK,
-      FormulaOption.LEFT_TACK,
-      FormulaOption.DOWN_TACK,
-      FormulaOption.UP_TACK,
-      FormulaOption.ASSERTION,
-      FormulaOption.MODELS,
-      FormulaOption.TRUE,
-      FormulaOption.FORCES,
-      FormulaOption.TRIPLE_VERTICAL_BAR_RIGHT_TURNSTILE,
-      FormulaOption.DOUBLE_VERTICAL_BAR_DOUBLE_RIGHT_TURNSTILE,
-      FormulaOption.DOES_NOT_PROVE,
-      FormulaOption.NOT_TRUE,
-      FormulaOption.DOES_NOT_FORCE,
-      FormulaOption.NEGATED_DOUBLE_VERTICAL_BAR_DOUBLE_RIGHT_TURNSTILE,
-      FormulaOption.PRECEDES_UNDER_RELATION,
-      FormulaOption.SUCCEEDS_UNDER_RELATION,
-      FormulaOption.NORMAL_SUBGROUP_OF,
-      FormulaOption.CONTAINS_AS_NORMAL_SUBGROUP,
-      FormulaOption.NORMAL_SUBGROUP_OF_OR_EQUAL_TO,
-      FormulaOption.CONTAINS_AS_NORMAL_SUBGROUP_OR_EQUAL_TO,
-      FormulaOption.ORIGINAL_OF,
-      FormulaOption.IMAGE_OF,
-      FormulaOption.MULTIMAP,
-      FormulaOption.HERMITIAN_CONJUGATE_MATRIX,
-      FormulaOption.INTERCALATE,
-      FormulaOption.XOR,
-      FormulaOption.NAND,
-      FormulaOption.NOR,
-      FormulaOption.RIGHT_ANGLE_WITH_ARC,
-      FormulaOption.RIGHT_TRIANGLE,
-      FormulaOption.N_ARY_LOGICAL_AND,
-      FormulaOption.N_ARY_LOGICAL_OR,
-      FormulaOption.N_ARY_INTERSECTION,
-      FormulaOption.N_ARY_UNION,
-      FormulaOption.DIAMOND_OPERATOR,
-      FormulaOption.DOT_OPERATOR,
-      FormulaOption.STAR_OPERATOR,
-      FormulaOption.DIVISION_TIMES,
-      FormulaOption.BOWTIE,
-      FormulaOption.LEFT_NORMAL_FACTOR_SEMIDIRECT_PRODUCT,
-      FormulaOption.RIGHT_NORMAL_FACTOR_SEMIDIRECT_PRODUCT,
-      FormulaOption.LEFT_SEMIDIRECT_PRODUCT,
-      FormulaOption.RIGHT_SEMIDIRECT_PRODUCT,
-      FormulaOption.REVERSED_TILDE_EQUALS,
-      FormulaOption.CURLY_LOGICAL_OR,
-      FormulaOption.CURLY_LOGICAL_AND,
-      FormulaOption.DOUBLE_SUBSET,
-      FormulaOption.DOUBLE_SUPERSET,
-      FormulaOption.DOUBLE_INTERSECTION,
-      FormulaOption.DOUBLE_UNION,
-      FormulaOption.PITCHFORK,
-      FormulaOption.EQUAL_AND_PARALLEL_TO,
-      FormulaOption.LESS_THAN_WITH_DOT,
-      FormulaOption.GREATER_THAN_WITH_DOT,
-      FormulaOption.VERY_MUCH_LESS_THAN,
-      FormulaOption.VERY_MUCH_GREATER_THAN,
-      FormulaOption.LESS_THAN_EQUAL_TO_OR_GREATER_THAN,
-      FormulaOption.GREATER_THAN_EQUAL_TO_OR_LESS_THAN,
-      FormulaOption.EQUAL_TO_OR_LESS_THAN,
-      FormulaOption.EQUAL_TO_OR_GREATER_THAN,
-      FormulaOption.EQUAL_TO_OR_PRECEDES,
-      FormulaOption.EQUAL_TO_OR_SUCCEEDS,
-      FormulaOption.DOES_NOT_PRECEDE_OR_EQUAL,
-      FormulaOption.DOES_NOT_SUCCEED_OR_EQUAL,
-      FormulaOption.NOT_SQUARE_IMAGE_OF_OR_EQUAL_TO,
-      FormulaOption.NOT_SQUARE_ORIGINAL_OF_OR_EQUAL_TO,
-      FormulaOption.SQUARE_IMAGE_OF_OR_NOT_EQUAL_TO,
-      FormulaOption.SQUARE_ORIGINAL_OF_OR_NOT_EQUAL_TO,
-      FormulaOption.LESS_THAN_BUT_NOT_EQUIVALENT_TO,
-      FormulaOption.GREATER_THAN_BUT_NOT_EQUIVALENT_TO,
-      FormulaOption.PRECEDES_BUT_NOT_EQUIVALENT_TO,
-      FormulaOption.SUCCEEDS_BUT_NOT_EQUIVALENT_TO,
-      FormulaOption.NOT_NORMAL_SUBGROUP_OF,
-      FormulaOption.DOES_NOT_CONTAIN_AS_NORMAL_SUBGROUP,
-      FormulaOption.NOT_NORMAL_SUBGROUP_OF_OR_EQUAL_TO,
-      FormulaOption.DOES_NOT_CONTAIN_AS_NORMAL_SUBGROUP_OR_EQUAL,
-      FormulaOption.VERTICAL_ELLIPSIS,
-      FormulaOption.MIDLINE_HORIZONTAL_ELLIPSIS,
-      FormulaOption.UP_RIGHT_DIAGONAL_ELLIPSIS,
-      FormulaOption.DOWN_RIGHT_DIAGONAL_ELLIPSIS,
-      FormulaOption.ELEMENT_OF_WITH_LONG_HORIZONTAL_STROKE,
-      FormulaOption.ELEMENT_OF_WITH_VERTICAL_BAR_AT_END_OF_HORIZONTAL_STROKE,
-      FormulaOption.SMALL_ELEMENT_OF_WITH_VERTICAL_BAR_AT_END_OF_HORIZONTAL_STROKE,
-      FormulaOption.ELEMENT_OF_WITH_DOT_ABOVE,
-      FormulaOption.ELEMENT_OF_WITH_OVERBAR,
-      FormulaOption.SMALL_ELEMENT_OF_WITH_OVERBAR,
-      FormulaOption.ELEMENT_OF_WITH_UNDERBAR,
-      FormulaOption.ELEMENT_OF_WITH_TWO_HORIZONTAL_STROKES,
-      FormulaOption.CONTAINS_WITH_LONG_HORIZONTAL_STROKE,
-      FormulaOption.CONTAINS_WITH_VERTICAL_BAR_AT_END_OF_HORIZONTAL_STROKE,
-      FormulaOption.SMALL_CONTAINS_WITH_VERTICAL_BAR_AT_END_OF_HORIZONTAL_STROKE,
-      FormulaOption.CONTAINS_WITH_OVERBAR,
-      FormulaOption.SMALL_CONTAINS_WITH_OVERBAR,
-      FormulaOption.Z_NOTATION_BAG_MEMBERSHIP
+      FormulaOption.PARTIAL_DIFFERENTIAL
     ];
 
     const formulaPosition: CSSProperties = currentMenuStyle ? currentMenuStyle : { position:'fixed', top: (currentTop ? currentTop + 30 : 300), left: (currentLeft ? currentLeft: 300)};
@@ -1692,59 +1441,1097 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
 
   const showLatexDropdown = () => {
-    const latexList = [ 
-      LatexOption.BigSquareCup,
-      LatexOption.Product,
-      LatexOption.SquareRoot,
-      LatexOption.SquareRootN,
-      LatexOption.Summation,
-      LatexOption.WideTilde
-    ];
-
-    const latexOptions = [
+    const mathLatex = [
       {
+          
         url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/sqrt.png',
         label: 'SquareRoot',
         defaultText: '\\sqrt{ab}',
       },
+      
       {
         url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/widetilde.png',
         label: 'WideTilde',
         defaultText: '\\widetilde{ab}',
       },
+      
       {
-        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/frac.png',
-        label: 'Fraction',
-        defaultText: '\\frac{a}{b}'
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/overleftarrow.png',
+        label: 'overleftarrow',
+        defaultText: '\\overleftarrow{ba}',
       },
+  
       {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/overline.png',
+        label: 'overline',
+        defaultText: '\\overline{ab}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/overbrace.png',
+        label: 'overbrace', 
+        defaultText: '\\overbrace{ab}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/fdash.png',
+        label: 'fdash',
+        defaultText: 'f\'',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/xpk.png',
+        label: 'xpk',
+        defaultText: 'x^{k}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/limit.png',
+        label: 'limit',
+        defaultText: '\\lim_{a \\rightarrow b}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/matrix.png',
+        label: 'matrix',
+        defaultText: '\\begin{bmatrix}a & b \\\\c & d \\end{bmatrix}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/para.png',
+        label: 'para',
+        defaultText: '\\big(a\\big)',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/int.png',
+        label: 'int',
+        defaultText: '\\int_a^b x',
+      },
+  
+      {
+          
         url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/sum.png',
-        label: 'Summation',
-        defaultText: '\\displaystyle\\sum_0^n',
+        label: 'sum',
+        defaultText: '\\sum_a^b x',
       },
+  
       {
+          
         url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/prod.png',
-        label: 'Product',
+        label: 'prod',
         defaultText: '\\prod_a^b x',
       },
+  
       {
-        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/partial.png',
-        label: 'Partial',
-        defaultText: '\\frac{\\partial^nf}{\\partial x^n}'
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/bigcap.png',
+        label: 'bigcap',
+        defaultText: '\\bigcap_a^b x',
       },
+  
       {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/bigotimes.png',
+        label: 'bigotimes',
+        defaultText: '\\bigotimes',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/widehat.png',
+        label: 'widehat',
+        defaultText: '\\widehat{ab}',
+      },
+  
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/overrightarrow.png',
+        label: 'overrightarrow',
+        defaultText: '\\overrightarrow{ab}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/underline.png',
+        label: 'underline',
+        defaultText: '\\underline{ab}',
+      },
+      
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/underbrace.png',
+        label: 'underbrace',
+        defaultText: '\\underbrace{ab}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/sqrtn.png',
+        label: 'sqrtn',
+        defaultText: '\\sqrt[n]{ab}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/frac.png',
+        label: 'frac',
+        defaultText: '\\frac{a}{b}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/xuk.png',
+        label: 'xuk',
+        defaultText: 'x_{k}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/partial.png',
+        label: 'partial',
+        defaultText: '\\frac{\\partial^nf}{\\partial x^n}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/select.png',
+        label: 'select',
+        defaultText: 'x =\\begin{cases}a & x = 0\\\\b & x > 0\\end{cases}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/curly.png',
+        label: 'curly',
+        defaultText: '\\big\\{a\\big\\}',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/oint.png',
+        label: 'oint',
+        defaultText: '\\oint_a^b x',
+      },
+  
+      {
+          
         url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/bigsqcup.png',
-        label: 'BigSquareCup',
+        label: 'bigsqcup',
         defaultText: '\\bigsqcup_a^b x',
       },
+  
       {
-        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/sqrtn.png',
-        label: 'SquareRootN',
-        defaultText: '\\sqrt[n]{ab}',
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/coprod.png',
+        label: 'coprod',
+        defaultText: '\\coprod_a^b x',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/bigcup.png',
+        label: 'bigcup',
+        defaultText: '\\bigcup_a^b x',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/bigvee.png',
+        label: 'bigvee',
+        defaultText: '\\bigwedge_a^b x',
+      },
+  
+      {
+          
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/math/bigoplus.png',
+        label: 'bigoplus',
+        defaultText: '\\bigoplus',
+      }
+    ];
+
+    const greekLatex = [
+      {
+        
+      url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/alpha.png',
+      label: 'alpha',
+      defaultText: '\\alpha',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/beta.png',
+        label: 'beta',
+        defaultText: '\\beta',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/gamma.png',
+        label: 'gamma',
+        defaultText: '\\gamma',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/delta.png',
+        label: 'delta',
+        defaultText: '\\delta',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/epsilon.png',
+        label: 'epsilon',
+        defaultText: '\\epsilon',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/varepsilon.png',
+        label: 'varepsilon',
+        defaultText: '\\varepsilon',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/zeta.png',
+        label: 'zeta',
+        defaultText: '\\zeta',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/eta.png',
+        label: 'eta',
+        defaultText: '\\eta',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/theta.png',
+        label: 'theta',
+        defaultText: '\\theta',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/vartheta.png',
+        label: 'vartheta',
+        defaultText: '\\vartheta',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/kappa.png',
+        label: 'kappa',
+        defaultText: '\\kappa',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/lambda.png',
+        label: 'lambda',
+        defaultText: '\\lambda',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/mu.png',
+        label: 'mu',
+        defaultText: '\\mu',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/nu.png',
+        label: 'nu',
+        defaultText: '\\nu',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Gammabig.png',
+        label: 'Gammabig',
+        defaultText: '\\Gamma',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Deltabig.png',
+        label: 'Deltabig',
+        defaultText: '\\Delta',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Thetabig.png',
+        label: 'Thetabig',
+        defaultText: '\\Theta',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Lambdabig.png',
+        label: 'Lambdabig',
+        defaultText: '\\Lambda',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Xibig.png',
+        label: 'Xibig',
+        defaultText: '\\Xi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Pibig.png',
+        label: 'Pibig',
+        defaultText: '\\Pi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/xi.png',
+        label: 'xi',
+        defaultText: '\\xi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/o.png',
+        label: 'o',
+        defaultText: ' o',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/pi.png',
+        label: 'pi',
+        defaultText: '\\pi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/varpi.png',
+        label: 'varpi',
+        defaultText: '\\varpi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/rho.png',
+        label: 'rho',
+        defaultText: '\\rho',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/varrho.png',
+        label: 'varrho',
+        defaultText: '\\varrho',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/sigma.png',
+        label: 'sigma',
+        defaultText: '\\sigma',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/varsigma.png',
+        label: 'varsigma',
+        defaultText: '\\varsigma',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/tau.png',
+        label: 'tau',
+        defaultText: '\\tau',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/upsilon.png',
+        label: 'upsilon',
+        defaultText: '\\upsilon',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/phi.png',
+        label: 'phi',
+        defaultText: '\\phi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/varphi.png',
+        label: 'varphi',
+        defaultText: '\\varphi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/chi.png',
+        label: 'chi',
+        defaultText: '\\chi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/psi.png',
+        label: 'psi',
+        defaultText: '\\psi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/omega.png',
+        label: 'omega',
+        defaultText: '\\omega',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Sigmabig.png',
+        label: 'Sigmabig',
+        defaultText: '\\Sigma',
+      },
+
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Upsilonbig.png',
+        label: 'Upsilonbig',
+        defaultText: '\\Upsilon',
+      },
+
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Phibig.png',
+        label: 'Phibig',
+        defaultText: '\\Phi',
+      },
+
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Psibig.png',
+        label: 'Psibig',
+        defaultText: '\\Psi',
+      },
+
+      {
+        
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/greek/Omegabig.png',
+        label: 'Omegabig',
+        defaultText: '\\Omega',
+      }
+    ]
+
+    const relationsLatex = [
+      {
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/leq.png',
+        label: 'leq',
+        defaultText: '\\leq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/prec.png',
+        label: 'prec',
+        defaultText: '\\prec',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/preceq.png',
+        label: 'preceq',
+        defaultText: '\\preceq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/ll.png',
+        label: 'll',
+        defaultText: '\\ll',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/subset.png',
+        label: 'subset',
+        defaultText: '\\subset',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/subseteq.png',
+        label: 'subseteq',
+        defaultText: '\\subseteq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/sqsubset.png',
+        label: 'sqsubset',
+        defaultText: '\\sqsubset',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/sqsubseteq.png',
+        label: 'sqsubseteq',
+        defaultText: '\\sqsubseteq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/in.png',
+        label: 'in',
+        defaultText: '\\in',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/vdash.png',
+        label: 'vdash',
+        defaultText: '\\vdash>',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/gt.png',
+        label: '',
+        defaultText: '>',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/Join.png',
+        label: 'Join',
+        defaultText: '\\Join',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/smile.png',
+        label: 'smile',
+        defaultText: '\\smile',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/sim.png',
+        label: 'sim',
+        defaultText: '\\sim',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/asymp.png',
+        label: 'asymp',
+        defaultText: '\\asymp',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/equiv.png',
+        label: 'equiv',
+        defaultText: '\\equiv',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/mid.png',
+        label: 'mid',
+        defaultText: '\\mid',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/neq.png',
+        label: 'neq',
+        defaultText: '\\neq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/perp.png',
+        label: 'perp',
+        defaultText: '\\perp',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/colon.png',
+        label: 'colon',
+        defaultText: ':',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/rhd.png',
+        label: 'rhd',
+        defaultText: '\\rhd',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/unrhd.png',
+        label: 'unrhd',
+        defaultText: '\\unrhd',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/geq.png',
+        label: 'geq',
+        defaultText: '\\geq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/succ.png',
+        label: 'succ',
+        defaultText: '\\succ',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/succeq.png',
+        label: 'succeq',
+        defaultText: '\\succeq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/gg.png',
+        label: 'gg',
+        defaultText: '\\gg',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/supset.png',
+        label: 'supset',
+        defaultText: '\\supset',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/supseteq.png',
+        label: 'supseteq',
+        defaultText: '\\supseteq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/sqsupset.png',
+        label: 'sqsupset',
+        defaultText: '\\sqsupset',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/sqsupseteq.png',
+        label: 'sqsupseteq',
+        defaultText: '\\sqsupseteq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/ni.png',
+        label: 'ni',
+        defaultText: '\\ni',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/dashv.png',
+        label: 'dashv',
+        defaultText: '\\dashv',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/lt.png',
+        label: 'lt',
+        defaultText: '<',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/bowtie.png',
+        label: 'bowtie',
+        defaultText: '\\bowtie',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/frown.png',
+        label: 'frown',
+        defaultText: '\\frown',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/simeq.png',
+        label: 'simeq',
+        defaultText: '\\simeq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/approx.png',
+        label: 'approx',
+        defaultText: '\\approx',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/cong.png',
+        label: 'cong',
+        defaultText: '\\cong',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/parallel.png',
+        label: 'parallel',
+        defaultText: '\\parallel',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/doteq.png',
+        label: 'doteq',
+        defaultText: '\\doteq',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/models.png',
+        label: 'models',
+        defaultText: '\\models',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/propto.png',
+        label: 'propto',
+        defaultText: '\\propto',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/lhd.png',
+        label: 'lhd',
+        defaultText: '\\lhd',
+      },
+
+      {
+      
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/relations/unlhd.png',
+        label: 'unlhd',
+        defaultText: '\\unlhd',
+      }
+    ];
+
+    const logicLatex = [
+
+      {
+    
+      url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/hat.png',
+      label: 'hat',
+      defaultText: '\\hat{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/acute.png',
+        label: 'acute',
+        defaultText: '\\acute{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/bar.png',
+        label: 'bar',
+        defaultText: '\\bar{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/dot.png',
+        label: 'dot',
+        defaultText: '\\dot{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/breve.png',
+        label: 'breve',
+        defaultText: '\\breve{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/plus.png',
+        label: 'plus',
+        defaultText: '+',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/times.png',
+        label: 'times',
+        defaultText: '\\times',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/cap.png',
+        label: 'cap',
+        defaultText: '\\cap',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/cup.png',
+        label: 'cup',
+        defaultText: '\\cup',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/vee.png',
+        label: 'vee',
+        defaultText: '\\vee',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/setminus.png',
+        label: 'setminus',
+        defaultText: '\\setminus',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/bigtriangleup.png',
+        label: 'bigtriangleup',
+        defaultText: '\\bigtriangleup',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/triangleright.png',
+        label: 'triangleright',
+        defaultText: '\\triangleright',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/rhd.png',
+        label: 'rhd',
+        defaultText: '\\rhd',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/unrhd.png',
+        label: 'unrhd',
+        defaultText: '\\unrhd',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/oplus.png',
+        label: 'oplus',
+        defaultText: '\\oplus',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/otimes.png',
+        label: 'otimes',
+        defaultText: '\\otimes',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/odot.png',
+        label: 'odot',
+        defaultText: '\\odot',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/uplus.png',
+        label: 'uplus',
+        defaultText: '\\uplus',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/ast.png',
+        label: 'ast',
+        defaultText: '\\ast',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/check.png',
+        label: 'check',
+        defaultText: '\\check{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/grave.png',
+        label: 'grave',
+        defaultText: '\\grave{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/vec.png',
+        label: 'vec',
+        defaultText: '\\vec{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/ddot.png',
+        label: 'ddot',
+        defaultText: '\\ddot{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/tilde.png',
+        label: 'tilde',
+        defaultText: '\\tilde{a}',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/minus.png',
+        label: 'minus',
+        defaultText: '-',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/div.png',
+        label: 'div',
+        defaultText: '\\div',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/sqcup.png',
+        label: 'sqcup',
+        defaultText: '\\sqcup',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/wedge.png',
+        label: 'wedge',
+        defaultText: '\\wedge',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/wr.png',
+        label: 'wr',
+        defaultText: '\\wr',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/bigtriangledown.png',
+        label: 'bigtriangledown',
+        defaultText: '\\bigtriangledown',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/triangleleft.png',
+        label: 'triangleleft',
+        defaultText: '\\triangleleft',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/lhd.png',
+        label: 'lhd',
+        defaultText: '\\lhd',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/unlhd.png',
+        label: 'unlhd',
+        defaultText: '\\unlhd',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/ominus.png',
+        label: 'ominus',
+        defaultText: '\\ominus',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/oslash.png',
+        label: 'oslash',
+        defaultText: '\\oslash',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/bigcirc.png',
+        label: 'bigcirc',
+        defaultText: '\\bigcirc',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/amalg.png',
+        label: 'amalg',
+        defaultText: '\\amalg',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/star.png',
+        label: 'star',
+        defaultText: '\\star',
+      },
+
+      {
+    
+        url: 'https://live.braincert.com/html5/build/images/www/assets/latex/logic/bullet.png',
+        label: 'bullet',
+        defaultText: '\\bullet',
       },
     ]
 
-    const latexPosition: CSSProperties = currentMenuStyle ? currentMenuStyle : { position:'fixed', top: (currentTop ? currentTop + 30 : 300), left: (currentLeft ? currentLeft: 300)};
+    const latexPosition: CSSProperties = currentMenuStyle ? currentMenuStyle : { position:'fixed', top: (latexTopPosition ? latexTopPosition + 30 : 300), left: (latexLeftPosition ? latexLeftPosition: 300)};
     
     const latexStyles: any = {
       latexPosition,
@@ -1753,60 +2540,176 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         cursor: 'pointer', 
         fontSize: 25,
         flexWrap: 'wrap',
-        width: 300,
         background: '#ffffff',
-        boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.2)',
+        boxShadow: 'rgba(0, 0, 0, 0.2) 0px 6px 16px 0px',
         borderRadius: 4,
         padding: 10,
       } 
-    }
-
-    const handleLatex = () => {
-      refInput.current.innerText = refInput.current.innerText;
-      refInput.current.style.display = 'none';
-      console.log(refContext)
+    } 
+    
+    const handleLatexSize = (value) => {
+      setLatexFontSize(value)
     }
     
+    const latexGroupList = ["Math", "Greek", "Relations", "Logic"];
+
     return (
       <div 
-        style={{...latexStyles.latexPosition, ...latexStyles.latexDisplay}}
-        onClick={()=> {setShowLatexMenu(false)}}
+        style={{height: 'auto', zIndex: 9, display: 'flex', flexDirection: 'column', position: 'fixed', bottom: 50, width: 'calc(100% - 100px)', left: 50, ...latexStyles.latexDisplay}}  
       >
-        {latexOptions.map( latexs => {
+        <div
+          style={{display: 'flex', justifyContent: 'space-between', paddingRight: 5}}
+        >
+        <input 
+          type={'text'} 
+          id={'latexInputContainer'}
+          value={latexValue}
+          style={{border: '1px solid #ececec', marginRight: 5, marginBottom: 10, padding: 5,
+          width: '100%'}} 
+          onChange={(e)=> setLatexValue(e.target.value)}/>
+        <button 
+        onClick={()=> setLatexValue('')} 
+        style={{
+          padding: 5,
+          background: '#ffffff',
+          color: 'black',
+          textAlign: 'center',
+          border: '1px solid #cecece',
+          fontSize: 14,
+          borderRadius: 4,
+          marginBottom: 10
+        }}>clear</button>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+          }}
+          className={'latex-list'}
+        >
+          {latexGroupList.map( latexGroupItem => {
+            return(
+              <div
+                className={'latext-list-item'} 
+                key={latexGroupItem} 
+                style={{opacity: latexGroupItem === latexGroup ? 1: 0.5}}
+                onClick={()=> setLatexGroup(latexGroupItem)}
+              >
+                {latexGroupItem}
+              </div>
+            )
+          })}
+        </div>
+        <div style={{display: 'flex', flexWrap: 'wrap'}}>
+        {latexGroup === 'Math' && mathLatex.map( latexs => {
           return (
             <img 
               key={latexs.url}
-              style={{ marginBottom: 10 }}
+              className={'img-latex'}
+              style={{ marginBottom: 10}}
               onMouseDown={stopPropagation}
               alt={latexs.defaultText}
-              onClick={()=> setCurrentLatex(latexs.defaultText)}
+              onClick={(e)=> {
+                e.preventDefault();
+                const _toCurrentLatex = latexValue.toString() + latexs.defaultText;
+                setLatexValue(_toCurrentLatex);
+                setCurrentLatex(latexValue)
+                setShowTextArea(true);
+              }}
               src={latexs.url}
             />
           )
         })}
-        <button
-          style={{
-            fontSize: 14, 
-            marginLeft: 'auto', 
-            padding: 5,
-            height: 34,
-            lineHeight: 'normal'
-          }} 
-          onClick={handleLatex}>
-            Add Latex
-        </button>
+
+        {latexGroup === 'Greek' && greekLatex.map( latexs => {
+          return (
+            <img 
+              key={latexs.url}
+              className={'img-latex'}
+              style={{ marginBottom: 10}}
+              onMouseDown={stopPropagation}
+              alt={latexs.defaultText}
+              onClick={(e)=> {
+                e.preventDefault();
+                const _toCurrentLatex = latexValue.toString() + latexs.defaultText;
+                setLatexValue(_toCurrentLatex);
+                setCurrentLatex(latexValue)
+                setShowTextArea(true);
+              }}
+              src={latexs.url}
+            />
+          )
+        })}
+
+        {latexGroup === 'Relations' && relationsLatex.map( latexs => {
+          return (
+            <img 
+              key={latexs.url}
+              className={'img-latex'}
+              style={{ marginBottom: 10}}
+              onMouseDown={stopPropagation}
+              alt={latexs.defaultText}
+              onClick={(e)=> {
+                e.preventDefault();
+                const _toCurrentLatex = latexValue.toString() + latexs.defaultText;
+                setLatexValue(_toCurrentLatex);
+                setCurrentLatex(latexValue)
+                setShowTextArea(true);
+              }}
+              src={latexs.url}
+            />
+          )
+        })}
+
+        {latexGroup === 'Logic' && logicLatex.map( latexs => {
+          return (
+            <img 
+              key={latexs.url}
+              className={'img-latex'}
+              style={{ marginBottom: 10}}
+              onMouseDown={stopPropagation}
+              alt={latexs.defaultText}
+              onClick={(e)=> {
+                e.preventDefault();
+                const _toCurrentLatex = latexValue.toString() + latexs.defaultText;
+                setLatexValue(_toCurrentLatex);
+                setCurrentLatex(latexValue)
+                setShowTextArea(true);
+              }}
+              src={latexs.url}
+            />
+          )
+        })}
+        </div>
+        <div style={{width: '100%',display: 'flex', paddingTop: 20, justifyContent: 'space-between'}}>
+          <div 
+            id={'latexFontSlider'}
+          >
+            <Slider
+              value={latexFontSize} 
+              style={{width: 100}}
+              min={12} 
+              max={120} 
+              onChange={handleLatexSize}>
+            </Slider>
+          </div>
+          <button
+            id={`formulaBtn`}
+            onClick={(e)=> {
+              e.preventDefault();
+              e.stopPropagation();
+              refInput.current.innerText = latexValue;
+              onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize);
+              setShowSettings('');
+              setShowLatexMenu(false);
+            }}>Add Formula
+          </button>
+        </div>
       </div>
     )
   }
-
-  //LATEX REFINPUTS
-  useEffect(() => {
-    refInput.current.innerText = currentLatex ? currentLatex: refInput.current.innerText;
-    onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-    setShowSettings('');
-  }, [currentLatex, refInput])
   
-  return (
+  return (  
     <div
       className={`${sketchpadPrefixCls}-container`}
       onMouseDown={onMouseDown}
@@ -1818,6 +2721,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       style={backgroundStyle}
     >
       <div id='app'></div>
+      {showLatexDropdown()}
       <canvas
         ref={refCanvas}
         onDoubleClick={onDoubleClick}
@@ -1829,7 +2733,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       <div
         ref={refInput}
         contentEditable
-        style={{ fontSize: `${12 * scale}px`, }}
+        style={{fontSize: `${12 * scale}px`, }}
         className={`${sketchpadPrefixCls}-textInput`}
         onBlur={() => {
           if(showSettings === 'Emoji') {
@@ -1843,7 +2747,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           }
           else{
             onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-            onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+            onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize);
             setShowSettings('')
           }
         }}
@@ -1861,14 +2765,10 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         }}
       >
       </div>
-      <div style={{position:'fixed', top: latexTopPosition, left: latexLeftPosition, fontSize: 32}}>
-          <BlockMath>
-            {refInput.current?refInput.current.innerText:"c = pmsqrt{a^4 + b^8}"}
-          </BlockMath> 
+      <div style={{position:'fixed', top: latexTopPosition, left: latexLeftPosition,  fontSize: 32}}>
       </div>
       {showEmojiDropdown()}
       {showFormulaDropdown()}
-      {showLatexDropdown()}
       {settingMenu}
       {removeButton}
       {resizer}

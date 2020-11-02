@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Tool, { ToolOption, LatexOption, Position, LatexSize, strokeColor } from './enums/Tool';
+import ReactDOMServer from 'react-dom/server';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
 import { BlockMath } from "react-katex";
@@ -21,6 +22,7 @@ export interface Latex {
 }
 
 export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanvas, intl, selectedItem, setCurrentTool: (tool: Tool) => void) => {
+  console.log('onLatexMouseDown')
   setCurrentTool(selectedItem)
   if (!currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
@@ -63,58 +65,58 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
   }
 }
 
-export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
-  // if (currentText && refInput.current && refCanvas.current) {
-  //   const textarea = refInput.current;
-  //   const text = textarea.innerText;
-
-  //   let { top, left, width, height } = textarea.getBoundingClientRect();
-  //   width = 1 / scale * width;
-  //   const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
-  //   height = 1 / scale * lineHeight * text.split('\n').length;
-
-  //   const currentPos = mapClientToCanvas({
-  //     clientX: left,
-  //     clientY: top,
-  //   } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
-
-  //   textarea.style.display = 'none';
-
-  //   const pos: Position = {
-  //     x: currentPos[0],
-  //     y: currentPos[1],
-  //     w: width,
-  //     h: height,
-  //   };
-
-  //   handleCompleteOperation(Tool.Latex, { text, color: currentColor, size: currentSize }, pos);
-  //   setCurrentTool(Tool.Select);
-  //   currentText = '';
-  // }
+export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize) => {
   if (currentText && refInput.current && refCanvas.current) {
-    
     const textarea = refInput.current;
     const text = textarea.innerText;
-    let { top, left, width, height } = textarea.getBoundingClientRect();
-    width = 1 / scale * width;
-    const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
-    height = 1 / scale * lineHeight * text.split('\n').length;
+    let htmlToCanvas = document.createElement('div');
+    //htmlToCanvas.setAttribute('style','z-index: 0;position:fixed;top:50px;left:50px;');
+    htmlToCanvas.setAttribute('id','htmltocanvas');
+    const _blockMath = <div style={{fontSize: latexFontSize * 5, padding: 0}}><BlockMath>{`${text}`}</BlockMath></div>;
+    const htmlCanvasContent = ReactDOMServer.renderToStaticMarkup(_blockMath); 
+    htmlToCanvas.innerHTML = htmlCanvasContent;
+    document.body.appendChild(htmlToCanvas);
 
-    const currentPos = mapClientToCanvas({
-      clientX: left,
-      clientY: top,
-    } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
+    let svgElements: any = document.body.querySelectorAll('svg');
+    svgElements.forEach(function(item) {
+        item.setAttribute("width", item.getBoundingClientRect().width);
+        item.setAttribute("height", item.getBoundingClientRect().height);
+        item.style.width = null;
+        item.style.height= null;
+    });
 
-    textarea.style.display = 'none';
+    html2canvas(htmlToCanvas.querySelector('.katex')).then(_canvas => {
+      let katex_offsetWidth : any = document.querySelectorAll('.katex-html')[0];
+      const width = htmlToCanvas.querySelector('.katex').offsetWidth;
+      const height = katex_offsetWidth.offsetHeight;
+      document.getElementById('htmltocanvas').remove();
 
-    const pos: Position = {
-      x: currentPos[0],
-      y: currentPos[1],
-      w: width,
-      h: height,
-    };
+      const image = new Image();
+      image.onload = () => {
+        let { top, left } = textarea.getBoundingClientRect();
+        const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
 
-    handleCompleteOperation(Tool.Latex, { text, color: currentColor, size: currentSize }, pos);
+        const currentPos = mapClientToCanvas({
+          clientX: left,
+          clientY: top,
+        } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
+
+        textarea.style.display = 'none';
+
+        const pos: any = {
+          x: currentPos[0],
+          y: currentPos[1],
+          w: width/1.5,
+          h: height,
+        };
+    
+        handleCompleteOperation(Tool.Image, {
+          imageData: _canvas.toDataURL(),
+        }, pos);
+      }
+
+      image.src = _canvas.toDataURL();
+    });
     setCurrentTool(Tool.Select);
     currentText = '';
   }
@@ -123,6 +125,8 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
 export const fontLatex = `"PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif, "localant"`;
 
 export const drawLatex = (item: Latex, context: CanvasRenderingContext2D, pos: Position) => {
+  console.log('drawLatex')
+
   context.globalCompositeOperation = 'source-over';
   context.font = `${item.size}px ${fontLatex}` ;
   context.fillStyle = item.color || '#4a4a4a';

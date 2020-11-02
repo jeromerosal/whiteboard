@@ -63,17 +63,17 @@ const Block: React.FC<BlockProps> = (props) => {
   useEffect(() => {
     const keydownHandler = (evt: KeyboardEvent) => {
       const { keyCode } = evt;
-      if (keyCode === 80) { // key 'p'
-        setCurrentTool(Tool.Stroke);
-      } else if (keyCode === 82) { // key 'r'
-        setCurrentTool(Tool.Shape);
-        setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Rectangle });
-      } else if (keyCode === 79) { // key 'o'
-        setCurrentTool(Tool.Shape);
-        setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Oval });
-      } else if (keyCode === 84) { // key 't'
-        setCurrentTool(Tool.Text);
-      }
+      // if (keyCode === 80) { // key 'p'
+      //   setCurrentTool(Tool.Stroke);
+      // } else if (keyCode === 82) { // key 'r'
+      //   setCurrentTool(Tool.Shape);
+      //   setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Rectangle });
+      // } else if (keyCode === 79) { // key 'o'
+      //   setCurrentTool(Tool.Shape);
+      //   setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Oval });
+      // } else if (keyCode === 84) { // key 't'
+      //   setCurrentTool(Tool.Text);
+      // }
     };
 
     addEventListener('keydown', keydownHandler);
