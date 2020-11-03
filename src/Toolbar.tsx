@@ -72,7 +72,8 @@ const tools = [{
   type: Tool.Latex,
 },
 {
-  label: 'umi.block.sketch.image',
+  //label: 'umi.block.sketch.image',
+  label: 'umi.block.sketch.file',
   icon: ImageIcon,
   type: Tool.Image,
 },
@@ -332,7 +333,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       <input
         type="file"
         style={{ display: 'none' }}
-        accept="image/jpeg, image/png"
+        accept="image/jpeg, image/png, video/mp4, video/avi, application/pdf"
         ref={refFileInput}
         onChange={handleFileChange}
       />

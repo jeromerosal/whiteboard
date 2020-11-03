@@ -4,6 +4,7 @@ export default {
   'umi.block.sketch.shape': '形状 r',
   'umi.block.sketch.text': '文字 t',
   'umi.block.sketch.image': '图片',
+  'umi.block.sketch.file': '文件',
   'umi.block.sketch.highlighter': '荧光笔',
   'umi.block.sketch.undo': '撤销',
   'umi.block.sketch.redo': '重做',
