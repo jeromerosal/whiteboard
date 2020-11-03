@@ -2739,6 +2739,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             console.log(blob);
             let pdfIframe = document.createElement('iframe');
             let existingPdfIframe = document.getElementById('pdfIframe');
+            
+            let removePdf = document.createElement('div');
 
             // overwrite the existing pdf
             if (existingPdfIframe) {
@@ -2750,7 +2752,15 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             pdfIframe.height = '900px';
             pdfIframe.id = 'pdfIframe';
 
+            removePdf.innerText = 'X CLOSE';
+            removePdf.style.cursor = 'pointer';
+            removePdf.onclick = () => {
+              document.getElementById('pdfId').removeChild(pdfIframe);
+              document.getElementById('pdfId').removeChild(removePdf);
+            };
+
             document.getElementById('pdfId').appendChild(pdfIframe);
+            document.getElementById('pdfId').appendChild(removePdf);
 
             setPdfCache({
               [pdfFile.id]: pdfFile.pdf,
@@ -2786,9 +2796,19 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           .then(res => res.blob())
           .then(blob => {
             let vid = document.createElement('video');
+            let removeVid = document.createElement('div');
 
             vid.controls = true;
             vid.src = URL.createObjectURL(blob);
+            vid.id = latestVideo.id.concat('-video');
+
+            removeVid.innerText = 'X CLOSE';
+            removeVid.style.cursor = 'pointer';
+            removeVid.id = latestVideo.id.concat('-close');
+            removeVid.onclick = () => {
+              document.getElementById('videoId').removeChild(document.getElementById(latestVideo.id.concat('-video')));
+              document.getElementById('videoId').removeChild(document.getElementById(latestVideo.id.concat('-close')));
+            };
 
             vid.addEventListener('play', function() {
               this.width = this.videoWidth / 2;
@@ -2796,6 +2816,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             });
 
             document.getElementById('videoId').appendChild(vid);
+            document.getElementById('videoId').appendChild(removeVid);
+
             setCacheVids({
               [latestVideo.id]: latestVideo.video, ...cacheVids
             });
