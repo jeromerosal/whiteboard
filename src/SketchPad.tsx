@@ -496,6 +496,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [ currentEmoji, setCurrentEmoji ] = useState('');
   const [ currentFormula, setCurrentFormula ] = useState('');
   const [ latexGroup, setLatexGroup] = useState('Math');
+  const [pdfFile, setPdfFile] = useState(null);
+  const [videoList, setVideoList] = useState([]);
 
   const [ currentLatex, setCurrentLatex ] = useState('');
   const [ latexLeftPosition, setLatexLeftPosition ] = useState(null);
@@ -1224,9 +1226,20 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const imperativeHandler = () => {
     useImperativeHandle(ref, () => {
       return {
-        selectImage: (image: string) => {
-          if (image && refCanvas.current) {
-            onImageComplete(image, refCanvas.current, viewMatrix, handleCompleteOperation);
+        selectImage: (file: string) => {
+          if (file && refCanvas.current) {
+            if (file.slice(0, 10) === 'data:video') {
+              const lastChar = file.substr(file.length - 16);
+              setVideoList([
+                { video: file, id: lastChar },
+                ...videoList
+              ]);
+            } else if (file.slice(0, 20) === 'data:application/pdf') {
+              const lastChar = file.substr(file.length - 16);
+              setPdfFile({ pdf: file, id: lastChar });
+            } else {
+              onImageComplete(file, refCanvas.current, viewMatrix, handleCompleteOperation);
+            }
           }
         },
         undo: () => {
@@ -2708,6 +2721,97 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       </div>
     )
   }
+
+  const pdfUploaded = () => {
+    const [cachePdf, setPdfCache] = useState({});
+    const pdfStyles: any = {
+      pdfDisplay: {
+        display: Boolean(pdfFile) ? 'flex': 'none',
+      }
+    };
+
+    if (Boolean(pdfFile)) {
+      if(!cachePdf[pdfFile.id]) {
+        fetch(pdfFile.pdf)
+          .then(res => res.blob())
+          .then(blob => {
+            console.log(blob);
+            let pdfIframe = document.createElement('iframe');
+            let existingPdfIframe = document.getElementById('pdfIframe');
+
+            // overwrite the existing pdf
+            if (existingPdfIframe) {
+              document.getElementById('pdfId').removeChild(existingPdfIframe);
+            }
+
+            pdfIframe.src = URL.createObjectURL(blob);
+            pdfIframe.width = '900px';
+            pdfIframe.height = '900px';
+            pdfIframe.id = 'pdfIframe';
+
+            document.getElementById('pdfId').appendChild(pdfIframe);
+
+            setPdfCache({
+              [pdfFile.id]: pdfFile.pdf,
+            });
+          })
+          .catch(e => console.log(e));
+      }
+    }
+
+    return (
+      <div
+        id="pdfId"
+        style={{height: 'auto', zIndex: 9, flexDirection: 'column', position: 'fixed', top: 0, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...pdfStyles.pdfDisplay}}  
+      >
+        
+      </div>
+    );
+  };
+
+  const videoUploaded = () => {
+    const [cacheVids, setCacheVids] = useState({});
+    const videoStyles: any = {
+      videoDisplay: {
+        display: Boolean(videoList.length > 0) ? 'flex': 'none',
+      }
+    };
+
+    if (Boolean(videoList.length > 0)) {
+      const latestVideo = videoList.find(({ id }) => id !== cacheVids[id]);
+
+      if (!cacheVids[latestVideo.id]) {
+        fetch(latestVideo.video)
+          .then(res => res.blob())
+          .then(blob => {
+            let vid = document.createElement('video');
+
+            vid.controls = true;
+            vid.src = URL.createObjectURL(blob);
+
+            vid.addEventListener('play', function() {
+              this.width = this.videoWidth / 2;
+              this.height = this.videoHeight  / 2;
+            });
+
+            document.getElementById('videoId').appendChild(vid);
+            setCacheVids({
+              [latestVideo.id]: latestVideo.video, ...cacheVids
+            });
+          })
+          .catch(e => console.log(e));
+      }
+    }
+
+    return (
+      <div
+        id="videoId"
+        style={{height: 'auto', zIndex: 9, flexDirection: 'column', position: 'fixed', bottom: 50, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...videoStyles.videoDisplay}}  
+      >
+        
+      </div>
+    );
+  };
   
   return (  
     <div
@@ -2722,6 +2826,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     >
       <div id='app'></div>
       {showLatexDropdown()}
+      {videoUploaded()}
+      {pdfUploaded()}
       <canvas
         ref={refCanvas}
         onDoubleClick={onDoubleClick}
