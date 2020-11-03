@@ -1202,6 +1202,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   } else if (currentTool === Tool.Text) {
     canvasStyle.cursor = `text`;
   }
+  canvasStyle.position = `relative`;
 
   const backgroundStyle: CSSProperties = {};
   backgroundStyle.backgroundImage = showGrid ? `url(${gridLines})`: 'none';
@@ -2762,7 +2763,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     return (
       <div
         id="pdfId"
-        style={{height: 'auto', zIndex: 9, flexDirection: 'column', position: 'fixed', top: 0, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...pdfStyles.pdfDisplay}}  
+        style={{height: 'auto', zIndex: 0, flexDirection: 'column', position: 'fixed', top: 0, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...pdfStyles.pdfDisplay}}  
       >
         
       </div>
@@ -2806,7 +2807,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     return (
       <div
         id="videoId"
-        style={{height: 'auto', zIndex: 9, flexDirection: 'column', position: 'fixed', bottom: 50, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...videoStyles.videoDisplay}}  
+        style={{height: 'auto', zIndex: 0, flexDirection: 'column', position: 'fixed', bottom: 50, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...videoStyles.videoDisplay}}  
       >
         
       </div>
