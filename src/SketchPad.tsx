@@ -498,6 +498,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [ latexGroup, setLatexGroup] = useState('Math');
   const [pdfFile, setPdfFile] = useState(null);
   const [videoList, setVideoList] = useState([]);
+  const [cacheVids, setCacheVids] = useState({});
 
   const [ currentLatex, setCurrentLatex ] = useState('');
   const [ latexLeftPosition, setLatexLeftPosition ] = useState(null);
@@ -1202,7 +1203,13 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   } else if (currentTool === Tool.Text) {
     canvasStyle.cursor = `text`;
   }
-  canvasStyle.position = `relative`;
+
+  if (currentTool === Tool.Select) {
+    canvasStyle.position = `unset`;
+  } else {
+    canvasStyle.position = `relative`;
+  }
+
 
   const backgroundStyle: CSSProperties = {};
   backgroundStyle.backgroundImage = showGrid ? `url(${gridLines})`: 'none';
@@ -2781,57 +2788,70 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   };
 
   const videoUploaded = () => {
-    const [cacheVids, setCacheVids] = useState({});
-    const videoStyles: any = {
-      videoDisplay: {
-        display: Boolean(videoList.length > 0) ? 'flex': 'none',
+    Object.values(cacheVids).map((data: any) => {
+      const toDelete = data.slice(17, 23);
+      const dataId = data.slice(0, 16);
+
+      if (toDelete === 'delete') {
+        delete cacheVids[dataId];
       }
-    };
+    });
 
     if (Boolean(videoList.length > 0)) {
-      const latestVideo = videoList.find(({ id }) => id !== cacheVids[id]);
+      const latestVideo = videoList
+        .find(({ id }) => id !== cacheVids[id]) || '';
 
-      if (!cacheVids[latestVideo.id]) {
+      if (Boolean(latestVideo) && !cacheVids[latestVideo?.id]) {
         fetch(latestVideo.video)
           .then(res => res.blob())
           .then(blob => {
             let vid = document.createElement('video');
             let removeVid = document.createElement('div');
+            let removeIcon = document.getElementById('removeIcon').lastChild.cloneNode(true);
 
             vid.controls = true;
+            
             vid.src = URL.createObjectURL(blob);
             vid.id = latestVideo.id.concat('-video');
+            vid.style.position = 'absolute';
+            vid.style.top = Boolean(videoList.length > 1) 
+              ? String(document.getElementById(videoList.slice(1)[0]?.id.concat('-video')).offsetHeight + 50).concat('px')
+              : '50px';
+            vid.style.left = '50px';
+            vid.style.height = '300px';
+            vid.style.width = '500px';
 
-            removeVid.innerText = 'X CLOSE';
-            removeVid.style.cursor = 'pointer';
-            removeVid.id = latestVideo.id.concat('-close');
-            removeVid.onclick = () => {
-              document.getElementById('videoId').removeChild(document.getElementById(latestVideo.id.concat('-video')));
-              document.getElementById('videoId').removeChild(document.getElementById(latestVideo.id.concat('-close')));
-            };
-
-            vid.addEventListener('play', function() {
-              this.width = this.videoWidth / 2;
-              this.height = this.videoHeight  / 2;
-            });
-
-            document.getElementById('videoId').appendChild(vid);
-            document.getElementById('videoId').appendChild(removeVid);
-
+            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].prepend(vid);
+            
             setCacheVids({
-              [latestVideo.id]: latestVideo.video, ...cacheVids
+              [latestVideo.id]: latestVideo.id, ...cacheVids
             });
+
+            removeVid.style.position = 'absolute';
+            removeVid.style.cursor = 'pointer';
+            removeVid.style.left = String(vid.offsetWidth + 50).concat('px');
+            removeVid.style.top = vid.style.top;
+            removeVid.id = latestVideo.id.concat('-close'); 
+            removeVid.onclick = (() => {
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(document.getElementById(latestVideo.id.concat('-video')));
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(document.getElementById(latestVideo.id.concat('-close')));
+              setVideoList(videoList.filter(({ id }) => id !== latestVideo.id ));
+              setCacheVids({ 
+                [latestVideo.id]: latestVideo.id.concat('-delete'), ...cacheVids
+              });
+            });
+
+            removeVid.appendChild(removeIcon);
+
+            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].appendChild(removeVid);
           })
           .catch(e => console.log(e));
       }
     }
 
     return (
-      <div
-        id="videoId"
-        style={{height: 'auto', zIndex: 0, flexDirection: 'column', position: 'fixed', bottom: 50, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...videoStyles.videoDisplay}}  
-      >
-        
+      <div id="removeIcon" style={{ display: 'none' }}>
+        <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
       </div>
     );
   };
