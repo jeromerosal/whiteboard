@@ -498,6 +498,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [ latexGroup, setLatexGroup] = useState('Math');
   const [pdfFile, setPdfFile] = useState(null);
   const [videoList, setVideoList] = useState([]);
+  const [cacheVids, setCacheVids] = useState({});
 
   const [ currentLatex, setCurrentLatex ] = useState('');
   const [ latexLeftPosition, setLatexLeftPosition ] = useState(null);
@@ -1202,7 +1203,13 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   } else if (currentTool === Tool.Text) {
     canvasStyle.cursor = `text`;
   }
-  canvasStyle.position = `relative`;
+
+  if (currentTool === Tool.Select) {
+    canvasStyle.position = `unset`;
+  } else {
+    canvasStyle.position = `relative`;
+  }
+
 
   const backgroundStyle: CSSProperties = {};
   backgroundStyle.backgroundImage = showGrid ? `url(${gridLines})`: 'none';
@@ -2725,11 +2732,15 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
   const pdfUploaded = () => {
     const [cachePdf, setPdfCache] = useState({});
-    const pdfStyles: any = {
-      pdfDisplay: {
-        display: Boolean(pdfFile) ? 'flex': 'none',
+
+    Object.values(cachePdf).map((data: any) => {
+      const toDelete = data.slice(17, 23);
+      const dataId = data.slice(0, 16);
+
+      if (toDelete === 'delete') {
+        delete cachePdf[dataId];
       }
-    };
+    });
 
     if (Boolean(pdfFile)) {
       if(!cachePdf[pdfFile.id]) {
@@ -2738,77 +2749,126 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           .then(blob => {
             let pdfIframe = document.createElement('iframe');
             let existingPdfIframe = document.getElementById('pdfIframe');
+            let existingPdfIcon = document.getElementById('pdfIcon');
+            
+            let removePdf = document.createElement('div');
+            let removeIcon = document.getElementById('removeIcon').lastChild.cloneNode(true);
 
             // overwrite the existing pdf
             if (existingPdfIframe) {
-              document.getElementById('pdfId').removeChild(existingPdfIframe);
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(existingPdfIframe);
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(existingPdfIcon);
             }
 
             pdfIframe.src = URL.createObjectURL(blob);
             pdfIframe.width = '900px';
             pdfIframe.height = '900px';
+            pdfIframe.style.position = 'absolute';
+            pdfIframe.style.top = '50px';
+            pdfIframe.style.left = '50px';
             pdfIframe.id = 'pdfIframe';
 
-            document.getElementById('pdfId').appendChild(pdfIframe);
+            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].prepend(pdfIframe);
 
             setPdfCache({
-              [pdfFile.id]: pdfFile.pdf,
+              [pdfFile.id]: pdfFile.id,
             });
+
+            removePdf.style.cursor = 'pointer';
+            removePdf.style.position = 'absolute';
+            removePdf.style.left = String(pdfIframe.offsetWidth + 50).concat('px');
+            removePdf.style.top = '35px';
+            removePdf.style.fontSize = '16px';
+            removePdf.id = 'pdfIcon';
+            removePdf.onclick = (() => {
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(pdfIframe);
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(removePdf);
+              setCacheVids({ 
+                [pdfFile.id]: pdfFile.id.concat('-delete')
+              });
+            });
+
+            removePdf.appendChild(removeIcon);
+
+            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].appendChild(removePdf);
           })
           .catch(e => console.log(e));
       }
     }
 
     return (
-      <div
-        id="pdfId"
-        style={{height: 'auto', zIndex: 0, flexDirection: 'column', position: 'fixed', top: 0, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...pdfStyles.pdfDisplay}}  
-      >
-        
+      <div id="removePdfIcon" style={{ display: 'none' }}>
+        <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
       </div>
     );
   };
 
   const videoUploaded = () => {
-    const [cacheVids, setCacheVids] = useState({});
-    const videoStyles: any = {
-      videoDisplay: {
-        display: Boolean(videoList.length > 0) ? 'flex': 'none',
+    Object.values(cacheVids).map((data: any) => {
+      const toDelete = data.slice(17, 23);
+      const dataId = data.slice(0, 16);
+
+      if (toDelete === 'delete') {
+        delete cacheVids[dataId];
       }
-    };
+    });
 
     if (Boolean(videoList.length > 0)) {
-      const latestVideo = videoList.find(({ id }) => id !== cacheVids[id]);
+      const latestVideo = videoList
+        .find(({ id }) => id !== cacheVids[id]) || '';
 
-      if (!cacheVids[latestVideo.id]) {
+      if (Boolean(latestVideo) && !cacheVids[latestVideo?.id]) {
         fetch(latestVideo.video)
           .then(res => res.blob())
           .then(blob => {
             let vid = document.createElement('video');
+            let removeVid = document.createElement('div');
+            let removeIcon = document.getElementById('removeIcon').lastChild.cloneNode(true);
 
             vid.controls = true;
+            
             vid.src = URL.createObjectURL(blob);
+            vid.id = latestVideo.id.concat('-video');
+            vid.style.position = 'absolute';
+            vid.style.top = Boolean(videoList.length > 1) 
+              ? String(document.getElementById(videoList.slice(1)[0]?.id.concat('-video')).offsetHeight + 50).concat('px')
+              : '50px';
+            vid.style.left = '50px';
+            vid.style.height = '300px';
+            vid.style.width = '500px';
 
-            vid.addEventListener('play', function() {
-              this.width = this.videoWidth / 2;
-              this.height = this.videoHeight  / 2;
-            });
-
-            document.getElementById('videoId').appendChild(vid);
+            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].prepend(vid);
+            
             setCacheVids({
-              [latestVideo.id]: latestVideo.video, ...cacheVids
+              [latestVideo.id]: latestVideo.id, ...cacheVids
             });
+
+            removeVid.style.position = 'absolute';
+            removeVid.style.cursor = 'pointer';
+            removeVid.style.left = String(vid.offsetWidth + 50).concat('px');
+            removeVid.style.top = vid.style.top;
+            removeVid.style.fontSize = '16px';
+            removeVid.id = latestVideo.id.concat('-close'); 
+            removeVid.onclick = (() => {
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(document.getElementById(latestVideo.id.concat('-video')));
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(document.getElementById(latestVideo.id.concat('-close')));
+              setVideoList(videoList.filter(({ id }) => id !== latestVideo.id ));
+              setCacheVids({ 
+                [latestVideo.id]: latestVideo.id.concat('-delete'), ...cacheVids
+              });
+            });
+
+            removeVid.appendChild(removeIcon);
+
+            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].appendChild(removeVid);
           })
           .catch(e => console.log(e));
       }
     }
 
     return (
-      <div
-        id="videoId"
-        style={{height: 'auto', zIndex: 0, flexDirection: 'column', position: 'fixed', bottom: 50, width: 'calc(100% - 100px)', maxWidth: 716, left: 50, ...videoStyles.videoDisplay}}  
-      >
-        
+      <div id="removeIcon" style={{ display: 'none' }}>
+        <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
       </div>
     );
   };
