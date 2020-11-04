@@ -118,21 +118,69 @@
 
 .katex-display {
   margin: -10px 50px !important;
-  padding: 50px;
+  padding: 30px 50px 50px;
   svg {
     margin-right: 20px;
   }
 }
 
 .katex {
-  padding: 20px 50px 20px 50px;
+  padding: 10px 20px 20px 20px;
   line-height: auto !important;
 
   * {
     margin-right: 10px;
   }
+
+  .katex-html {
+    padding: 10px 10px 0px;
+
+    .base {
+      padding: 20px 0 50px;
+
+      .pstrut ~ span {
+        width: 100% !important; 
+      }
+    }
+  }
+
+  span.mclose.delimcenter {
+    top: -0.5em !important;
+  }
+  
+  span.minner .mopen.delimcenter ~ span.mord {
+    top: 0.25em;
+    position: relative;
+    padding: 50px 0;
+  }
+  
+  span.mopen.delimcenter {
+    top: -0.5em !important;
+  }
+
+  .delimsizing.size4 {
+    position: relative;
+    top: -0.5em;
+  }
 }
 
 .katex .fontsize-ensurer.reset-size6.size1, .katex .sizing.reset-size6.size1 {
   margin-right: -30px
+}
+
+.katex .base > .mop.op-symbol.large-op {
+  position: absolute;
+  right: 0.25em;
+  top: -0.5em !important;
+}
+
+span.mord.accent {
+  position: relative;
+  
+  svg {
+    position: absolute;
+    top: 0;
+    width: 2em;
+    height: 20px;
+  }
 }

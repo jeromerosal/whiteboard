@@ -61,8 +61,6 @@ export const onImageComplete = (data: string, canvas: HTMLCanvasElement, viewMat
     handleCompleteOperation(Tool.Image, {
       imageData: data,
     }, posInfo);
-    
-    console.log('image source data', data)
   };
 
   image.src = data;

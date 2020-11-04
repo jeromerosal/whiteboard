@@ -2736,7 +2736,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         fetch(pdfFile.pdf)
           .then(res => res.blob())
           .then(blob => {
-            console.log(blob);
             let pdfIframe = document.createElement('iframe');
             let existingPdfIframe = document.getElementById('pdfIframe');
 
