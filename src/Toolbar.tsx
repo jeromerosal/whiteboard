@@ -260,10 +260,10 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           >
             <tool.icon />
             <span className={'toolbar-tooltip'} style={{position: 'absolute',top: -10, left: 'calc(100% - 10px)', background: '#ffffff', border: '1px solid #dedede', borderRadius: 4, padding: 3}}>
-              {!isMobileDevice ? <label className={`${toolbarPrefixCls}-iconLabel`}>{tool.labelThunk ? tool.labelThunk(props) : formatMessage({ id: tool.label })}</label> : null}
+              {!isMobileDevice ? <label style={{color: 'rgb(24, 144, 255)'}} className={`${toolbarPrefixCls}-iconLabel`}>{tool.labelThunk ? tool.labelThunk(props) : formatMessage({ id: tool.label })}</label> : null}
             </span>
             <span>
-            {formatMessage({ id: tool.label }) && formatMessage({ id: tool.label }).indexOf('0') > -1 ? <span>{tool.labelThunk ? tool.labelThunk(props) : formatMessage({ id: tool.label })}</span> : null}
+            {tool.labelThunk || formatMessage({ id: tool.label }) && formatMessage({ id: tool.label }).indexOf('0') > -1 ? <span style={{color: 'rgb(24, 144, 255)'}}>{tool.labelThunk ? tool.labelThunk(props) : formatMessage({ id: tool.label })}</span> : null}
             </span>
             {tool.type === Tool.Eraser &&
               <div style={{

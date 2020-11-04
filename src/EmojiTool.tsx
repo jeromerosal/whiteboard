@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
 import Tool, { ToolOption, EmojiOption, Position, EmojiSize, strokeColor } from './enums/Tool';
 import { IntlShape, } from 'react-intl';
 import { RefObject, MouseEvent as ReactMouseEvent } from 'react';
 import { mapClientToCanvas, isMobileDevice } from './utils';
 import { Icon, Slider } from 'antd';
 import './TextTool.less';
+import html2canvas from 'html2canvas';
 
 let currentText = '';
 let currentColor = '';
@@ -62,6 +64,84 @@ export const onEmojiMouseDown = (e, toolOption, scale:number , refInput, refCanv
 }
 
 export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
+  if (currentText && refInput.current && refCanvas.current) {
+    const textarea = refInput.current;
+    textarea.style.opacity = '0';
+    const text = textarea.innerText;
+
+    const imgForCanvas = document.getElementById('emojiId');
+    const _imgs = imgForCanvas.firstChild.firstChild.style;
+    let _backgroundImage = _imgs.backgroundImage;
+    _backgroundImage = _backgroundImage.replace('url("', '');
+    _backgroundImage = _backgroundImage.replace('")','');
+    let _backgroundPosX = _imgs.backgroundPositionX.replace('%','');
+    _backgroundPosX = ( _backgroundPosX -50 ) * -1;
+    let _backgroundPosY = _imgs.backgroundPositionY.replace('%','');
+    _backgroundPosY = ( _backgroundPosY -50 ) * -1;
+
+    let htmlToCanvas = document.createElement('div');
+    htmlToCanvas.setAttribute('style', `position: fixed; z-index: 999; width: 100px;height: 100px;border: 1px solid black;right: 0; top: 0;`)
+
+    const emojiImg = <img 
+          src={_backgroundImage}
+          style={{
+            position: 'absolute',
+            top: 50,
+            left: 0,
+            width: 100,
+            height: 100,
+            display: 'flex',
+            transform: `scale(57) translateX(${_backgroundPosX}px) translateY(${_backgroundPosY}px)`
+          }}
+        />;
+
+    const htmlCanvasContent = ReactDOMServer.renderToStaticMarkup(emojiImg); 
+    htmlToCanvas.innerHTML = htmlCanvasContent;
+
+    document.body.appendChild(htmlToCanvas);
+
+    html2canvas(htmlToCanvas, {
+      allowTaint: false,
+      logging:true
+    }).then(_canvas => {
+      //htmlToCanvas.setAttribute('style', 'visibility:hidden;');
+      const width = htmlToCanvas.offsetWidth;
+      const height = htmlToCanvas.offsetHeight;
+      
+      //htmlToCanvas.remove();
+
+      const image = new Image();
+      image.onload = () => {
+        textarea.style.opacity = '1';
+        let { top, left } = textarea.getBoundingClientRect();
+
+        const currentPos = mapClientToCanvas({
+          clientX: left,
+          clientY: top,
+        } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
+
+        textarea.style.display = 'none';
+
+        const pos: any = {
+          x: currentPos[0],
+          y: currentPos[1],
+          w: width/1.45,
+          h: height/1.7,
+        };
+    
+        handleCompleteOperation(Tool.Image, {
+          imageData: _canvas.toDataURL(),
+        }, pos);
+      }
+
+      image.src = _canvas.toDataURL();
+    });
+    setCurrentTool(Tool.Select);
+    currentText = '';
+  }
+}
+
+export const onEmojiCompletesss = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
   if (currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
     const text = textarea.innerText;
