@@ -39,7 +39,7 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
     textarea.style.lineHeight = (toolOption.latexSize as number) * scale + 'px';
     textarea.style.height = (toolOption.latexSize as number) * scale + 'px';
     textarea.style.color = toolOption.textColor;
-    textarea.innerText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
+    textarea.innerText = '';
 
     if (isMobileDevice) {
       textarea.focus();
@@ -64,14 +64,15 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
   }
 }
 
-export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize) => {
+export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor) => {
   if (currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
+    textarea.style.opacity = '0';
     const text = textarea.innerText;
     let htmlToCanvas = document.createElement('div');
     htmlToCanvas.setAttribute('style', 'z-index: 0;position:fixed;top:100px;left:-100%;');
     htmlToCanvas.setAttribute('id','htmltocanvas');
-    const _blockMath = <div style={{fontSize: latexFontSize * 3, padding: 0}}><BlockMath>{`${text}`}</BlockMath></div>;
+    const _blockMath = <div style={{color: latexFontColor, fontSize: latexFontSize * 3, padding: 0}}><BlockMath>{`${text}`}</BlockMath></div>;
     const htmlCanvasContent = ReactDOMServer.renderToStaticMarkup(_blockMath); 
     htmlToCanvas.innerHTML = htmlCanvasContent;
     document.body.appendChild(htmlToCanvas);
@@ -86,8 +87,10 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
 
     if(htmlToCanvas.querySelectorAll('.mord.accent').length) {
       htmlToCanvas.querySelectorAll('.mord.accent').forEach( mord_accent => {
-        var _svg = mord_accent.querySelector('svg');
-        mord_accent.appendChild(_svg);
+        var _svg = mord_accent.querySelectorAll('svg');
+        _svg.forEach( _svgItem => {
+          mord_accent.appendChild(_svgItem);
+        })
       })
     }
 
@@ -96,10 +99,11 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
       let katex_offsetWidth : any = document.querySelectorAll('.katex-html')[0];
       const width = htmlToCanvas.querySelector('.base').offsetWidth;
       const height = htmlToCanvas.querySelector('.katex').offsetHeight;
-      //document.getElementById('htmltocanvas').remove();
+      document.getElementById('htmltocanvas').remove();
 
       const image = new Image();
       image.onload = () => {
+        textarea.style.opacity = '1';
         let { top, left } = textarea.getBoundingClientRect();
         const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
 
@@ -114,7 +118,7 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
           x: currentPos[0],
           y: currentPos[1],
           w: width/1.45,
-          h: height/1.45,
+          h: height/1.7,
         };
     
         handleCompleteOperation(Tool.Image, {
@@ -173,26 +177,6 @@ export const useLatexDropdown = (currentToolOption, setCurrentToolOption, setCur
                 }
               </div>
             )
-          })}
-        </div>
-        <div className={`${prefixCls}-split`}></div>
-          <div className={`${prefixCls}-palette`}>
-          {strokeColor.map(color => {
-            return <div className={`${prefixCls}-color`} key={color}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                setCurrentToolOption({ ...currentToolOption, textColor: color });
-                setCurrentTool && setCurrentTool(Tool.Stroke);
-              }}
-              onTouchStart={(evt) => {
-                evt.stopPropagation();
-                setCurrentToolOption({ ...currentToolOption, textColor: color });
-                setCurrentTool && setCurrentTool(Tool.Stroke);
-              }}
-            >
-              <div className={`${prefixCls}-fill`} style={{ background: color }}></div>
-              {currentToolOption.textColor === color ? <Icon type="check" style={color === '#ffffff' ? { color: '#979797' } : {}} /> : null}
-            </div>
           })}
         </div>
       </div>

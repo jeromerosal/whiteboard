@@ -485,6 +485,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [ showTextArea, setShowTextArea] = useState(false);
   const [ latexValue, setLatexValue] = useState('');
   const [ latexFontSize, setLatexFontSize ] = useState(12);
+  const [ latexFontColor, setLatexFontColor ] = useState('#4a4a4a');
 
   const [ showLatexMenu, setShowLatexMenu ] = useState(false);
   const [ currentTop, setCurrentTop ] = useState<any>('');
@@ -523,6 +524,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       });
     }, [(operations as Operation[]).length]);
   }
+
+  const latexFontColors = ['#4a4a4a', '#f55b6c', '#f7c924', '#63d321', '#50e3c2', '#59b9ff', '#bd10e0', '#ffffff'];
 
   const refOperationListState = useRef<OperationListState>(operationListState);
   refOperationListState.current = operationListState;
@@ -1452,14 +1455,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     setShowSettings('');
     setShowEmojiMenu(false);    
   }, [currentEmoji, refInput]);
-
-  useEffect(() => {
-    refInput.current.innerText = currentFormula ? currentFormula: refInput.current.innerText;
-    onFormulaComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-    setShowSettings('');
-    setShowFormulaMenu(false);    
-  }, [currentFormula, refInput]);
-
 
   const showLatexDropdown = () => {
     const mathLatex = [
@@ -2585,7 +2580,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           type={'text'} 
           id={'latexInputContainer'}
           value={latexValue}
-          style={{border: '1px solid #ececec', marginRight: 5, marginBottom: 10, padding: 5,
+          style={{ color: latexFontColor, border: '1px solid #ececec', marginRight: 5, marginBottom: 10, padding: 5,
           width: '100%'}} 
           onChange={(e)=> setLatexValue(e.target.value)}/>
         <button 
@@ -2599,7 +2594,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           fontSize: 14,
           borderRadius: 4,
           marginBottom: 10
-        }}>clear</button>
+        }}>Clear</button>
         </div>
 
         <div
@@ -2713,6 +2708,32 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
               max={120} 
               onChange={handleLatexSize}>
             </Slider>
+            <div style={{
+              fontSize: 14,
+              marginTop: 12
+             }}>{latexFontSize}</div>
+          </div>
+          <div style={{display: 'flex', alignItems: 'flex-end'}}>
+            {latexFontColors.map( _fontColor => {
+              return(
+                <div
+                  style={{
+                    background: _fontColor, 
+                    width: 20, 
+                    height: 20, 
+                    marginRight: 5, 
+                    border: `2px solid ${_fontColor}`, 
+                    borderRadius: 4,
+                    boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.2)'
+                  }}
+                  onClick={() => setLatexFontColor(_fontColor)}
+                  onMouseOver={(evt)=> evt.target.style.border = `2px solid black`}
+                  onMouseOut={(evt)=> evt.target.style.border = `2px solid ${_fontColor}`}
+                >
+                </div>
+              )
+            })}
+            
           </div>
           <button
             id={`formulaBtn`}
@@ -2720,7 +2741,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
               e.preventDefault();
               e.stopPropagation();
               refInput.current.innerText = latexValue;
-              onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize);
+              onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor);
               setShowSettings('');
               setShowLatexMenu(false);
             }}>Add Formula
@@ -2913,7 +2934,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           }
           else{
             onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-            onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize);
+            onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor);
             setShowSettings('')
           }
         }}
