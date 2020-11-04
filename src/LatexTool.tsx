@@ -70,9 +70,9 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
     textarea.style.opacity = '0';
     const text = textarea.innerText;
     let htmlToCanvas = document.createElement('div');
-    htmlToCanvas.setAttribute('style', 'z-index: 0;position:fixed;top:100px;left:-100%;');
+    htmlToCanvas.setAttribute('style', 'z-index: 0; opacity: 0;position:fixed;top:100px;left:-100%;');
     htmlToCanvas.setAttribute('id','htmltocanvas');
-    const _blockMath = <div style={{color: latexFontColor, fontSize: latexFontSize * 3, padding: 0}}><BlockMath>{`${text}`}</BlockMath></div>;
+    const _blockMath = <div style={{color: latexFontColor, fontSize: latexFontSize? latexFontSize * 4 : 30, padding: 0}}><BlockMath>{`${text}`}</BlockMath></div>;
     const htmlCanvasContent = ReactDOMServer.renderToStaticMarkup(_blockMath); 
     htmlToCanvas.innerHTML = htmlCanvasContent;
     document.body.appendChild(htmlToCanvas);
@@ -99,6 +99,7 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
       let katex_offsetWidth : any = document.querySelectorAll('.katex-html')[0];
       const width = htmlToCanvas.querySelector('.base').offsetWidth;
       const height = htmlToCanvas.querySelector('.katex').offsetHeight;
+      
       document.getElementById('htmltocanvas').remove();
 
       const image = new Image();
@@ -118,7 +119,8 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
           x: currentPos[0],
           y: currentPos[1],
           w: width/1.45,
-          h: height/1.7,
+          h: htmlToCanvas.querySelector('.base').querySelectorAll('*').length < 2
+          ? height/2 : height/1.7,
         };
     
         handleCompleteOperation(Tool.Image, {
