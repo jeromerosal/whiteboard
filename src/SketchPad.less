@@ -256,6 +256,37 @@ span.mord.accent {
   border-radius: 50%;
 }
 
-#emojiId > span > span {
-  background-image: url('./images/fb-icons.png') !important;
+#emojiId {
+  padding-bottom: 20px !important;
+  height: 120px !important;
+  > span {
+    > span {
+      background-image: url('./images/fb-icons.png') !important;
+    }
+  }
+}
+
+#errorContainer {
+  position: fixed;
+  display: flex;
+  padding: 30px;
+  top: calc(50% - 50px);
+  left: calc(50% - 100px);
+  border: 1px solid #dadada;
+  flex-direction: column;
+  border-radius: 5px;
+  background: #eeeeee;
+  width: 200px;
+
+  > .error-message {
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  > .dismiss-message {
+    margin-bottom: 0;
+    text-align: center;
+    font-size: 16px;
+  }
 }

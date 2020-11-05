@@ -334,7 +334,7 @@ const useResizeHandler = (
   }) => void,
   resizer: ReactNode,
 } => {
-  if (selectedOperation && (selectedOperation.tool === Tool.Shape || selectedOperation.tool === Tool.Image || selectedOperation.tool === Tool.Emoji || selectedOperation.tool === Tool.Stroke)) {
+  if (selectedOperation && (selectedOperation.tool === Tool.Shape || selectedOperation.tool === Tool.Image || selectedOperation.tool === Tool.Emoji || selectedOperation.tool === Tool.Latex)) {
     const [a, b, c, d, e, f] = viewMatrix;
     const pos = {
       x: selectedOperation.pos.x - SELECT_BOX_PADDING,
@@ -516,6 +516,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [ emojiTopPosition, setEmojiTopPosition ] = useState(null);
   const [ currentEmoji, setCurrentEmoji ]  = useState("grinning");
 
+  const [ errorMessage, setErrorMessage ] = useState('');
 
   const [hoverOperationId, setHoverOperationId] = useState<string | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
@@ -1688,7 +1689,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
                 e.preventDefault();
                 e.stopPropagation();
                 refInput.current.innerText = latexValue;
-                onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor);
+                onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor, setErrorMessageAs);
                 setShowSettings('');
                 setShowLatexMenu(false);
               }}>Add Formula
@@ -1850,6 +1851,31 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     );
   };
   
+  const setErrorMessageAs = (_message) => {
+    setErrorMessage(_message);
+  }
+
+  const handleErrorMessagePopup = () => {
+    setErrorMessage('');
+  } 
+
+  const showErrorContainer = (message) => {
+    return(
+      <>
+        {message && 
+          <div id={'errorContainer'}>
+            <div className={'error-message'}>
+                <span>{message}</span>
+            </div>
+            <div className={'dismiss-message'}>
+              <button onClick={handleErrorMessagePopup}>Dismiss</button>
+            </div>
+          </div>
+        }
+      </>
+    )
+  }
+  
   return (  
     <div
       className={`${sketchpadPrefixCls}-container`}
@@ -1891,8 +1917,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           }
           else{
             onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-            onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor);
-            onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+            onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor, setErrorMessageAs);
+            onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, setShowEmojiMenu);
             setShowSettings('');
           }
         }}
@@ -1913,6 +1939,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       <div style={{position:'fixed', top: latexTopPosition, left: latexLeftPosition,  fontSize: 32}}>
       </div>
       {showEmojiDropdown()}
+      {showErrorContainer(errorMessage)}
       {settingMenu}
       {removeButton}
       {resizer}

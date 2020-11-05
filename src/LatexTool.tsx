@@ -64,7 +64,7 @@ export const onLatexMouseDown = (e, toolOption, scale:number , refInput, refCanv
   }
 }
 
-export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor) => {
+export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor, setErrorMessageAs) => {
   if (currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
     textarea.style.opacity = '0';
@@ -72,7 +72,14 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
     let htmlToCanvas = document.createElement('div');
     htmlToCanvas.setAttribute('style', 'z-index: 0; opacity: 0;position:fixed;top:100px;left:-100%;');
     htmlToCanvas.setAttribute('id','htmltocanvas');
-    const _blockMath = <div style={{color: latexFontColor, fontSize: latexFontSize? latexFontSize * 4 : 30, padding: 0}}><BlockMath>{`${text}`}</BlockMath></div>;
+    let _blockMath = <div style={{color: latexFontColor, fontSize: latexFontSize? latexFontSize * 4 : 30, padding: 0}}>{text}</div>;
+    try {
+      _blockMath = <div style={{color: latexFontColor, fontSize: latexFontSize? latexFontSize * 4 : 30, padding: 0}}><BlockMath>{`${text}`}</BlockMath></div>;
+    }
+    catch(e){
+      _blockMath = <div style={{color: latexFontColor, fontSize: latexFontSize? latexFontSize * 4 : 30, padding: 0}}>{text}</div>;
+    }
+
     const htmlCanvasContent = ReactDOMServer.renderToStaticMarkup(_blockMath); 
     htmlToCanvas.innerHTML = htmlCanvasContent;
     document.body.appendChild(htmlToCanvas);
@@ -94,42 +101,48 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
       })
     }
 
-    html2canvas(htmlToCanvas.querySelector('.katex-display')).then(_canvas => {
-      //htmlToCanvas.setAttribute('style', 'visibility:hidden;');
-      let katex_offsetWidth : any = document.querySelectorAll('.katex-html')[0];
-      const width = htmlToCanvas.querySelector('.base').offsetWidth;
-      const height = htmlToCanvas.querySelector('.katex').offsetHeight;
+    if(htmlToCanvas.querySelectorAll('.katex-display').length){
+      html2canvas(htmlToCanvas.querySelector('.katex-display')).then(_canvas => {
+        //htmlToCanvas.setAttribute('style', 'visibility:hidden;');
+        let katex_offsetWidth : any = document.querySelectorAll('.katex-html')[0];
+        const width = htmlToCanvas.querySelector('.base').offsetWidth;
+        const height = htmlToCanvas.querySelector('.katex').offsetHeight;
+        
+        document.getElementById('htmltocanvas').remove();
+
+        const image = new Image();
+        image.onload = () => {
+          textarea.style.opacity = '1';
+          let { top, left } = textarea.getBoundingClientRect();
+          const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
+
+          const currentPos = mapClientToCanvas({
+            clientX: left,
+            clientY: top,
+          } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
+
+          textarea.style.display = 'none';
+
+          const pos: any = {
+            x: currentPos[0],
+            y: currentPos[1],
+            w: width/1.45,
+            h: htmlToCanvas.querySelector('.base').querySelectorAll('*').length < 2
+            ? height/2 : height/1.7,
+          };
       
+          handleCompleteOperation(Tool.Image, {
+            imageData: _canvas.toDataURL(),
+          }, pos);
+        }
+
+        image.src = _canvas.toDataURL();
+      });
+    }
+    else {
+      setErrorMessageAs('Unrecognized Formula. Check your format');
       document.getElementById('htmltocanvas').remove();
-
-      const image = new Image();
-      image.onload = () => {
-        textarea.style.opacity = '1';
-        let { top, left } = textarea.getBoundingClientRect();
-        const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
-
-        const currentPos = mapClientToCanvas({
-          clientX: left,
-          clientY: top,
-        } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
-
-        textarea.style.display = 'none';
-
-        const pos: any = {
-          x: currentPos[0],
-          y: currentPos[1],
-          w: width/1.45,
-          h: htmlToCanvas.querySelector('.base').querySelectorAll('*').length < 2
-          ? height/2 : height/1.7,
-        };
-    
-        handleCompleteOperation(Tool.Image, {
-          imageData: _canvas.toDataURL(),
-        }, pos);
-      }
-
-      image.src = _canvas.toDataURL();
-    });
+    }
     setCurrentTool(Tool.Select);
     currentText = '';
   }

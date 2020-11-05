@@ -72,9 +72,6 @@ export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
       html2canvas(imgForCanvas).then(_canvas => {
         const width = imgForCanvas.offsetWidth;
         const height = imgForCanvas.offsetHeight;
-  
-        //htmlToCanvas.remove();
-  
         const image = new Image();
         image.onload = () => {
           textarea.style.opacity = '1';
@@ -90,8 +87,8 @@ export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
           const pos: any = {
             x: currentPos[0],
             y: currentPos[1],
-            w: width/1.45,
-            h: height/1.7,
+            w: width,
+            h: height,
           };
       
           handleCompleteOperation(Tool.Image, {
@@ -104,35 +101,6 @@ export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
     },100 )
 
     
-    setCurrentTool(Tool.Select);
-    currentText = '';
-  }
-}
-
-export const onEmojiCompletesss = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
-  if (currentText && refInput.current && refCanvas.current) {
-    const textarea = refInput.current;
-    const text = textarea.innerText;
-    let { top, left, width, height } = textarea.getBoundingClientRect();
-    width = 1 / scale * width;
-    const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
-    height = 1 / scale * lineHeight * text.split('\n').length;
-
-    const currentPos = mapClientToCanvas({
-      clientX: left,
-      clientY: top,
-    } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
-
-    textarea.style.display = 'none';
-
-    const pos: Position = {
-      x: currentPos[0],
-      y: currentPos[1],
-      w: width,
-      h: height,
-    };
-
-    handleCompleteOperation(Tool.Emoji, { text, color: currentColor, size: currentSize }, pos);
     setCurrentTool(Tool.Select);
     currentText = '';
   }

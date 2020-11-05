@@ -64,26 +64,29 @@ const draw = (item: Shape, mouseX: number, mouseY: number, context: CanvasRender
   }
   else if (item.type === ShapeType.Triangle) {
     context.beginPath();
-    context.moveTo(startX, startX);
-    context.lineTo(startX, startX * 3);
-    context.lineTo(startX * 3, startX * 3);
+    context.lineWidth = item.size;
+    context.strokeStyle = item.color;
+    let halfWidth = widthX;
+    context.moveTo(startX, startY - halfWidth);
+    context.lineTo(startX - halfWidth /* remove to form right triangle*/, startY + halfWidth);
+    context.lineTo(startX + halfWidth, startY + halfWidth); 
+    context.lineTo(startX, startY - halfWidth); 
     context.closePath();
-
+    context.stroke();
+    context.closePath();
+    
     if (hover) {
       context.beginPath();
       context.strokeStyle = '#3AB1FE';
       context.lineWidth = item.size / 2;
-      context.moveTo(startX - item.size / 2, (startX - item.size / 2));
-      context.lineTo(startX - item.size / 2, (startX - item.size / 2) * 3);
-      context.lineTo((startX - item.size / 2) * 3, (startX - item.size / 2) * 3);
+      // context.moveTo(startX, startY - halfWidth);
+      // context.lineTo(startX - halfWidth, startY + halfWidth); 
+      // context.lineTo(startX + halfWidth, startY + halfWidth); 
+      // context.lineTo(startX, startY - halfWidth); 
+
       context.stroke();
       context.closePath();
     }
-
-    // the outline
-    context.lineWidth = item.size / 2;
-    context.strokeStyle = '#3AB1FE';
-    context.stroke();
 
   }
   else if (item.type === ShapeType.Oval) {
