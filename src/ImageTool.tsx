@@ -21,6 +21,7 @@ export const drawImage = (item: Image, context: CanvasRenderingContext2D, pos: P
             resolve(this);
           });
           img.src = URL.createObjectURL(blob);
+          console.log('img.src', img.src)
         });
       })
       .then(imageBitmap => {

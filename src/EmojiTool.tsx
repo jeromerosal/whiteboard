@@ -7,6 +7,7 @@ import { mapClientToCanvas, isMobileDevice } from './utils';
 import { Icon, Slider } from 'antd';
 import './TextTool.less';
 import html2canvas from 'html2canvas';
+import './images/fb-icons.png';
 
 let currentText = '';
 let currentColor = '';
@@ -34,11 +35,7 @@ export const onEmojiMouseDown = (e, toolOption, scale:number , refInput, refCanv
     textarea.style.display = 'block';
     textarea.style.left = x + canvas.offsetLeft + 'px';
     textarea.style.top = y + canvas.offsetTop + 'px';
-    textarea.style.fontSize = (toolOption.emojiSize as number) * scale + 'px';
-    textarea.style.lineHeight = (toolOption.emojiSize as number) * scale + 'px';
-    textarea.style.height = (toolOption.emojiSize as number) * scale + 'px';
-    textarea.style.color = toolOption.textColor;
-    textarea.innerText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
+    textarea.innerText = '';
 
     if (isMobileDevice) {
       textarea.focus();
@@ -57,85 +54,56 @@ export const onEmojiMouseDown = (e, toolOption, scale:number , refInput, refCanv
       }
     }, 0);
 
-    currentText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
+    currentText = typeof toolOption.defaultEmoji === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultEmoji);
     currentColor = toolOption.textColor;
     currentSize = toolOption.emojiSize;
   }
 }
 
-export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool) => {
+export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, setShowEmojiMenu) => {
   if (currentText && refInput.current && refCanvas.current) {
     const textarea = refInput.current;
     textarea.style.opacity = '0';
     const text = textarea.innerText;
 
     const imgForCanvas = document.getElementById('emojiId');
-    const _imgs = imgForCanvas.firstChild.firstChild.style;
-    let _backgroundImage = _imgs.backgroundImage;
-    _backgroundImage = _backgroundImage.replace('url("', '');
-    _backgroundImage = _backgroundImage.replace('")','');
-    let _backgroundPosX = _imgs.backgroundPositionX.replace('%','');
-    _backgroundPosX = ( _backgroundPosX -50 ) * -1;
-    let _backgroundPosY = _imgs.backgroundPositionY.replace('%','');
-    _backgroundPosY = ( _backgroundPosY -50 ) * -1;
 
-    let htmlToCanvas = document.createElement('div');
-    htmlToCanvas.setAttribute('style', `position: fixed; z-index: 999; width: 100px;height: 100px;border: 1px solid black;right: 0; top: 0;`)
-
-    const emojiImg = <img 
-          src={_backgroundImage}
-          style={{
-            position: 'absolute',
-            top: 50,
-            left: 0,
-            width: 100,
-            height: 100,
-            display: 'flex',
-            transform: `scale(57) translateX(${_backgroundPosX}px) translateY(${_backgroundPosY}px)`
-          }}
-        />;
-
-    const htmlCanvasContent = ReactDOMServer.renderToStaticMarkup(emojiImg); 
-    htmlToCanvas.innerHTML = htmlCanvasContent;
-
-    document.body.appendChild(htmlToCanvas);
-
-    html2canvas(htmlToCanvas, {
-      allowTaint: false,
-      logging:true
-    }).then(_canvas => {
-      //htmlToCanvas.setAttribute('style', 'visibility:hidden;');
-      const width = htmlToCanvas.offsetWidth;
-      const height = htmlToCanvas.offsetHeight;
+    setTimeout(() => {
+      html2canvas(imgForCanvas).then(_canvas => {
+        const width = imgForCanvas.offsetWidth;
+        const height = imgForCanvas.offsetHeight;
+  
+        //htmlToCanvas.remove();
+  
+        const image = new Image();
+        image.onload = () => {
+          textarea.style.opacity = '1';
+          let { top, left } = textarea.getBoundingClientRect();
+  
+          const currentPos = mapClientToCanvas({
+            clientX: left,
+            clientY: top,
+          } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
+  
+          textarea.style.display = 'none';
+  
+          const pos: any = {
+            x: currentPos[0],
+            y: currentPos[1],
+            w: width/1.45,
+            h: height/1.7,
+          };
       
-      //htmlToCanvas.remove();
+          handleCompleteOperation(Tool.Image, {
+            imageData: _canvas.toDataURL(),
+          }, pos);
+        }
+        image.src = _canvas.toDataURL();
+        setShowEmojiMenu(false);
+      });
+    },100 )
 
-      const image = new Image();
-      image.onload = () => {
-        textarea.style.opacity = '1';
-        let { top, left } = textarea.getBoundingClientRect();
-
-        const currentPos = mapClientToCanvas({
-          clientX: left,
-          clientY: top,
-        } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
-
-        textarea.style.display = 'none';
-
-        const pos: any = {
-          x: currentPos[0],
-          y: currentPos[1],
-          w: width/1.45,
-          h: height/1.7,
-        };
     
-        handleCompleteOperation(Tool.Image, {
-          imageData: _canvas.toDataURL(),
-        }, pos);
-      }
-
-      image.src = _canvas.toDataURL();
-    });
     setCurrentTool(Tool.Select);
     currentText = '';
   }

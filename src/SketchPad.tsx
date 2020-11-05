@@ -118,6 +118,8 @@ export interface SketchPadProps {
   operations?: Operation[];
   onChange?: onChangeCallback;
   showGrid: boolean;
+  showEmojiMenu: boolean;
+  setShowEmojiMenu: any;
 }
 
 export type onChangeCallback = (newOperaton: Operation, operationsAfter: Operation[]) => void;
@@ -474,7 +476,7 @@ const useResizeHandler = (
 }
 
 const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, ref) => {
-  const { currentTool, setCurrentTool, userId, currentToolOption, onScaleChange, scale, operations, onChange, setShowEraserSize, showEraserSize, eraserSize, showGrid } = props;
+  const { currentTool, setCurrentTool, userId, currentToolOption, onScaleChange, scale, operations, onChange, setShowEraserSize, showEraserSize, eraserSize, showGrid, showEmojiMenu, setShowEmojiMenu } = props;
 
   const refCanvas = useRef<HTMLCanvasElement>(null);
   const refContext = useRef<CanvasRenderingContext2D | null>(null);
@@ -487,7 +489,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const enableSketchPadContext = useContext(EnableSketchPadContext);
   const [ currentMenuStyle, setCurrentMenuStyle ] = useState<CSSProperties | null>(null);
   const sketchpadPrefixCls = prefixCls + '-sketchpad';
-  const [ showEmojiMenu, setShowEmojiMenu ] = useState(false);
   const [ showFormulaMenu, setShowFormulaMenu ] = useState(false);
   const [ showTextArea, setShowTextArea] = useState(false);
   const [ latexValue, setLatexValue] = useState('');
@@ -1406,11 +1407,12 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
 
     const onEmojiSelect = (emojis) => {
       setCurrentEmoji(emojis);
-      onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
+      onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, setShowEmojiMenu);
     }
     
     return (
-      <div 
+      <>
+      { showEmojiMenu && <div 
         style={{bottom: 50, left: 50, position: 'fixed', ...emojiStyles.emojiDisplay}}
         onMouseDown={stopPropagation}
       >
@@ -1418,7 +1420,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           onEmojiSelect={onEmojiSelect}
           currentEmoji={currentEmoji}
         />
-      </div>
+      </div>}
+      </>
     )
   }
 
@@ -1863,6 +1866,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       {videoUploaded()}
       {pdfUploaded()}
       <canvas
+        id={'appCanvas'}
         ref={refCanvas}
         onDoubleClick={onDoubleClick}
         className={`${sketchpadPrefixCls}-canvas`}
@@ -1889,7 +1893,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             onTextComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
             onLatexComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, latexFontSize, latexFontColor);
             onEmojiComplete(refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool);
-            setShowSettings('')
+            setShowSettings('');
           }
         }}
         onFocus={() => {

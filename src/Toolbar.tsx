@@ -131,10 +131,12 @@ export interface ToolbarProps {
   eraserSize: number;
   setShowGrid: any;
   showGrid: boolean;
+  showEmojiMenu: boolean;
+  setShowEmojiMenu: any;
 }
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const { currentTool, setCurrentTool, currentToolOption, setCurrentToolOption, selectImage, undo, redo, clear, save, toolbarPlacement, setShowEraserSize, setEraserSize, showEraserSize, eraserSize, setShowGrid, showGrid } = props;
+  const { currentTool, setCurrentTool, currentToolOption, setCurrentToolOption, selectImage, undo, redo, clear, save, toolbarPlacement, setShowEraserSize, setEraserSize, showEraserSize, eraserSize, setShowGrid, showGrid, showEmojiMenu, setShowEmojiMenu } = props;
   const refFileInput = useRef<HTMLInputElement>(null);
   const { formatMessage } = useIntl();
   const { prefixCls } = useContext(ConfigContext);
@@ -226,31 +228,42 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
               let currentToolType = tool.type;
               if (tool.type === Tool.Image && refFileInput.current) {
                 setShowEraserSize(false);
+                setShowEmojiMenu(false);
                 refFileInput.current.click();
               } else if (tool.type === Tool.Undo) {
                 setShowEraserSize(false);
+                setShowEmojiMenu(false);
                 undo();
                 currentToolType = tool.type;
               } else if (tool.type === Tool.Eraser) { 
-                setShowEraserSize(true);
+                setShowEraserSize(false);
+                setShowEmojiMenu(false);
                 setCurrentTool(tool.type);
               } else if (tool.type === Tool.Redo) {
                 setShowEraserSize(false);
+                setShowEmojiMenu(false);
                 redo();
                 currentToolType = tool.type;
               } else if (tool.type === Tool.Clear) {
                 setShowEraserSize(false);
+                setShowEmojiMenu(false);
                 clear();
                 currentToolType = tool.type;
               } else if (tool.type === Tool.Grid) {
                 setShowGrid(!showGrid);
-                currentToolType = tool.type;
-              }
-              else if (tool.type === Tool.Zoom) {
                 setShowEraserSize(false);
+                setShowEmojiMenu(false);
+                currentToolType = tool.type;
+              } else if (tool.type === Tool.Zoom) {
+                setShowEraserSize(false);
+                setShowEmojiMenu(false);              
               } else if (tool.type === Tool.Save) {
                 setShowEraserSize(false);
+                setShowEmojiMenu(false);
                 save();
+              } else if (tool.type === Tool.Emoji) {
+                setShowEraserSize(false);
+                setCurrentTool(currentToolType);
               } else {
                 setCurrentTool(currentToolType);
                 setShowEraserSize(false);

@@ -55,6 +55,7 @@ const Block: React.FC<BlockProps> = (props) => {
   const [ showEraserSize, setShowEraserSize] = useState(false);
   const [ eraserSize, setEraserSize ] = useState(2);
   const [ showGrid, setShowGrid ] = useState(false);
+  const [ showEmojiMenu, setShowEmojiMenu ] = useState(false);
 
   const animatedProps = useSpring<{
     value: number
@@ -125,6 +126,8 @@ const Block: React.FC<BlockProps> = (props) => {
                     setCurrentTool={setCurrentTool}
                     currentToolOption={currentToolOption}
                     setCurrentToolOption={setCurrentToolOption}
+                    showEmojiMenu={showEmojiMenu}
+                    setShowEmojiMenu={setShowEmojiMenu}
                     scale={scale}
                     eraserSize={eraserSize}
                     setShowGrid={setShowGrid}
@@ -164,6 +167,8 @@ const Block: React.FC<BlockProps> = (props) => {
                     userId={userId}
                     currentTool={currentTool}
                     setCurrentTool={setCurrentTool}
+                    showEmojiMenu={showEmojiMenu}
+                    setShowEmojiMenu={setShowEmojiMenu}
                     currentToolOption={currentToolOption}
                     scale={animatedProps.value}
                     onScaleChange={setScale}
