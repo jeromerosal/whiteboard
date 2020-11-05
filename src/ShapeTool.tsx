@@ -2,6 +2,8 @@ import Tool, { ToolOption, ShapeType, strokeSize, strokeColor, } from './enums/T
 import React, { useContext } from 'react';
 import { Icon } from 'antd';
 import './ShapeTool.less';
+import IsoTriangle from './svgs/shapes/IsoTriangle';
+import RightTriangle from './svgs/shapes/RightTriangle';
 
 export interface Position {
   x: number;
@@ -62,33 +64,65 @@ const draw = (item: Shape, mouseX: number, mouseY: number, context: CanvasRender
       context.closePath();
     }
   }
-  else if (item.type === ShapeType.Triangle) {
+
+  else if (item.type === ShapeType.IsoTriangle) {
     context.beginPath();
     context.lineWidth = item.size;
     context.strokeStyle = item.color;
-    let halfWidth = widthX;
-    context.moveTo(startX, startY - halfWidth);
-    context.lineTo(startX - halfWidth /* remove to form right triangle*/, startY + halfWidth);
-    context.lineTo(startX + halfWidth, startY + halfWidth); 
-    context.lineTo(startX, startY - halfWidth); 
+    let halfWidth = widthX / 2;
+    context.moveTo(startX + halfWidth, startY);
+    context.lineTo(startX, mouseY); 
+    context.lineTo(mouseX, mouseY); 
+    context.lineTo(startX + halfWidth, startY ); 
     context.closePath();
     context.stroke();
     context.closePath();
+
     
     if (hover) {
       context.beginPath();
       context.strokeStyle = '#3AB1FE';
       context.lineWidth = item.size / 2;
-      // context.moveTo(startX, startY - halfWidth);
-      // context.lineTo(startX - halfWidth, startY + halfWidth); 
-      // context.lineTo(startX + halfWidth, startY + halfWidth); 
-      // context.lineTo(startX, startY - halfWidth); 
+      context.moveTo(startX + halfWidth, startY);
+      context.lineTo(startX, mouseY); 
+      context.lineTo(mouseX, mouseY); 
+      context.lineTo(startX + halfWidth, startY ); 
 
       context.stroke();
       context.closePath();
     }
 
   }
+
+  else if (item.type === ShapeType.RightTriangle) {
+    context.beginPath();
+    context.lineWidth = item.size;
+    context.strokeStyle = item.color;
+    let halfWidth = widthX / 2;
+    context.moveTo(startX, startY + 20);
+    context.lineTo(startX, mouseY); 
+    context.lineTo(mouseX, mouseY); 
+    context.lineTo(mouseX - widthX, mouseY - widthY + 2 ); 
+    context.closePath();
+    context.stroke();
+    context.closePath();
+
+    
+    if (hover) {
+      context.beginPath();
+      context.strokeStyle = '#3AB1FE';
+      context.lineWidth = item.size / 2;
+      context.moveTo(startX, startY + 20);
+      context.lineTo(startX, mouseY); 
+      context.lineTo(mouseX, mouseY); 
+      context.lineTo(mouseX - widthX, mouseY - widthY + 2 ); 
+      context.closePath();
+      context.stroke();
+      context.closePath();
+    }
+
+  }
+
   else if (item.type === ShapeType.Oval) {
     const endX = mouseX >= item.start.x ? mouseX : item.start.x;
     const endY = mouseY >= item.start.y ? mouseY : item.start.y;
@@ -203,7 +237,7 @@ export const useShapeDropdown = (currentToolOption: ToolOption, setCurrentToolOp
             setCurrentTool(Tool.Shape);
           }}
           className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.Rectangle ? { background: 'rgba(238, 238, 238, 1)' } : {}}>
-          <div className={`${prefixCls}-rect`} style={ currentToolOption.shapeType === ShapeType.Rectangle ? { borderColor: currentToolOption.shapeBorderColor } : {}} />
+          <div className={`${prefixCls}-rect`} style={ currentToolOption.shapeType === ShapeType.Rectangle ? { /*borderColor: currentToolOption.shapeBorderColor*/ } : {}} />
         </div>
 
         <div
@@ -219,22 +253,39 @@ export const useShapeDropdown = (currentToolOption: ToolOption, setCurrentToolOp
           }}
           className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.Oval ? { background: 'rgba(238, 238, 238, 1)' } : {}} 
         >
-          <div className={`${prefixCls}-circle`} style={ currentToolOption.shapeType === ShapeType.Oval ? { borderColor: currentToolOption.shapeBorderColor } : {}} />
+          <div className={`${prefixCls}-circle`} style={ currentToolOption.shapeType === ShapeType.Oval ? { /*borderColor: currentToolOption.shapeBorderColor*/ } : {}} />
         </div>
 
         <div
           onClick={(evt) => {
             evt.stopPropagation();
-            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Triangle });
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.IsoTriangle });
             setCurrentTool(Tool.Shape);
           }}
           onTouchStart={(evt) => {
             evt.stopPropagation();
-            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.Triangle });
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.IsoTriangle });
             setCurrentTool(Tool.Shape);
           }}
-          className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.Triangle ? { background: 'rgba(238, 238, 238, 1)' } : {}}>
-          <div className={`${prefixCls}-rect`} style={ currentToolOption.shapeType === ShapeType.Triangle ? { borderColor: currentToolOption.shapeBorderColor } : {}} />
+          className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.IsoTriangle ? { background: 'rgba(238, 238, 238, 1)', padding: 3 } : {padding: 3}}>
+            <IsoTriangle _color={currentToolOption.shapeType === ShapeType.IsoTriangle ?  currentToolOption.shapeBorderColor: '#000000'}/>
+          <div className={`${prefixCls}-rect`} style={currentToolOption.shapeType === ShapeType.Oval ? { /*borderColor: currentToolOption.shapeBorderColor*/ border: 0 } : {border: 0}}/>
+        </div>
+
+        <div
+          onClick={(evt) => {
+            evt.stopPropagation();
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.RightTriangle });
+            setCurrentTool(Tool.Shape);
+          }}
+          onTouchStart={(evt) => {
+            evt.stopPropagation();
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.RightTriangle });
+            setCurrentTool(Tool.Shape);
+          }}
+          className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.RightTriangle ? { background: 'rgba(238, 238, 238, 1)', padding: 3 } : {padding: 3}}>
+            <RightTriangle _color={currentToolOption.shapeType === ShapeType.RightTriangle ?  currentToolOption.shapeBorderColor: '#000000'}/>
+          <div className={`${prefixCls}-rect`} style={currentToolOption.shapeType === ShapeType.Oval ? { /*borderColor: currentToolOption.shapeBorderColor*/ border: 0 } : {border: 0}}/>
         </div>
         
       </div>

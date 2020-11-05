@@ -24,7 +24,8 @@ enum Tool {
 export enum ShapeType {
   Rectangle = 'Rectangle',
   Oval = 'Oval',
-  Triangle= 'Triangle'
+  IsoTriangle= 'IsoTriangle',
+  RightTriangle= 'RightTriangle'
 } 
 
 export const MAX_SCALE = 10;
