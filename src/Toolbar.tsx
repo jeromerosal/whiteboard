@@ -19,6 +19,7 @@ import FormulaIcon from './svgs/FormulaIcon';
 import UndoIcon from './svgs/UndoIcon';
 import ZoomIcon from './svgs/ZoomIcon';
 import EraserIcon from './svgs/EraserIcon';
+import LinkIcon from './svgs/LinkIcon';
 import { useStrokeDropdown } from './StrokeTool';
 import { useShapeDropdown } from './ShapeTool';
 import { Dropdown, Slider } from 'antd';
@@ -81,6 +82,11 @@ const tools = [{
   label: 'umi.block.sketch.grid',
   icon: GridIcon,
   type: Tool.Grid,
+},
+{
+  label: 'umi.block.sketch.link',
+  icon: LinkIcon,
+  type: Tool.Link,
 },
 {
   label: 'umi.block.sketch.undo',

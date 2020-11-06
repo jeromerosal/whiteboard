@@ -19,6 +19,7 @@ enum Tool {
   LazyUpdate = 'LazyUpdate',
   Remove = 'Remove',
   Highlighter = 'Highlighter',
+  Link = 'Link',
 }
 
 export enum ShapeType {

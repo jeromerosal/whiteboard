@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { Icon, Slider } from 'antd';
+import { Button, Icon, Slider } from 'antd';
 import { usePinch, useWheel } from 'react-use-gesture';
 import { useIntl } from 'react-intl';
 import { v4 } from 'uuid';
@@ -17,7 +17,8 @@ import React, {
   useImperativeHandle,
   useRef, 
   useReducer,
-  useState, 
+  useState,
+  Fragment, 
 } from 'react';
 
 import './SketchPad.less';
@@ -483,6 +484,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const refInput = useRef<HTMLInputElement>(null);
   const refLatex = useRef<HTMLInputElement>(null);
   const refLatexContainer = useRef<HTMLDivElement>(null);
+  const refLink = useRef<HTMLInputElement>(null);
   const lastTapRef = useRef<number>(0);
   const intl = useIntl();
   const { prefixCls } = useContext(ConfigContext);
@@ -507,6 +509,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [pdfFile, setPdfFile] = useState(null);
   const [videoList, setVideoList] = useState([]);
   const [cacheVids, setCacheVids] = useState({});
+  const [showLinkMenu, setShowLinkMenu] = useState(false);
+  const [youtubeLink, setYoutubeLink] = useState('');
 
   const [ currentLatex, setCurrentLatex ] = useState('');
   const [ latexLeftPosition, setLatexLeftPosition ] = useState(null);
@@ -771,6 +775,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         }
         onFormulaMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl, currentTool, setCurrentTool);
         break;
+      case Tool.Link:
+        setShowLinkMenu(true);
       default:
         break;
     }
@@ -1730,7 +1736,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             let existingPdfIcon = document.getElementById('pdfIcon');
             
             let removePdf = document.createElement('div');
-            let removeIcon = document.getElementById('removeIcon').lastChild.cloneNode(true);
+            let removeIcon = document.getElementById('removePdfIcon').lastChild.cloneNode(true);
 
             // overwrite the existing pdf
             if (existingPdfIframe) {
@@ -1850,6 +1856,112 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       </div>
     );
   };
+
+  const showYoutubeEmbedded = () => {
+    const [isDisplayYoutube, setDisplayYoutube] = useState(false);
+
+    const linkStyles: any = {
+      linkDisplay: {
+        display: showLinkMenu ? 'flex' : 'none',
+        fontSize: 25,
+        flexWrap: 'wrap',
+        background: '#ffffff',
+        boxShadow: 'rgba(0, 0, 0, 0.2) 0px 6px 16px 0px',
+        borderRadius: 4,
+        padding: 10,
+      }
+    };
+
+    return (
+      <Fragment>
+        <div 
+          style={{height: 'auto', zIndex: 9, display: 'flex', flexDirection: 'column', position: 'fixed', bottom: 120, width: 'calc(100% - 100px)', maxWidth: 500, left: 50, ...linkStyles.linkDisplay}} 
+        >
+          <input 
+            type={'text'} 
+            value={youtubeLink}
+            style={{
+              border: '1px solid rgb(206, 206, 206)', 
+              marginRight: 5, 
+              marginBottom: 10, 
+              padding: '5px 15px',
+              width: '100%',
+              borderRadius: 4,
+              fontSize: '0.8em'
+            }} 
+            onChange={(e)=> setYoutubeLink(e.target.value)}
+            ref={refLink}  
+          />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-evenly',
+            }}
+          >
+            <Button
+              onClick={() => {
+                setCurrentTool(Tool.Select);
+                setDisplayYoutube(true);
+                setShowLinkMenu(false);
+                
+                let iframeIcon = document.getElementById('youtubeVideo');
+                let removeIcon = document.getElementById('removeYoutubeIcon');
+                removeIcon.style.left = '50px';
+
+                setTimeout(() => {
+                  removeIcon.style.left = String(iframeIcon.offsetWidth + 50).concat('px');
+                }, 100)
+
+              }}
+              type="primary"
+            >
+              Display
+            </Button>
+            <Button
+              onClick={() => {
+                setDisplayYoutube(false);
+                setShowLinkMenu(false);
+                setYoutubeLink('');
+              }}
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+        
+        <div 
+          id="removeYoutubeIcon" 
+          onClick={() => {
+            setDisplayYoutube(false);
+            setShowLinkMenu(false);
+            setYoutubeLink('');
+          }}
+          style={{ 
+            display: isDisplayYoutube ? 'block' : 'none',
+            cursor: 'pointer',
+            position: 'absolute',
+            top: 35,
+            fontSize: 16,
+          }}
+        >
+          <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
+        </div>
+
+        <iframe
+          height="480"
+          src={youtubeLink}
+          style={{
+            position: 'absolute',
+            top: '50px',
+            left: '50px',
+            display: isDisplayYoutube ? 'block' : 'none',
+          }}
+          width="720"
+          id="youtubeVideo"
+        />
+      </Fragment>
+    );
+  };
   
   const setErrorMessageAs = (_message) => {
     setErrorMessage(_message);
@@ -1875,7 +1987,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       </>
     )
   }
-  
+
   return (  
     <div
       className={`${sketchpadPrefixCls}-container`}
@@ -1891,6 +2003,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       {showLatexDropdown()}
       {videoUploaded()}
       {pdfUploaded()}
+      {showYoutubeEmbedded()}
       <canvas
         id={'appCanvas'}
         ref={refCanvas}
