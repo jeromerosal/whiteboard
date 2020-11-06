@@ -26,7 +26,10 @@ export enum ShapeType {
   Rectangle = 'Rectangle',
   Oval = 'Oval',
   IsoTriangle= 'IsoTriangle',
-  RightTriangle= 'RightTriangle'
+  RightTriangle= 'RightTriangle',
+  ArrowLeft= 'ArrowLeft',
+  ArrowRight = 'ArrowRight'
+
 } 
 
 export const MAX_SCALE = 10;

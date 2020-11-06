@@ -4,9 +4,10 @@ function RightTriangle(props) {
   return (
     <svg width={206} height={165} viewBox="0 0 206 165" fill="none" {...props}>
       <path
-        d="M103.69 84.892L204.559 164.5H.5V1.05l103.185 83.838.005.004z"
+        d="M106.874 90.109l91.911 72.391H2.5V5.254l104.344 84.83.015.013.015.012z"
         fill="#fff"
         stroke="#000"
+        strokeWidth={5}
       />
     </svg>
   )
