@@ -4,12 +4,12 @@ function IsoTriangle(props) {
   const { _color } = props;
   console.log(props)
   return (
-    <svg width={139} height={120} viewBox="0 0 139 120" fill="none">
+    <svg width={204} height={177} viewBox="0 0 204 177" fill="none" {...props}>
       <path
-        d="M2.383 118.25L69.5 2l67.117 116.25H2.383z"
+        d="M4.987 174.5L102 5.032 199.013 174.5H4.987z"
         fill="#fff"
-        stroke={_color?_color:"#000"}
-        strokeWidth={2}
+        stroke="#000"
+        strokeWidth={5}
       />
     </svg>
   )
