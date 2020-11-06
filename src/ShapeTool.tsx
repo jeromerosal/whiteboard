@@ -4,6 +4,8 @@ import { Icon } from 'antd';
 import './ShapeTool.less';
 import IsoTriangle from './svgs/shapes/IsoTriangle';
 import RightTriangle from './svgs/shapes/RightTriangle';
+import ArrowLeft from './svgs/shapes/ArrowLeft';
+import ArrowRight from './svgs/shapes/ArrowRight';
 
 export interface Position {
   x: number;
@@ -116,6 +118,75 @@ const draw = (item: Shape, mouseX: number, mouseY: number, context: CanvasRender
       context.lineTo(startX, mouseY); 
       context.lineTo(mouseX, mouseY); 
       context.lineTo(mouseX - widthX, mouseY - widthY + 2 ); 
+      context.closePath();
+      context.stroke();
+      context.closePath();
+    }
+
+  }
+
+  else if (item.type === ShapeType.ArrowRight) {
+    context.beginPath();
+    context.lineWidth = item.size;
+    context.strokeStyle = item.color;
+    context.moveTo(startX, startY + ((widthY/8) * 2.5)); // x1, y1
+    context.lineTo(startX + ((widthX / 5) *3), startY + ((widthY/8) * 2.5)); //x2, y2
+    context.lineTo(startX + ((widthX / 5) *3), startY); // x3, y3
+    context.lineTo(startX + widthX, startY + (widthY/2)); // x4, y4
+    context.lineTo(startX + ((widthX / 5) *3), startY + widthY); // x5, y5
+    context.lineTo(startX + ((widthX / 5) *3), startY + ((widthY/8) * 5.5)); // x6, y6
+    context.lineTo(startX, startY + ((widthY/8) * 5.5)); // x7, y7
+
+    context.closePath();
+    context.stroke();
+    context.closePath();
+
+    if (hover) {
+      context.beginPath();
+      context.strokeStyle = '#3AB1FE';
+      context.lineWidth = item.size / 2;
+      context.moveTo(startX, startY + ((widthY/8) * 2.5)); // x1, y1
+      context.lineTo(startX + ((widthX / 5) *3), startY + ((widthY/8) * 2.5)); //x2, y2
+      context.lineTo(startX + ((widthX / 5) *3), startY); // x3, y3
+      context.lineTo(startX + widthX, startY + (widthY/2)); // x4, y4
+      context.lineTo(startX + ((widthX / 5) *3), startY + widthY); // x5, y5
+      context.lineTo(startX + ((widthX / 5) *3), startY + ((widthY/8) * 5.5)); // x6, y6
+      context.lineTo(startX, startY + ((widthY/8) * 5.5)); // x7, y7
+      context.closePath();
+      context.stroke();
+      context.closePath();
+    }
+  }
+
+  else if (item.type === ShapeType.ArrowLeft) {
+    context.beginPath();
+    context.lineWidth = item.size;
+    context.strokeStyle = item.color;
+    //context.moveTo(startX, startY);
+    context.moveTo(startX, startY + (widthY/2)); // x1, y1//
+    context.lineTo(startX + ((widthX /5) *2), startY); // x2, y2//
+    context.lineTo(startX + ((widthX /5) *2), startY + (widthY/8) * 2.5); // x3, y3//
+    context.lineTo(startX + widthX, startY + (widthY/8) * 2.5); // x4, y4//
+    context.lineTo(startX + widthX, startY + ((widthY/8) * 5.5)); // x5, y5//
+    context.lineTo(startX + ((widthX /5) *2), startY + ((widthY/8) * 5.5)); // x6, y6//
+    context.lineTo(startX + ((widthX /5) *2), startY + widthY); // x7, y7
+
+    context.closePath();
+    context.stroke();
+    context.closePath();
+
+    
+    if (hover) {
+      context.beginPath();
+      context.strokeStyle = '#3AB1FE';
+      context.lineWidth = item.size / 2;
+      context.moveTo(startX, startY + (widthY/2)); // x1, y1//
+      context.lineTo(startX + ((widthX /5) *2), startY); // x2, y2//
+      context.lineTo(startX + ((widthX /5) *2), startY + (widthY/8) * 2.5); // x3, y3//
+      context.lineTo(startX + widthX, startY + (widthY/8) * 2.5); // x4, y4//
+      context.lineTo(startX + widthX, startY + ((widthY/8) * 5.5)); // x5, y5//
+      context.lineTo(startX + ((widthX /5) *2), startY + ((widthY/8) * 5.5)); // x6, y6//
+      context.lineTo(startX + ((widthX /5) *2), startY + widthY); // x7, y7
       context.closePath();
       context.stroke();
       context.closePath();
@@ -269,7 +340,7 @@ export const useShapeDropdown = (currentToolOption: ToolOption, setCurrentToolOp
           }}
           className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.IsoTriangle ? { background: 'rgba(238, 238, 238, 1)', padding: 3 } : {padding: 3}}>
             <IsoTriangle _color={currentToolOption.shapeType === ShapeType.IsoTriangle ?  currentToolOption.shapeBorderColor: '#000000'}/>
-          <div className={`${prefixCls}-rect`} style={currentToolOption.shapeType === ShapeType.Oval ? { /*borderColor: currentToolOption.shapeBorderColor*/ border: 0 } : {border: 0}}/>
+          <div className={`${prefixCls}-rect`} style={currentToolOption.shapeType === ShapeType.IsoTriangle ? { /*borderColor: currentToolOption.shapeBorderColor*/ border: 0 } : {border: 0}}/>
         </div>
 
         <div
@@ -285,7 +356,40 @@ export const useShapeDropdown = (currentToolOption: ToolOption, setCurrentToolOp
           }}
           className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.RightTriangle ? { background: 'rgba(238, 238, 238, 1)', padding: 3 } : {padding: 3}}>
             <RightTriangle _color={currentToolOption.shapeType === ShapeType.RightTriangle ?  currentToolOption.shapeBorderColor: '#000000'}/>
-          <div className={`${prefixCls}-rect`} style={currentToolOption.shapeType === ShapeType.Oval ? { /*borderColor: currentToolOption.shapeBorderColor*/ border: 0 } : {border: 0}}/>
+          <div className={`${prefixCls}-rect`} style={currentToolOption.shapeType === ShapeType.RightTriangle ? { /*borderColor: currentToolOption.shapeBorderColor*/ border: 0 } : {border: 0}}/>
+        </div>
+
+        <div
+          onClick={(evt) => {
+            evt.stopPropagation();
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.ArrowLeft });
+            setCurrentTool(Tool.Shape);
+          }}
+          onTouchStart={(evt) => {
+            evt.stopPropagation();
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.ArrowLeft });
+            setCurrentTool(Tool.Shape);
+          }}
+          className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.ArrowLeft ? { background: 'rgba(238, 238, 238, 1)', padding: 3 } : {padding: 3}}>
+            <ArrowLeft _color={currentToolOption.shapeType === ShapeType.ArrowLeft ?  currentToolOption.shapeBorderColor: '#000000'}/>
+          <div className={`${prefixCls}-rect`} style={currentToolOption.shapeType === ShapeType.ArrowLeft ? { /*borderColor: currentToolOption.shapeBorderColor*/ border: 0 } : {border: 0}}/>
+        </div>
+
+
+        <div
+          onClick={(evt) => {
+            evt.stopPropagation();
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.ArrowRight });
+            setCurrentTool(Tool.Shape);
+          }}
+          onTouchStart={(evt) => {
+            evt.stopPropagation();
+            setCurrentToolOption({ ...currentToolOption, shapeType: ShapeType.ArrowRight });
+            setCurrentTool(Tool.Shape);
+          }}
+          className={`${prefixCls}-shapeItem`} style={currentToolOption.shapeType === ShapeType.ArrowRight ? { background: 'rgba(238, 238, 238, 1)', padding: 3 } : {padding: 3}}>
+            <ArrowRight _color={currentToolOption.shapeType === ShapeType.ArrowRight ?  currentToolOption.shapeBorderColor: '#000000'}/>
+          <div className={`${prefixCls}-rect`} style={currentToolOption.shapeType === ShapeType.ArrowRight ? { /*borderColor: currentToolOption.shapeBorderColor*/ border: 0 } : {border: 0}}/>
         </div>
         
       </div>
