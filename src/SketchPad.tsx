@@ -1919,9 +1919,9 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             </Button>
             <Button
               onClick={() => {
-                setDisplayYoutube(false);
+                //setDisplayYoutube(false);
                 setShowLinkMenu(false);
-                setYoutubeLink('');
+                //setYoutubeLink('');
               }}
             >
               Close
