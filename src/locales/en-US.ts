@@ -8,7 +8,7 @@ export default {
   'umi.block.sketch.formula': 'Formula',
   'umi.block.sketch.image': 'Image',
   'umi.block.sketch.file': 'File',
-  'umi.block.sketch.link': 'Youtube Embedded Link',
+  'umi.block.sketch.link': 'Embedded Link',
   'umi.block.sketch.grid': 'Grid',
   'umi.block.sketch.highlighter': 'Highlighter',
   'umi.block.sketch.undo': 'Undo',

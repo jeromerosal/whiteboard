@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { Button, Icon, Slider } from 'antd';
+import { Button, Icon, Input, Slider, Spin } from 'antd';
 import { usePinch, useWheel } from 'react-use-gesture';
 import { useIntl } from 'react-intl';
 import { v4 } from 'uuid';
@@ -511,6 +511,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [cacheVids, setCacheVids] = useState({});
   const [showLinkMenu, setShowLinkMenu] = useState(false);
   const [youtubeLink, setYoutubeLink] = useState('');
+  const [isDisplayYoutube, setDisplayYoutube] = useState(false);
 
   const [ currentLatex, setCurrentLatex ] = useState('');
   const [ latexLeftPosition, setLatexLeftPosition ] = useState(null);
@@ -684,6 +685,14 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     }
   }, []);
 
+  useEffect(() => {
+    if (currentTool === Tool.Link) {
+      setShowLinkMenu(true);
+    } else {
+      setShowLinkMenu(false);
+    }
+  }, [currentTool]);
+
   const handleCompleteOperation = (tool?: Tool, data?: Stroke | Shape | Text | Latex | Emoji | Formula | Image | Update | Remove | Highlighter, pos?: Position) => {
     if (!tool) {
       renderOperations(operationListState.reduced);
@@ -775,8 +784,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         }
         onFormulaMouseDown(e, currentToolOption, scale, refInput, refCanvas, intl, currentTool, setCurrentTool);
         break;
-      case Tool.Link:
-        setShowLinkMenu(true);
       default:
         break;
     }
@@ -1858,7 +1865,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   };
 
   const showYoutubeEmbedded = () => {
-    const [isDisplayYoutube, setDisplayYoutube] = useState(false);
+    const [isYtLoading, setYtLoading] = useState(false);
 
     const linkStyles: any = {
       linkDisplay: {
@@ -1877,55 +1884,52 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         <div 
           style={{height: 'auto', zIndex: 9, display: 'flex', flexDirection: 'column', position: 'fixed', bottom: 120, width: 'calc(100% - 100px)', maxWidth: 500, left: 50, ...linkStyles.linkDisplay}} 
         >
-          <input 
-            type={'text'} 
-            value={youtubeLink}
-            style={{
-              border: '1px solid rgb(206, 206, 206)', 
-              marginRight: 5, 
-              marginBottom: 10, 
-              padding: '5px 15px',
-              width: '100%',
-              borderRadius: 4,
-              fontSize: '0.8em'
-            }} 
-            onChange={(e)=> setYoutubeLink(e.target.value)}
-            ref={refLink}  
-          />
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-evenly',
+              alignItems: 'flex-end',
             }}
           >
-            <Button
-              onClick={() => {
-                setCurrentTool(Tool.Select);
-                setDisplayYoutube(true);
-                setShowLinkMenu(false);
-                
-                let iframeIcon = document.getElementById('youtubeVideo');
-                let removeIcon = document.getElementById('removeYoutubeIcon');
-                removeIcon.style.left = '50px';
-
-                setTimeout(() => {
-                  removeIcon.style.left = String(iframeIcon.offsetWidth + 50).concat('px');
-                }, 100)
-
+            <Input.TextArea
+              onChange={(e) => setYoutubeLink(e.target.value)}
+              style={{
+                border: '1px solid rgb(206, 206, 206)', 
+                marginRight: 5, 
+                padding: '5px 15px',
+                width: '100%',
+                borderRadius: 4,
+                fontSize: '0.8em',
+                height: '10em',
               }}
-              type="primary"
-            >
-              Display
-            </Button>
-            <Button
-              onClick={() => {
-                //setDisplayYoutube(false);
-                setShowLinkMenu(false);
-                //setYoutubeLink('');
-              }}
-            >
-              Close
-            </Button>
+              value={youtubeLink}
+            />
+            {!isYtLoading && ( 
+              <Button
+                onClick={() => {
+                  if (youtubeLink) {
+                    setYtLoading(true);
+                    setDisplayYoutube(true);
+                    let iframeElement = document.getElementById('youtubeVideo');
+                    iframeElement.innerHTML = youtubeLink;
+
+                    setTimeout(() => {
+                      
+
+                      if (iframeElement.innerHTML !== ''){
+                        setCurrentTool(Tool.Select);
+                        setShowLinkMenu(false);
+                        setYtLoading(false);
+                      }
+                    }, 1000);
+                  }
+                }}
+                type="primary"
+              >
+                Display
+              </Button>
+            )}
+            {isYtLoading && <Spin style={{width: 90}}/>}
           </div>
         </div>
         
@@ -1937,28 +1941,27 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             setYoutubeLink('');
           }}
           style={{ 
-            display: isDisplayYoutube ? 'block' : 'none',
+            display: isDisplayYoutube && !isYtLoading && currentTool === Tool.Select ? 'block' : 'none',
             cursor: 'pointer',
             position: 'absolute',
             top: 35,
             fontSize: 16,
+            left: 660,
           }}
         >
           <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
         </div>
 
-        <iframe
-          height="480"
-          src={youtubeLink}
+        <div 
+          id="youtubeVideo"
           style={{
             position: 'absolute',
             top: '50px',
-            left: '50px',
-            display: isDisplayYoutube ? 'block' : 'none',
+            left: '100px',
+            display: isDisplayYoutube && !isYtLoading ? 'block' : 'none',
           }}
-          width="720"
-          id="youtubeVideo"
-        />
+        >
+        </div>
       </Fragment>
     );
   };
