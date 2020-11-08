@@ -1,0 +1,26 @@
+@import './theme';
+
+@fileTool-prefix: ~'@{prefix}-fileTool';
+
+.@{fileTool-prefix}-fileMenu {
+  background: rgba(255,255,255,1);
+  box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.2);
+  border-radius: 4px;
+
+  .@{fileTool-prefix}-links {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px dashed #eee;
+    padding: 0 5px;
+  
+    .@{fileTool-prefix}-section {
+      width: 35px;
+      height: 35px;
+      margin-right: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+  }
+}

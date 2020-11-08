@@ -20,6 +20,7 @@ import UndoIcon from './svgs/UndoIcon';
 import ZoomIcon from './svgs/ZoomIcon';
 import EraserIcon from './svgs/EraserIcon';
 import LinkIcon from './svgs/LinkIcon';
+import { useFileDropDown } from './FileTool';
 import { useStrokeDropdown } from './StrokeTool';
 import { useShapeDropdown } from './ShapeTool';
 import { Dropdown, Slider } from 'antd';
@@ -73,10 +74,11 @@ const tools = [{
   type: Tool.Latex,
 },
 {
-  //label: 'umi.block.sketch.image',
   label: 'umi.block.sketch.file',
   icon: ImageIcon,
-  type: Tool.Image,
+  type: Tool.File,
+  useDropdown: useFileDropDown,
+  linkType: [Tool.Image, Tool.Video, Tool.Pdf]
 },
 {
   label: 'umi.block.sketch.grid',
@@ -124,7 +126,7 @@ export interface ToolbarProps {
   setCurrentTool: (tool: Tool) => void;
   currentToolOption: ToolOption;
   setCurrentToolOption: (option: ToolOption) => void;
-  selectImage: (image: string) => void;
+  selectFile: (image: string) => void;
   undo: () => void;
   redo: () => void;
   clear: () => void;
@@ -142,8 +144,10 @@ export interface ToolbarProps {
 }
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const { currentTool, setCurrentTool, currentToolOption, setCurrentToolOption, selectImage, undo, redo, clear, save, toolbarPlacement, setShowEraserSize, setEraserSize, showEraserSize, eraserSize, setShowGrid, showGrid, showEmojiMenu, setShowEmojiMenu } = props;
-  const refFileInput = useRef<HTMLInputElement>(null);
+  const { currentTool, setCurrentTool, currentToolOption, setCurrentToolOption, selectFile, undo, redo, clear, save, toolbarPlacement, setShowEraserSize, setEraserSize, showEraserSize, eraserSize, setShowGrid, showGrid, showEmojiMenu, setShowEmojiMenu } = props;
+  const refFileInputImage = useRef<HTMLInputElement>(null);
+  const refFileInputPdf = useRef<HTMLInputElement>(null);
+  const refFileInputVideo = useRef<HTMLInputElement>(null);
   const { formatMessage } = useIntl();
   const { prefixCls } = useContext(ConfigContext);
   const enableSketchPadContext = useContext(EnableSketchPadContext);
@@ -159,7 +163,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       reader.readAsDataURL(file);
       reader.onloadend = () => {
         const base64data = reader.result;
-        selectImage(base64data as string);
+        selectFile(base64data as string);
       }
     }
   };
@@ -185,6 +189,16 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
   const handleEraserSize = (value) => {
     setEraserSize(value)
   }
+
+  useEffect(() => {
+    if (currentTool === Tool.Image && refFileInputImage.current) {
+      refFileInputImage.current.click();
+    } else if (currentTool === Tool.Video && refFileInputVideo.current) {
+      refFileInputVideo.current.click();
+    } else if (currentTool === Tool.Pdf && refFileInputPdf.current) {
+      refFileInputPdf.current.click();
+    }
+  }, [currentTool])
 
   return (
     <div className={classNames({
@@ -232,11 +246,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
             style={iconAnimateProps}
             onClick={() => {
               let currentToolType = tool.type;
-              if (tool.type === Tool.Image && refFileInput.current) {
-                setShowEraserSize(false);
-                setShowEmojiMenu(false);
-                refFileInput.current.click();
-              } else if (tool.type === Tool.Undo) {
+              if (tool.type === Tool.Undo) {
                 setShowEraserSize(false);
                 setShowEmojiMenu(false);
                 undo();
@@ -344,6 +354,33 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
               >
                 {menu}
               </Dropdown>
+              {(tool.linkType || []).map(linkName => {
+                let ext = '';
+
+                if (linkName === Tool.Image) {
+                  ext = 'image/jpeg, image/png';
+                } else if (linkName === Tool.Video) {
+                  ext = 'video/mp4, video/avi';
+                } else if (linkName === Tool.Pdf) {
+                  ext = 'application/pdf';
+                }
+
+                return (
+                  <input
+                    key={linkName}
+                    type="file"
+                    style={{ display: 'none' }}
+                    accept={ext}
+                    ref={linkName === Tool.Image 
+                      ? refFileInputImage 
+                      : linkName === Tool.Video
+                      ? refFileInputVideo
+                      : refFileInputPdf
+                    }
+                    onChange={handleFileChange}
+                  />
+                );
+              })}
             </div>
           )
         } else {
@@ -351,13 +388,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
         }
       }))}
 
-      <input
-        type="file"
-        style={{ display: 'none' }}
-        accept="image/jpeg, image/png, video/mp4, video/avi, application/pdf"
-        ref={refFileInput}
-        onChange={handleFileChange}
-      />
+      
     </div>
   )
 } 

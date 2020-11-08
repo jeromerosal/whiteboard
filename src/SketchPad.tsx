@@ -131,7 +131,7 @@ export type onSaveCallback = (image: {
 }) => void;
 
 export type SketchPadRef = {
-  selectImage: (image: string) => void;
+  selectFile: (image: string) => void;
   undo: () => void;
   redo: () => void;
   clear: () => void;
@@ -1266,7 +1266,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const imperativeHandler = () => {
     useImperativeHandle(ref, () => {
       return {
-        selectImage: (file: string) => {
+        selectFile: (file: string) => {
           if (file && refCanvas.current) {
             if (file.slice(0, 10) === 'data:video') {
               const lastChar = file.substr(file.length - 16);

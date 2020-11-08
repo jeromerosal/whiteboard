@@ -132,9 +132,9 @@ const Block: React.FC<BlockProps> = (props) => {
                     eraserSize={eraserSize}
                     setShowGrid={setShowGrid}
                     showGrid={showGrid}
-                    selectImage={(image: string) => {
+                    selectFile={(image: string) => {
                       if (image && refSketch.current) {
-                        refSketch.current.selectImage(image);
+                        refSketch.current.selectFile(image);
                       }
                     }}
                     undo={() => {

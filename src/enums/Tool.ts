@@ -20,6 +20,9 @@ enum Tool {
   Remove = 'Remove',
   Highlighter = 'Highlighter',
   Link = 'Link',
+  File = 'File',
+  Pdf = 'PDF',
+  Video = 'Video',
 }
 
 export enum ShapeType {

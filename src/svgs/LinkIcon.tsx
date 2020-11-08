@@ -1,6 +1,6 @@
 import React from 'react';
 
-function LinkIcon(props) {
+const LinkIcon = (props) => {
   return (
     <svg
       width={40}
