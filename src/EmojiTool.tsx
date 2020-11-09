@@ -52,7 +52,7 @@ export const onEmojiMouseDown = (e, toolOption, scale:number , refInput, refCanv
           selection.addRange(range);
         }
       }
-    }, 0);
+    }, 200);
 
     currentText = typeof toolOption.defaultEmoji === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultEmoji);
     currentColor = toolOption.textColor;

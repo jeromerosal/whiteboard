@@ -101,6 +101,13 @@ const draw = (item: Shape, mouseX: number, mouseY: number, context: CanvasRender
     context.lineWidth = item.size;
     context.strokeStyle = item.color;
     let halfWidth = widthX / 2;
+    // let centerX = (startX + widthX)  - (widthX / 2);
+    // let centerY = (startY + widthY) - (widthY / 2);
+    //context.rect(startX, startY, widthX, widthY);
+    // context.translate(centerX, centerY);
+    // context.rotate(60 * (Math.PI/ 180));
+    // context.translate(-centerX, -centerY);
+
     context.moveTo(startX, startY + 20);
     context.lineTo(startX, mouseY); 
     context.lineTo(mouseX, mouseY); 

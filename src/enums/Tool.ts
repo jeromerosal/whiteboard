@@ -44,6 +44,7 @@ export interface Position {
   y: number;
   w: number;
   h: number;
+  d: number;
 }
 
 export const strokeSize = [2, 4, 6, 8, 10];

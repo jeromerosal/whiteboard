@@ -344,7 +344,7 @@ const useResizeHandler = (
       h: selectedOperation.pos.h + 2 * SELECT_BOX_PADDING,
     };
 
-    const tl = [a * pos.x + c * pos.y + e, b * pos.x + d * pos.y + f];
+    let tl = [a * pos.x + c * pos.y + e, b * pos.x + d * pos.y + f];
     const br = [a * (pos.x + pos.w) + c * (pos.y + pos.h) + e, b * (pos.x + pos.w) + d * (pos.y + pos.h) + f];
     const w = br[0] - tl[0], h = br[1] - tl[1];
 

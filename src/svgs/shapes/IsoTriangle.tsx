@@ -2,7 +2,6 @@ import * as React from "react"
 
 function IsoTriangle(props) {
   const { _color } = props;
-  console.log(props)
   return (
     <svg width={204} height={177} viewBox="0 0 204 177" fill="none" {...props}>
       <path

@@ -54,7 +54,7 @@ export const onTextMouseDown = (e: {
           selection.addRange(range);
         }
       }
-    }, 0);
+    }, 200);
 
     currentText = typeof toolOption.defaultText === 'string' ? toolOption.defaultText : intl.formatMessage(toolOption.defaultText);
     currentColor = toolOption.textColor;

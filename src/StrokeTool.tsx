@@ -94,8 +94,8 @@ export const drawStroke = (stroke: Stroke, context: CanvasRenderingContext2D, ho
 
   let i = 0;
   for (i = 1; i < points.length - 2; i++) {
-    var xc = (points[i].x + points[i + 1].x) / 2;
-    var yc = (points[i].y + points[i + 1].y) / 2;
+    var xc = (points[i].x + points[i + 1].x) / 2 + 0.01;
+    var yc = (points[i].y + points[i + 1].y) / 2 + 0.01;
     context.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
   }
 
