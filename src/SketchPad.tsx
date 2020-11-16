@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { Button, Icon, Input, Slider, Spin } from 'antd';
+import { Button, Dropdown, Icon, Input, Menu, Slider, Spin } from 'antd';
 import { usePinch, useWheel } from 'react-use-gesture';
 import { useIntl } from 'react-intl';
 import { v4 } from 'uuid';
@@ -30,6 +30,7 @@ import { useZoomGesture } from './gesture';
 import ConfigContext from './ConfigContext';
 import EnableSketchPadContext from './contexts/EnableSketchPadContext';
 import gridLines from './images/grid_lines';
+import PlacementIcon from './svgs/PlacementIcon';
 import sketchStrokeCursor from './images/sketch_stroke_cursor';
 import Tool, { ToolOption, LatexOption, EmojiOption, FormulaOption, Position, MAX_SCALE, MIN_SCALE, } from './enums/Tool';
 import "katex/dist/katex.min.css";
@@ -508,8 +509,8 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [ latexGroup, setLatexGroup] = useState('Math');
   const [pdfFile, setPdfFile] = useState(null);
   const [existingPdf, setExistingPdf] = useState('');
-  const [videoList, setVideoList] = useState([]);
-  const [cacheVids, setCacheVids] = useState({});
+  const [videoFile, setVideoFile] = useState(null);
+  const [existingVideo, setExistingVideo] = useState({});
   const [showLinkMenu, setShowLinkMenu] = useState(false);
   const [youtubeLink, setYoutubeLink] = useState('');
   const [isDisplayYoutube, setDisplayYoutube] = useState(false);
@@ -1272,10 +1273,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           if (file && refCanvas.current) {
             if (file.slice(0, 10) === 'data:video') {
               const lastChar = file.substr(file.length - 16);
-              setVideoList([
-                { video: file, id: lastChar },
-                ...videoList
-              ]);
+              setVideoFile({ video: file, id: lastChar });
             } else if (file.slice(0, 20) === 'data:application/pdf') {
               const lastChar = file.substr(file.length - 16);
               setPdfFile({ pdf: file, id: lastChar });
@@ -1727,11 +1725,10 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   }
 
   useEffect(() => {
+    let existingPdfIframe = document.getElementById('pdfIframe');
     let existingRemoveIcon = document.getElementById('pdfIcon');
 
     if (Boolean(pdfFile)) {
-      let existingPdfIframe = document.getElementById('pdfIframe');
-
       if (pdfFile.id !== existingPdf) {
         fetch(pdfFile.pdf)
         .then(res => res.blob())
@@ -1739,7 +1736,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           setExistingPdf(pdfFile.id);
           let pdfIframe = document.createElement('iframe');
           let removePdf = document.createElement('div');
-          //let sendBackFront = document.createElement('div');
           let removeIcon = document.getElementById('removePdfIcon').lastChild.cloneNode(true);
           let pdfInput = document.getElementsByTagName('input')[2];
 
@@ -1757,7 +1753,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           pdfIframe.style.height = '85vh';
           pdfIframe.style.width = '85vw';
           pdfIframe.style.position = 'absolute';
-          pdfIframe.style.top = '50px';
+          pdfIframe.style.top = '100px';
           pdfIframe.style.left = '100px';
           pdfIframe.id = 'pdfIframe';
 
@@ -1766,7 +1762,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
           removePdf.style.cursor = 'pointer';
           removePdf.style.position = 'absolute';
           removePdf.style.left = String(pdfIframe.offsetWidth + 100).concat('px');
-          removePdf.style.top = '35px';
+          removePdf.style.top = '80px';
           removePdf.style.fontSize = '16px';
           removePdf.id = 'pdfIcon';
           removePdf.onclick = (() => {
@@ -1774,6 +1770,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
               .removeChild(document.getElementById('pdfIframe'));
               document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
               .removeChild(document.getElementById('pdfIcon'));
+            pdfInput.value = null;
             setPdfFile('');
             setExistingPdf('');
             setCurrentTool(Tool.Select);
@@ -1792,73 +1789,84 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   }, [pdfFile, currentTool]);
 
   const pdfUploaded = () => {
+
     return (
-      <div id="removePdfIcon" style={{ display: 'none' }}>
-        <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
-      </div>
+      <Fragment>
+        <div id="removePdfIcon" style={{ display: 'none' }}>
+          <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
+        </div>
+      </Fragment>
     );
   };
 
   useEffect(() => {
-    if (Boolean(videoList.length > 0) || currentTool === Tool.Select) {
-      (videoList || []).map(({ id, video }) => {
-        let existingVid = document.getElementById(id.concat('-video'));
-        let existingRemoveIcon = document.getElementById(id.concat('-close'));
+    let existingVideoElement = document.getElementById('video');
+    let existingRemoveIcon = document.getElementById('videoClose');
 
-        if (!existingVid) {
-          fetch(video)
-            .then(res => res.blob())
-            .then(blob => {
-              let vid = document.createElement('video');
-              let removeVid = document.createElement('div');
-              let removeIcon = document.getElementById('removeIcon').lastChild.cloneNode(true);
-              let videoInput = document.getElementsByTagName('input')[1];
+    if (Boolean(videoFile)) {
+      if (videoFile.id !== existingVideo) {
+        fetch(videoFile.video)
+          .then(res => res.blob())
+          .then(blob => {
+            setExistingVideo(videoFile.id);
+            let vid = document.createElement('video');
+            let removeVid = document.createElement('div');
+            let removeIcon = document.getElementById('removeVideoIcon').lastChild.cloneNode(true);
+            let videoInput = document.getElementsByTagName('input')[1];
 
+            videoInput.value = null;
+
+            // overwrite the existing video
+            if (existingVideoElement) {
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
+                .removeChild(document.getElementById('video'));
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
+                .removeChild(document.getElementById('videoClose'));
+            }
+
+            vid.controls = true;
+            vid.src = URL.createObjectURL(blob);
+            vid.id = 'video';
+            vid.style.position = 'absolute';
+            vid.style.top = '100px';
+            vid.style.left = '100px';
+            vid.style.height = '300px';
+            vid.style.width = '500px';
+
+            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].prepend(vid);
+
+            removeVid.style.position = 'absolute';
+            removeVid.style.cursor = 'pointer';
+            removeVid.style.left = String(vid.offsetWidth + 100).concat('px');
+            removeVid.style.top = vid.style.top;
+            removeVid.style.fontSize = '16px';
+            removeVid.id = 'videoClose';
+            removeVid.onclick = (() => {
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
+                .removeChild(document.getElementById('video'));
+              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
+                .removeChild(document.getElementById('videoClose'));
               videoInput.value = null;
+              setVideoFile('');
+              setExistingVideo('');
+              setCurrentTool(Tool.Select);
+            });
 
-              vid.controls = true;
-              vid.src = URL.createObjectURL(blob);
-              vid.id = id.concat('-video');
-              vid.style.position = 'absolute';
-              vid.style.top = Boolean(videoList.length > 1) 
-                ? String(document.getElementById(videoList.slice(1)[0]?.id.concat('-video')).offsetHeight + 50).concat('px')
-                : '50px';
-              vid.style.left = '50px';
-              vid.style.height = '300px';
-              vid.style.width = '500px';
-
-              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].prepend(vid);
-
-              removeVid.style.position = 'absolute';
-              removeVid.style.cursor = 'pointer';
-              removeVid.style.left = String(vid.offsetWidth + 50).concat('px');
-              removeVid.style.top = vid.style.top;
-              removeVid.style.fontSize = '16px';
-              removeVid.id = id.concat('-close'); 
-              removeVid.onclick = (() => {
-                document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(document.getElementById(id.concat('-video')));
-                document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].removeChild(document.getElementById(id.concat('-close')));
-                videoInput.value = null;
-                setVideoList(videoList.filter(({ id }) => id !== id ));
-                setCurrentTool(Tool.Select);
-              });
-
-              removeVid.appendChild(removeIcon);
-              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].appendChild(removeVid);
-
-
-            })
-            .catch(e => console.log(e));
-        } else {
-          existingRemoveIcon.style.display = currentTool === Tool.Select ? 'block' : 'none';
-        }
-      });
+            removeVid.appendChild(removeIcon);
+            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].appendChild(removeVid);
+          })
+          .catch(e => console.log(e));
+      }
     }
-  }, [videoList, currentTool]);
+
+    if (existingRemoveIcon) {
+      existingRemoveIcon.style.display = currentTool === Tool.Select ? 'block' : 'none';
+    }
+  }, [videoFile, currentTool]);
 
   const videoUploaded = () => {
     return (
-      <div id="removeIcon" style={{ display: 'none' }}>
+      <div id="removeVideoIcon" style={{ display: 'none' }}>
         <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
       </div>
     );
@@ -1878,6 +1886,83 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         padding: 10,
       }
     };
+
+    let iframeElement = document.getElementById('youtubeVideo');
+
+    const placementMenu = (
+      <Menu>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('youtubeVideo');
+
+              iframeElement.style.top = '100px';
+              iframeElement.style.left = '100px';
+              iframeElement.style.bottom = 'unset';
+              iframeElement.style.right = 'unset';
+            }}
+          >
+            Upper Left
+          </div>
+        </Menu.Item>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('youtubeVideo');
+
+              iframeElement.style.top = '100px';
+              iframeElement.style.left = 'unset';
+              iframeElement.style.bottom = 'unset';
+              iframeElement.style.right = '100px';
+            }}
+          >
+            Upper Right
+          </div>
+        </Menu.Item>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('youtubeVideo');
+
+              iframeElement.style.top = '35%';
+              iframeElement.style.left = '35%';
+              iframeElement.style.bottom = 'unset';
+              iframeElement.style.right = 'unset';
+            }}
+          >
+            Middle Center
+          </div>
+        </Menu.Item>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('youtubeVideo');
+
+              iframeElement.style.top = 'unset';
+              iframeElement.style.left = '100px';
+              iframeElement.style.bottom = '100px';
+              iframeElement.style.right = 'unset';
+            }}
+          >
+            Bottom Left
+          </div>
+        </Menu.Item>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('youtubeVideo');
+
+              iframeElement.style.top = 'unset';
+              iframeElement.style.left = 'unset';
+              iframeElement.style.bottom = '100px';
+              iframeElement.style.right = '100px';
+            }}
+          >
+            Bottom Right
+          </div>
+        </Menu.Item>
+      </Menu>
+    );
 
     return (
       <Fragment>
@@ -1907,18 +1992,21 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             {!isYtLoading && ( 
               <Button
                 onClick={() => {
+                  setYtLoading(true);
+
                   if (youtubeLink) {
-                    setYtLoading(true);
                     setDisplayYoutube(true);
                     let iframeElement = document.getElementById('youtubeVideo');
-                    iframeElement.innerHTML = youtubeLink;
+                    let youtubeLinkElement = document.createElement('div');
+
+                    youtubeLinkElement.innerHTML = youtubeLink;
+                    
+                    iframeElement.appendChild(youtubeLinkElement);
 
                     setTimeout(() => {
-                      if (iframeElement.innerHTML !== ''){
-                        setCurrentTool(Tool.Select);
-                        setShowLinkMenu(false);
-                        setYtLoading(false);
-                      }
+                      setCurrentTool(Tool.Select);
+                      setShowLinkMenu(false);
+                      setYtLoading(false);
                     }, 1000);
                   }
                 }}
@@ -1932,33 +2020,50 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         </div>
         
         <div 
-          id="removeYoutubeIcon" 
-          onClick={() => {
-            setDisplayYoutube(false);
-            setShowLinkMenu(false);
-            setYoutubeLink('');
-          }}
-          style={{ 
-            display: isDisplayYoutube && !isYtLoading && currentTool === Tool.Select ? 'block' : 'none',
-            cursor: 'pointer',
-            position: 'absolute',
-            top: 35,
-            fontSize: 16,
-            left: 660,
-          }}
-        >
-          <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
-        </div>
-
-        <div 
           id="youtubeVideo"
           style={{
             position: 'absolute',
-            top: '50px',
+            top: '100px',
             left: '100px',
             display: isDisplayYoutube && !isYtLoading ? 'block' : 'none',
           }}
         >
+          <div 
+            id="removeYoutubeIcon" 
+            onClick={() => {
+              setDisplayYoutube(false);
+              setShowLinkMenu(false);
+              setYoutubeLink('');
+            }}
+            style={{ 
+              display: isDisplayYoutube && !isYtLoading && currentTool === Tool.Select ? 'block' : 'none',
+              cursor: 'pointer',
+              position: 'absolute',
+              top: '-15px',
+              right: '-15px',
+              fontSize: 16,
+            }}
+          >
+            <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
+          </div>
+
+          <Dropdown
+            overlay={placementMenu}
+            placement="bottomLeft"
+          >
+            <div
+              id="youtubeVideoPlacement"
+              style={{
+                display: isDisplayYoutube && !isYtLoading && currentTool === Tool.Select ? 'block' : 'none',
+                cursor: 'pointer',
+                position: 'absolute',
+                top: '20px',
+                right: '-25px',
+              }}
+            >
+              <PlacementIcon />
+            </div>
+          </Dropdown>
         </div>
       </Fragment>
     );
