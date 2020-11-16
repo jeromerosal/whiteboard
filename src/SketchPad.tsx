@@ -1800,74 +1800,160 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   };
 
   useEffect(() => {
-    let existingVideoElement = document.getElementById('video');
-    let existingRemoveIcon = document.getElementById('videoClose');
-
     if (Boolean(videoFile)) {
       if (videoFile.id !== existingVideo) {
         fetch(videoFile.video)
           .then(res => res.blob())
           .then(blob => {
             setExistingVideo(videoFile.id);
+            let videoElement = document.getElementById('videoDiv');
+            let existingVideoUpload = document.getElementById('videoUpload');
             let vid = document.createElement('video');
-            let removeVid = document.createElement('div');
-            let removeIcon = document.getElementById('removeVideoIcon').lastChild.cloneNode(true);
             let videoInput = document.getElementsByTagName('input')[1];
 
             videoInput.value = null;
 
             // overwrite the existing video
-            if (existingVideoElement) {
-              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
-                .removeChild(document.getElementById('video'));
-              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
-                .removeChild(document.getElementById('videoClose'));
+            if (existingVideoUpload) {
+              videoElement.removeChild(existingVideoUpload)
             }
 
             vid.controls = true;
             vid.src = URL.createObjectURL(blob);
-            vid.id = 'video';
-            vid.style.position = 'absolute';
-            vid.style.top = '100px';
-            vid.style.left = '100px';
+            vid.id = 'videoUpload';
             vid.style.height = '300px';
             vid.style.width = '500px';
 
-            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].prepend(vid);
-
-            removeVid.style.position = 'absolute';
-            removeVid.style.cursor = 'pointer';
-            removeVid.style.left = String(vid.offsetWidth + 100).concat('px');
-            removeVid.style.top = vid.style.top;
-            removeVid.style.fontSize = '16px';
-            removeVid.id = 'videoClose';
-            removeVid.onclick = (() => {
-              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
-                .removeChild(document.getElementById('video'));
-              document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0]
-                .removeChild(document.getElementById('videoClose'));
-              videoInput.value = null;
-              setVideoFile('');
-              setExistingVideo('');
-              setCurrentTool(Tool.Select);
-            });
-
-            removeVid.appendChild(removeIcon);
-            document.getElementsByClassName(`${sketchpadPrefixCls}-container`)[0].appendChild(removeVid);
+            videoElement.appendChild(vid);
           })
           .catch(e => console.log(e));
       }
     }
-
-    if (existingRemoveIcon) {
-      existingRemoveIcon.style.display = currentTool === Tool.Select ? 'block' : 'none';
-    }
   }, [videoFile, currentTool]);
 
   const videoUploaded = () => {
+    const placementMenu = (
+      <Menu>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('videoDiv');
+
+              iframeElement.style.top = '100px';
+              iframeElement.style.left = '100px';
+              iframeElement.style.bottom = 'unset';
+              iframeElement.style.right = 'unset';
+            }}
+          >
+            Upper Left
+          </div>
+        </Menu.Item>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('videoDiv');
+
+              iframeElement.style.top = '100px';
+              iframeElement.style.left = 'unset';
+              iframeElement.style.bottom = 'unset';
+              iframeElement.style.right = '100px';
+            }}
+          >
+            Upper Right
+          </div>
+        </Menu.Item>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('videoDiv');
+
+              iframeElement.style.top = '35%';
+              iframeElement.style.left = '35%';
+              iframeElement.style.bottom = 'unset';
+              iframeElement.style.right = 'unset';
+            }}
+          >
+            Middle Center
+          </div>
+        </Menu.Item>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('videoDiv');
+
+              iframeElement.style.top = 'unset';
+              iframeElement.style.left = '100px';
+              iframeElement.style.bottom = '100px';
+              iframeElement.style.right = 'unset';
+            }}
+          >
+            Bottom Left
+          </div>
+        </Menu.Item>
+        <Menu.Item>
+          <div 
+            onClick={() => {
+              let iframeElement = document.getElementById('videoDiv');
+
+              iframeElement.style.top = 'unset';
+              iframeElement.style.left = 'unset';
+              iframeElement.style.bottom = '100px';
+              iframeElement.style.right = '100px';
+            }}
+          >
+            Bottom Right
+          </div>
+        </Menu.Item>
+      </Menu>
+    );
+
     return (
-      <div id="removeVideoIcon" style={{ display: 'none' }}>
-        <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
+      <div 
+        id="videoDiv"
+        style={{
+          position: 'absolute',
+          top: '100px',
+          left: '100px',
+          display: existingVideo ? 'block' : 'none',
+        }}
+      >
+        <div 
+          id="removeVideoIcon" 
+          onClick={() => {
+            let videoInput = document.getElementsByTagName('input')[1];
+
+            videoInput.value = null;
+            setVideoFile('');
+            setExistingVideo('');
+          }}
+          style={{ 
+            display: existingVideo && currentTool === Tool.Select ? 'block' : 'none',
+            cursor: 'pointer',
+            position: 'absolute',
+            top: '-5px',
+            right: '-16px',
+            fontSize: 16,
+          }}
+        >
+          <Icon type="close-circle" theme="filled" style={{ background: 'white', color: '#f45b6c' }}/>
+        </div>
+
+        <Dropdown
+          overlay={placementMenu}
+          placement="bottomLeft"
+        >
+          <div
+            style={{
+              display: existingVideo && currentTool === Tool.Select ? 'block' : 'none',
+              cursor: 'pointer',
+              position: 'absolute',
+              top: '20px',
+              right: '-25px',
+            }}
+          >
+            <PlacementIcon />
+          </div>
+        </Dropdown>
       </div>
     );
   };
@@ -1886,8 +1972,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
         padding: 10,
       }
     };
-
-    let iframeElement = document.getElementById('youtubeVideo');
 
     const placementMenu = (
       <Menu>
@@ -1997,9 +2081,15 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
                   if (youtubeLink) {
                     setDisplayYoutube(true);
                     let iframeElement = document.getElementById('youtubeVideo');
+                    let existingYtLinkElement = document.getElementById('ytVid');
                     let youtubeLinkElement = document.createElement('div');
 
+                    if (existingYtLinkElement) {
+                      iframeElement.removeChild(existingYtLinkElement);
+                    }
+
                     youtubeLinkElement.innerHTML = youtubeLink;
+                    youtubeLinkElement.id = 'ytVid';
                     
                     iframeElement.appendChild(youtubeLinkElement);
 
@@ -2040,7 +2130,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
               cursor: 'pointer',
               position: 'absolute',
               top: '-15px',
-              right: '-15px',
+              right: '-16px',
               fontSize: 16,
             }}
           >
@@ -2052,7 +2142,6 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
             placement="bottomLeft"
           >
             <div
-              id="youtubeVideoPlacement"
               style={{
                 display: isDisplayYoutube && !isYtLoading && currentTool === Tool.Select ? 'block' : 'none',
                 cursor: 'pointer',
