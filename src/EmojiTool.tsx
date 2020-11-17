@@ -60,26 +60,23 @@ export const onEmojiMouseDown = (e, toolOption, scale:number , refInput, refCanv
   }
 }
 
-export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, setShowEmojiMenu) => {
-  if (currentText && refInput.current && refCanvas.current) {
+export const onEmojiComplete = async (refInput, refCanvas, viewMatrix, scale, handleCompleteOperation, setCurrentTool, setShowEmojiMenu) => {
+  if (refInput.current && refCanvas.current) {
     const textarea = refInput.current;
     textarea.style.opacity = '0';
-    const text = textarea.innerText;
 
-    const imgForCanvas = document.getElementById('emojiId');
+    const imgForCanvas = await document.getElementById('emojiId');
 
-    setTimeout(() => {
-      html2canvas(imgForCanvas).then(_canvas => {
-        const width = imgForCanvas.offsetWidth;
-        const height = imgForCanvas.offsetHeight;
+      try {
+        let result = await html2canvas(imgForCanvas);
+
         const image = new Image();
         image.onload = () => {
           textarea.style.opacity = '1';
-          let { top, left } = textarea.getBoundingClientRect();
   
           const currentPos = mapClientToCanvas({
-            clientX: left,
-            clientY: top,
+            clientX: 200,
+            clientY: 200,
           } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
   
           textarea.style.display = 'none';
@@ -87,19 +84,20 @@ export const onEmojiComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
           const pos: any = {
             x: currentPos[0],
             y: currentPos[1],
-            w: width,
-            h: height,
+            w: 100,
+            h: 120,
           };
       
           handleCompleteOperation(Tool.Image, {
-            imageData: _canvas.toDataURL(),
+            imageData: result.toDataURL(),
           }, pos);
         }
-        image.src = _canvas.toDataURL();
+        image.src = result.toDataURL();
         setShowEmojiMenu(false);
-      });
-    },100 )
 
+    } catch (e) {
+      console.error(e);
+    }
     
     setCurrentTool(Tool.Select);
     currentText = '';

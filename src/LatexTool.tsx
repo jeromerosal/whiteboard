@@ -113,12 +113,10 @@ export const onLatexComplete = (refInput, refCanvas, viewMatrix, scale, handleCo
         const image = new Image();
         image.onload = () => {
           textarea.style.opacity = '1';
-          let { top, left } = textarea.getBoundingClientRect();
-          const lineHeight = parseInt(textarea.style.lineHeight.replace('px', ''));
 
           const currentPos = mapClientToCanvas({
-            clientX: left,
-            clientY: top,
+            clientX: 200,
+            clientY: 200,
           } as ReactMouseEvent<HTMLCanvasElement>, refCanvas.current, viewMatrix);
 
           textarea.style.display = 'none';

@@ -510,7 +510,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
   const [pdfFile, setPdfFile] = useState(null);
   const [existingPdf, setExistingPdf] = useState('');
   const [videoFile, setVideoFile] = useState(null);
-  const [existingVideo, setExistingVideo] = useState({});
+  const [existingVideo, setExistingVideo] = useState('');
   const [showLinkMenu, setShowLinkMenu] = useState(false);
   const [youtubeLink, setYoutubeLink] = useState('');
   const [isDisplayYoutube, setDisplayYoutube] = useState(false);
@@ -692,6 +692,22 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
       setShowLinkMenu(true);
     } else {
       setShowLinkMenu(false);
+    }
+  }, [currentTool]);
+
+  useEffect(() => {
+    if (currentTool === Tool.Emoji) {
+      setShowEmojiMenu(true);
+    } else {
+      setShowEmojiMenu(false);
+    }
+  }, [currentTool]);
+
+  useEffect(() => {
+    if (currentTool === Tool.Latex) {
+      setShowLatexMenu(true);
+    } else {
+      setShowLatexMenu(false);
     }
   }, [currentTool]);
 
