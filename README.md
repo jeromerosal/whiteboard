@@ -24,6 +24,7 @@ React Drawing board uses a CMD so you can use it in NPM as well. `npm install`
 ### To run on dev
 
 #### NPM:
+`npm start`
 `npm run dev`
 
 #### YARN:
