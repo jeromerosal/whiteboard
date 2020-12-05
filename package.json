@@ -18,6 +18,7 @@
     "classnames": "^2.2.6",
     "html2canvas": "^1.0.0-rc.7",
     "react": ">=16.0.0",
+    "react-color": "^2.18.1",
     "react-intl": "^3.9.2",
     "react-katex": "^2.0.2",
     "react-spring": "^8.0.27",

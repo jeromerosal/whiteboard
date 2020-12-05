@@ -693,7 +693,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     clientY: number,
   }) => {
     if (!refCanvas.current) return null;
-    if (!enableSketchPadContext.enable) return null;
+    //if (!enableSketchPadContext.enable) return null;
 
     const [x, y] = mapClientToCanvas(e, refCanvas.current, viewMatrix);
 
@@ -1062,7 +1062,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     clientY: number,
   }) => {
     if (!refCanvas.current) return null;
-    if (!enableSketchPadContext.enable) return null;
+    //if (!enableSketchPadContext.enable) return null;
 
     onMouseResizeMove(e);
 
@@ -1107,7 +1107,7 @@ const SketchPad: React.ForwardRefRenderFunction<any, SketchPadProps> = (props, r
     clientY: number,
   }) => {
     if (!refCanvas.current) return null;
-    if (!enableSketchPadContext.enable) return null;
+    //if (!enableSketchPadContext.enable) return null;
 
     onMouseResizeUp(e);
 
